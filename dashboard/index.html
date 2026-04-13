@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Website Agent Dashboard</title>
+  <style>
+    :root { --bg:#f8fafc; --panel:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --blue:#2563eb; --soft:#dbeafe; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:linear-gradient(180deg,#eff6ff 0%,var(--bg) 35%); color:var(--text); }
+    .wrap { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
+    h1,h2 { margin:0 0 12px; }
+    .subtle { color:var(--muted); margin-bottom:24px; }
+    .grid { display:grid; grid-template-columns:1.2fr 1fr; gap:20px; }
+    .card { background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:20px; box-shadow:0 18px 45px rgba(15,23,42,0.06); }
+    form { display:flex; gap:12px; flex-wrap:wrap; }
+    input,select,button { font:inherit; }
+    input,select { width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:#fff; color:var(--text); }
+    .grow { flex:1; min-width:260px; }
+    button { border:none; border-radius:12px; padding:12px 16px; background:var(--blue); color:#fff; cursor:pointer; font-weight:600; }
+    button.secondary { background:#0f172a; }
+    button.ghost { background:#eef2ff; color:#1e3a8a; }
+    .status-line { margin-top:14px; color:var(--muted); min-height:24px; }
+    table { width:100%; border-collapse:collapse; margin-top:14px; }
+    th,td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--border); vertical-align:top; font-size:14px; }
+    th { color:var(--muted); font-weight:600; }
+    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; text-transform:capitalize; }
+    .badge.ready { background:#dcfce7; color:#166534; } .badge.embedding { background:#ffedd5; color:#9a3412; } .badge.crawling,.badge.pending { background:var(--soft); color:#1d4ed8; } .badge.error { background:#fee2e2; color:#991b1b; }
+    pre { background:#0f172a; color:#e2e8f0; padding:14px; border-radius:14px; overflow:auto; white-space:pre-wrap; word-break:break-all; }
+    .embed-box { margin-top:16px; display:none; }
+    .chat-shell { border:1px solid var(--border); border-radius:16px; overflow:hidden; background:#fff; display:flex; flex-direction:column; min-height:500px; }
+    .chat-header { padding:14px 16px; background:var(--blue); color:#fff; font-weight:700; }
+    .chat-messages { flex:1; overflow-y:auto; padding:16px; background:#f8fafc; }
+    .chat-row { display:flex; margin-bottom:12px; } .chat-row.user { justify-content:flex-end; } .chat-row.assistant { justify-content:flex-start; flex-direction:column; align-items:flex-start; gap:8px; }
+    .bubble { max-width:85%; border-radius:16px; padding:10px 12px; font-size:14px; line-height:1.45; white-space:pre-wrap; word-break:break-word; }
+    .chat-row.user .bubble { background:var(--blue); color:#fff; } .chat-row.assistant .bubble { background:#e5e7eb; color:#111827; }
+    .chat-row.assistant .assistant-markdown-bubble p { margin:0 0 8px 0; }
+    .chat-row.assistant .assistant-markdown-bubble p:last-child { margin-bottom:0; }
+    .chat-row.assistant .assistant-markdown-bubble strong { font-weight:600; }
+    .chat-row.assistant .assistant-markdown-bubble em { font-style:italic; }
+    .chat-row.assistant .assistant-markdown-bubble ol,
+    .chat-row.assistant .assistant-markdown-bubble ul { margin:6px 0; padding-left:20px; }
+    .chat-row.assistant .assistant-markdown-bubble li { margin-bottom:4px; line-height:1.5; }
+    .chat-row.assistant .assistant-markdown-bubble h1,
+    .chat-row.assistant .assistant-markdown-bubble h2,
+    .chat-row.assistant .assistant-markdown-bubble h3 { font-size:14px; font-weight:600; margin:8px 0 4px 0; }
+    .sources { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
+    .sources-label { font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); }
+    .source-list { display:flex; flex-wrap:wrap; gap:8px; }
+    .source-chip { display:inline-flex; align-items:center; max-width:100%; padding:6px 10px; border-radius:999px; background:#eff6ff; color:#1d4ed8; text-decoration:none; font-size:12px; font-weight:600; }
+    .source-chip:hover { background:#dbeafe; }
+    .chip-stack { display:flex; flex-direction:column; gap:6px; align-items:flex-start; margin-bottom:12px; }
+    .chip-group { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+    .chat-chip { display:inline-flex; align-items:center; justify-content:flex-start; width:fit-content; max-width:90%; padding:8px 16px; border:1px solid var(--border); border-radius:20px; background:#fff; color:#374151; cursor:pointer; font-size:13px; text-align:left; }
+    .chat-chip:hover { background:#eff6ff; border-color:#bfdbfe; }
+    .followup-chip { font-size:12px; padding:6px 14px; }
+    .chat-controls { display:flex; gap:10px; padding:12px; border-top:1px solid var(--border); } .chat-footer { padding:10px 12px; border-top:1px solid var(--border); color:var(--muted); font-size:11px; }
+    .stack { display:flex; flex-direction:column; gap:16px; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; }
+    @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>AI Website Agent</h1>
+    <p class="subtle">Deeply crawl a website, build a semantic knowledge base, and deploy a conversion-focused chat widget.</p>
+    <div class="grid">
+      <section class="card">
+        <h2>Add Website</h2>
+        <p class="subtle">Enter a site URL and the backend will crawl, chunk, embed, and prepare an embeddable chat agent.</p>
+        <form id="site-form">
+          <input class="grow" id="site-url" type="url" placeholder="https://example.com" required />
+          <button type="submit">Process Website</button>
+        </form>
+        <div class="status-line" id="status-line"></div>
+        <div class="embed-box" id="embed-box">
+          <h3>Embed Code</h3>
+          <pre id="embed-code"></pre>
+          <button class="secondary" id="copy-embed" type="button">Copy</button>
+        </div>
+      </section>
+      <section class="card stack">
+        <div>
+          <h2>Test Chat</h2>
+          <p class="subtle">Choose any ready site and test the streaming experience before embedding it elsewhere.</p>
+        </div>
+        <select id="test-site-select"><option value="">Select a ready site</option></select>
+        <div class="chat-shell">
+          <div class="chat-header" id="chat-title">Chat with your site</div>
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-controls">
+            <input id="chat-input" type="text" placeholder="Ask a question..." />
+            <button id="chat-send" type="button">Send</button>
+          </div>
+          <div class="chat-footer">Powered by AI Agent</div>
+        </div>
+      </section>
+    </div>
+    <section class="card" style="margin-top:20px;">
+      <h2>Processed Sites</h2>
+      <p class="subtle">View status, counts, and generate the embed script for any processed website.</p>
+      <table>
+        <thead><tr><th>Name</th><th>URL</th><th>Pages</th><th>Chunks</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="site-table-body"></tbody>
+      </table>
+    </section>
+  </div>
+  <script>
+    const FALLBACK_MESSAGE = "I don't have that information on this website. You might want to contact the team directly.";
+    let markedLoader = null;
+    const state = {
+      pollTimer: null,
+      sites: [],
+      activeEventSource: null,
+      sessionId: "aiwa-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
+      suggestedQuestionsCache: {},
+      suggestedQuestionsRequested: {},
+      starterDismissed: false
+    };
+    const form = document.getElementById("site-form");
+    const siteUrl = document.getElementById("site-url");
+    const statusLine = document.getElementById("status-line");
+    const siteTableBody = document.getElementById("site-table-body");
+    const embedBox = document.getElementById("embed-box");
+    const embedCode = document.getElementById("embed-code");
+    const copyEmbed = document.getElementById("copy-embed");
+    const testSiteSelect = document.getElementById("test-site-select");
+    const chatTitle = document.getElementById("chat-title");
+    const chatMessages = document.getElementById("chat-messages");
+    const chatInput = document.getElementById("chat-input");
+    const chatSend = document.getElementById("chat-send");
+
+    function loadMarked() {
+      if (window.marked && typeof window.marked.parse === "function") {
+        return Promise.resolve(window.marked);
+      }
+      if (markedLoader) return markedLoader;
+      markedLoader = new Promise(function (resolve, reject) {
+        const existing = document.querySelector('script[data-aiwa-marked="true"]');
+        if (existing) {
+          existing.addEventListener("load", function () { resolve(window.marked); }, { once: true });
+          existing.addEventListener("error", reject, { once: true });
+          return;
+        }
+        const markedScript = document.createElement("script");
+        markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+        markedScript.async = true;
+        markedScript.setAttribute("data-aiwa-marked", "true");
+        markedScript.onload = function () { resolve(window.marked); };
+        markedScript.onerror = reject;
+        document.head.appendChild(markedScript);
+      });
+      return markedLoader;
+    }
+
+    function renderAssistantContent(bubble, text) {
+      const value = text || "";
+      if (window.marked && typeof window.marked.parse === "function") {
+        bubble.innerHTML = window.marked.parse(value);
+      } else {
+        bubble.textContent = value;
+      }
+    }
+
+    function formatApiError(payload, fallback) {
+      if (!payload) return fallback;
+      if (typeof payload.detail === "string") return payload.detail;
+      if (Array.isArray(payload.detail)) {
+        return payload.detail.map(function (item) { return item.msg || item.message || String(item); }).join("; ");
+      }
+      if (payload.message) return payload.message;
+      return fallback;
+    }
+
+    function renderStatusBadge(status) { return '<span class="badge ' + status + '">' + status + "</span>"; }
+    function renderSites() {
+      siteTableBody.innerHTML = "";
+      if (!state.sites.length) siteTableBody.innerHTML = '<tr><td colspan="6">No sites processed yet.</td></tr>';
+      state.sites.forEach(function (site) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = [
+          "<td>" + (site.name || "Untitled site") + "</td>",
+          "<td>" + site.url + "</td>",
+          "<td>" + site.page_count + "</td>",
+          "<td>" + site.chunk_count + "</td>",
+          "<td>" + renderStatusBadge(site.status) + "</td>",
+          '<td><div class="actions"><button class="ghost" type="button" data-action="embed" data-site-id="' + site.site_id + '">Get Embed Code</button>' +
+          (site.status === "ready" ? '<button class="secondary" type="button" data-action="reprocess-ui" data-site-id="' + site.site_id + '">Reprocess UI</button>' : "") +
+          (site.status === "error" ? '<button class="secondary" type="button" data-action="retry" data-site-id="' + site.site_id + '">Retry</button>' : "") +
+          "</div></td>"
+        ].join("");
+        siteTableBody.appendChild(tr);
+      });
+      testSiteSelect.innerHTML = '<option value="">Select a ready site</option>';
+      state.sites.filter(function (site) { return site.status === "ready"; }).forEach(function (site) {
+        const option = document.createElement("option");
+        option.value = site.site_id;
+        option.textContent = (site.name || site.url) + " (" + site.url + ")";
+        testSiteSelect.appendChild(option);
+      });
+    }
+    async function fetchSites() {
+      try {
+        const response = await fetch("/api/sites");
+        const data = await response.json();
+        state.sites = data.sites || [];
+        localStorage.setItem("aiwa-sites", JSON.stringify(state.sites));
+        renderSites();
+      } catch (err) {
+        statusLine.textContent = "Unable to reach the backend. Make sure the FastAPI server is running.";
+      }
+    }
+    function loadCachedSites() {
+      try {
+        const cached = JSON.parse(localStorage.getItem("aiwa-sites") || "[]");
+        if (Array.isArray(cached)) { state.sites = cached; renderSites(); }
+      } catch (err) {}
+    }
+    function progressText(site) {
+      if (site.status === "crawling") return "Crawling... (" + site.page_count + " pages found)";
+      if (site.status === "embedding") return "Embedding... (" + site.chunk_count + " chunks built)";
+      if (site.status === "ready") return "Ready!";
+      if (site.status === "error") return "Error: " + (site.error_msg || "Unknown error");
+      return "Pending...";
+    }
+    async function pollStatus(siteId) {
+      if (state.pollTimer) window.clearInterval(state.pollTimer);
+      async function tick() {
+        try {
+          const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/status");
+          if (!response.ok) {
+            statusLine.textContent = "Unable to fetch status right now.";
+            return;
+          }
+          const site = await response.json();
+          statusLine.textContent = progressText(site);
+          await fetchSites();
+          if (site.status === "ready" || site.status === "error") {
+            window.clearInterval(state.pollTimer);
+            state.pollTimer = null;
+          }
+        } catch (err) {
+          statusLine.textContent = "Status polling failed. Please check that the backend is still running.";
+        }
+      }
+      await tick();
+      state.pollTimer = window.setInterval(tick, 3000);
+    }
+    async function handleCreateSite(event) {
+      event.preventDefault();
+      embedBox.style.display = "none";
+      statusLine.textContent = "Submitting...";
+      try {
+        const response = await fetch("/api/sites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: siteUrl.value.trim() }) });
+        const data = await response.json();
+        if (!response.ok) {
+          statusLine.textContent = formatApiError(data, "Unable to process website.");
+          return;
+        }
+        statusLine.textContent = "Pending...";
+        await pollStatus(data.site_id);
+        form.reset();
+      } catch (err) {
+        statusLine.textContent = "Unable to reach the backend. Make sure the FastAPI server is running.";
+      }
+    }
+    async function showEmbedCode(siteId) {
+      try {
+        const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/embed-script");
+        const data = await response.json();
+        if (!response.ok) {
+          statusLine.textContent = formatApiError(data, "Unable to generate embed code.");
+          return;
+        }
+        embedCode.textContent = data.script_tag;
+        embedBox.style.display = "block";
+      } catch (err) {
+        statusLine.textContent = "Unable to reach the backend while generating embed code.";
+      }
+    }
+    async function reprocessUi(siteId) {
+      statusLine.textContent = "Reprocessing UI structure...";
+      try {
+        const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/reprocess-ui", { method: "POST" });
+        const data = await response.json();
+        if (!response.ok) {
+          statusLine.textContent = formatApiError(data, "Unable to reprocess UI.");
+          return;
+        }
+        statusLine.textContent = "UI reprocessed. Added " + (data.ui_chunks_added || 0) + " UI chunks.";
+        await fetchSites();
+      } catch (err) {
+        statusLine.textContent = "Unable to reach the backend while reprocessing UI.";
+      }
+    }
+    async function retrySite(siteId) {
+      statusLine.textContent = "Retrying site processing...";
+      try {
+        const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/retry", { method: "POST" });
+        const data = await response.json();
+        if (!response.ok) {
+          statusLine.textContent = formatApiError(data, "Unable to retry website.");
+          return;
+        }
+        statusLine.textContent = "Pending...";
+        await pollStatus(siteId);
+      } catch (err) {
+        statusLine.textContent = "Unable to reach the backend while retrying.";
+      }
+    }
+    function scrollChatToBottom() {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    function resetChatPanel() {
+      closeExistingEventSource();
+      chatMessages.innerHTML = "";
+      chatInput.value = "";
+      state.sessionId = "aiwa-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      state.starterDismissed = false;
+    }
+    function removeStarterChips() {
+      const node = chatMessages.querySelector(".starter-chip-stack");
+      if (node) node.remove();
+      state.starterDismissed = true;
+    }
+    function clearFollowupChips() {
+      chatMessages.querySelectorAll(".followup-chip-stack").forEach(function (node) { node.remove(); });
+    }
+    function addChatMessage(role, text) {
+      const row = document.createElement("div");
+      row.className = "chat-row " + role;
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      if (role === "assistant") {
+        bubble.className += " assistant-markdown-bubble";
+        renderAssistantContent(bubble, text);
+      } else {
+        bubble.textContent = text;
+      }
+      row.appendChild(bubble);
+      chatMessages.appendChild(row);
+      scrollChatToBottom();
+      return { row, bubble };
+    }
+    function normalizeSources(payload) {
+      let sources = [];
+      if (payload && payload.sources && payload.sources.length) {
+        sources = payload.sources.slice(0, 1);
+      } else if (payload && payload.urls && payload.urls.length) {
+        const displayUrls = payload.urls.slice(0, 1);
+        sources = displayUrls.map(function (url, index) {
+          return { url: url, title: "Source " + (index + 1), section: "" };
+        });
+      }
+      return sources.slice(0, 1);
+    }
+    function appendSourceLinks(container, payload) {
+      const sources = normalizeSources(payload);
+      if (!sources.length) return;
+      const wrap = document.createElement("div");
+      wrap.className = "sources";
+      const label = document.createElement("div");
+      label.className = "sources-label";
+      label.textContent = "Sources";
+      wrap.appendChild(label);
+      const list = document.createElement("div");
+      list.className = "source-list";
+      sources.forEach(function (source, index) {
+        const link = document.createElement("a");
+        link.href = source.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.className = "source-chip";
+        link.textContent = source.title && source.section ? (source.title + " - " + source.section) : (source.title || ("Source " + (index + 1)));
+        list.appendChild(link);
+      });
+      wrap.appendChild(list);
+      container.appendChild(wrap);
+      scrollChatToBottom();
+    }
+    function closeExistingEventSource() {
+      if (state.activeEventSource) { state.activeEventSource.close(); state.activeEventSource = null; }
+    }
+    function isFallbackAnswer(text) {
+      return (text || "").trim() === FALLBACK_MESSAGE;
+    }
+    async function ensureStarterSuggestions() {
+      const siteId = testSiteSelect.value;
+      if (!siteId || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
+      if (state.suggestedQuestionsCache[siteId]) {
+        renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
+        return;
+      }
+      if (state.suggestedQuestionsRequested[siteId]) return;
+      state.suggestedQuestionsRequested[siteId] = true;
+      try {
+        const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/suggested-questions");
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data.questions || !data.questions.length) return;
+        state.suggestedQuestionsCache[siteId] = data.questions.slice(0, 3);
+        renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
+      } catch (err) {
+      }
+    }
+    function renderStarterSuggestions(questions) {
+      if (!questions || !questions.length || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
+      if (chatMessages.querySelector(".starter-chip-stack")) return;
+      const wrap = document.createElement("div");
+      wrap.className = "chip-stack starter-chip-stack";
+      questions.slice(0, 3).forEach(function (question) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chat-chip";
+        chip.textContent = "\u2192 " + question;
+        chip.addEventListener("click", function () {
+          removeStarterChips();
+          chatInput.value = question;
+          sendChat(question, { preserveFollowups: true, preserveStarter: true });
+        });
+        wrap.appendChild(chip);
+      });
+      chatMessages.appendChild(wrap);
+      scrollChatToBottom();
+    }
+    function appendFollowupChips(container, questions) {
+      if (!questions || !questions.length) return;
+      const wrap = document.createElement("div");
+      wrap.className = "chip-group followup-chip-stack";
+      questions.slice(0, 2).forEach(function (question) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "chat-chip followup-chip";
+        chip.textContent = "\u2192 " + question;
+        chip.addEventListener("click", function () {
+          wrap.remove();
+          sendChat(question, { preserveFollowups: true, preserveStarter: true });
+        });
+        wrap.appendChild(chip);
+      });
+      container.appendChild(wrap);
+      scrollChatToBottom();
+    }
+    async function fetchFollowupChips(lastQuestion, lastAnswer, container) {
+      const siteId = testSiteSelect.value;
+      if (!siteId) return;
+      try {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(function () { controller.abort(); }, 3000);
+        const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/followup-questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ last_question: lastQuestion, last_answer: lastAnswer, session_id: state.sessionId }),
+          signal: controller.signal
+        });
+        window.clearTimeout(timeoutId);
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!data.questions || !data.questions.length) return;
+        appendFollowupChips(container, data.questions);
+      } catch (err) {
+      }
+    }
+    function sendChat(forcedQuestion, options) {
+      options = options || {};
+      const siteId = testSiteSelect.value;
+      const question = (typeof forcedQuestion === "string" ? forcedQuestion : chatInput.value).trim();
+      if (!siteId || !question) return;
+      closeExistingEventSource();
+      if (!options.preserveStarter) removeStarterChips();
+      if (!options.preserveFollowups) clearFollowupChips();
+      addChatMessage("user", question);
+      chatInput.value = "";
+      const assistantMessage = addChatMessage("assistant", "");
+      const assistantBubble = assistantMessage.bubble;
+      let answerText = "";
+      let hadNoAnswer = false;
+      const source = new EventSource("/api/chat?site_id=" + encodeURIComponent(siteId) + "&q=" + encodeURIComponent(question) + "&session_id=" + encodeURIComponent(state.sessionId));
+      state.activeEventSource = source;
+      loadMarked().then(function () {
+        renderAssistantContent(assistantBubble, answerText);
+      }).catch(function () {});
+      source.onmessage = function (event) {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "token") {
+            answerText += data.content;
+            renderAssistantContent(assistantBubble, answerText);
+          } else if (data.type === "sources") {
+            appendSourceLinks(assistantMessage.row, data);
+          } else if (data.type === "no_answer") {
+            hadNoAnswer = true;
+            answerText = FALLBACK_MESSAGE;
+            renderAssistantContent(assistantBubble, FALLBACK_MESSAGE);
+          } else if (data.type === "done") {
+            source.close();
+            state.activeEventSource = null;
+            if (!hadNoAnswer && !isFallbackAnswer(answerText)) {
+              window.setTimeout(function () { fetchFollowupChips(question, answerText, assistantMessage.row); }, 0);
+            }
+          }
+        } catch (err) {
+          if (!assistantBubble.textContent && !assistantBubble.innerHTML) renderAssistantContent(assistantBubble, "Something went wrong. Please try again.");
+          source.close();
+          state.activeEventSource = null;
+        }
+        scrollChatToBottom();
+      };
+      source.onerror = function () {
+        if (!assistantBubble.textContent && !assistantBubble.innerHTML) renderAssistantContent(assistantBubble, "Something went wrong. Please try again.");
+        source.close();
+        state.activeEventSource = null;
+      };
+    }
+    form.addEventListener("submit", handleCreateSite);
+    siteTableBody.addEventListener("click", function (event) {
+      const button = event.target.closest("button[data-site-id]");
+      if (!button) return;
+      const siteId = button.getAttribute("data-site-id");
+      const action = button.getAttribute("data-action");
+      if (action === "reprocess-ui") reprocessUi(siteId);
+      else if (action === "retry") retrySite(siteId);
+      else showEmbedCode(siteId);
+    });
+    copyEmbed.addEventListener("click", async function () {
+      await navigator.clipboard.writeText(embedCode.textContent);
+      copyEmbed.textContent = "Copied";
+      window.setTimeout(function () { copyEmbed.textContent = "Copy"; }, 1200);
+    });
+    testSiteSelect.addEventListener("change", function () {
+      const selected = state.sites.find(function (site) { return site.site_id === testSiteSelect.value; });
+      chatTitle.textContent = "Chat with " + (selected ? (selected.name || selected.url) : "your site");
+      resetChatPanel();
+      ensureStarterSuggestions();
+    });
+    chatSend.addEventListener("click", function () { sendChat(); });
+    chatInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") { event.preventDefault(); sendChat(); }
+    });
+    loadCachedSites();
+    fetchSites();
+    loadMarked().catch(function () {});
+  </script>
+</body>
+</html>
