@@ -48,7 +48,7 @@ from backend.vector_store import write_vector_store
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-_bg_tasks: set[asyncio.Task] = set()
+_bg_tasks: dict[str, asyncio.Task] = {}
 FALLBACK_MESSAGE = (
     "I don't have that specific information here, but the team at "
     "{site_name} would be able to give you a definitive answer. "
@@ -65,6 +65,22 @@ _suggested_question_cache: dict[str, dict[str, Any]] = {}
 BASE_DIR = Path(__file__).resolve().parent.parent
 WIDGET_PATH = BASE_DIR / "widget" / "agent.js"
 DASHBOARD_PATH = BASE_DIR / "dashboard" / "index.html"
+
+
+def _schedule_process_site(site_id: str, site_url: str) -> None:
+    existing = _bg_tasks.get(site_id)
+    if existing is not None and not existing.done():
+        return
+
+    task = asyncio.create_task(process_site(site_id, site_url))
+    _bg_tasks[site_id] = task
+
+    def _cleanup(completed_task: asyncio.Task) -> None:
+        current = _bg_tasks.get(site_id)
+        if current is completed_task:
+            _bg_tasks.pop(site_id, None)
+
+    task.add_done_callback(_cleanup)
 
 
 def _parse_json_array(text_value: str, expected_length: int | None = None) -> list[str]:
@@ -185,6 +201,15 @@ async def startup_event() -> None:
     if "html_content" not in columns:
         with engine.begin() as connection:
             connection.execute(text("ALTER TABLE pages ADD COLUMN html_content TEXT"))
+
+    with session_scope() as db:
+        resumable_sites = db.execute(
+            select(Site).where(Site.status.in_(["pending", "crawling", "embedding"]))
+        ).scalars().all()
+
+    for site in resumable_sites:
+        logger.info("Resuming background processing for site %s (%s)", site.id, site.url)
+        _schedule_process_site(site.id, site.url)
 
 
 def _serialize_status(site: Site) -> SiteStatusResponse:
@@ -410,9 +435,7 @@ async def create_site(payload: CreateSiteRequest, db: Session = Depends(get_db))
         )
     )
     db.commit()
-    task = asyncio.create_task(process_site(site_id, normalized_url))
-    _bg_tasks.add(task)
-    task.add_done_callback(_bg_tasks.discard)
+    _schedule_process_site(site_id, normalized_url)
     return CreateSiteResponse(site_id=site_id, status="pending")
 
 
