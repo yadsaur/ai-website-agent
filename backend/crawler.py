@@ -5,6 +5,7 @@ import logging
 import re
 from collections import deque
 from dataclasses import dataclass
+from time import monotonic
 from typing import List
 from urllib.parse import parse_qsl, urljoin, urlparse, urlunparse
 
@@ -18,6 +19,7 @@ PRIMARY_NAVIGATION_TIMEOUT_MS = 20000
 FALLBACK_NAVIGATION_TIMEOUT_MS = 15000
 POST_COMMIT_WAIT_MS = 3000
 NETWORK_IDLE_TIMEOUT_MS = 8000
+SITE_CRAWL_DEADLINE_SECONDS = 120
 
 REAL_CHROME_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -88,6 +90,7 @@ async def crawl_site(url: str, site_id: str, max_pages: int = 40, max_depth: int
     queued: set[str] = {root_url}
     queue = deque([(root_url, 0)])
     results: list[PageResult] = []
+    crawl_started_at = monotonic()
 
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True)
@@ -99,6 +102,14 @@ async def crawl_site(url: str, site_id: str, max_pages: int = 40, max_depth: int
         page = await context.new_page()
 
         while queue and len(results) < max_pages:
+            if results and (monotonic() - crawl_started_at) > SITE_CRAWL_DEADLINE_SECONDS:
+                logger.warning(
+                    "Stopping crawl for %s after %ss with %s pages collected",
+                    root_url,
+                    SITE_CRAWL_DEADLINE_SECONDS,
+                    len(results),
+                )
+                break
             current_url, depth = queue.popleft()
             queued.discard(current_url)
             if current_url in visited or depth > max_depth:
