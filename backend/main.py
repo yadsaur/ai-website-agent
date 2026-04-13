@@ -264,6 +264,7 @@ async def process_site(site_id: str, root_url: str):
                                 html_content=page_result.html,
                             )
                         )
+                        db.flush()
                         for chunk in page_chunks:
                             chunk_id = str(uuid4())
                             db.add(
