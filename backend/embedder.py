@@ -9,7 +9,7 @@ import requests
 from backend.config import EMBEDDING_MODEL, HF_API_KEY
 
 HF_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-HF_URL = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{HF_MODEL}"
+HF_URL = f"https://router.huggingface.co/hf-inference/models/{HF_MODEL}/pipeline/feature-extraction"
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"} if HF_API_KEY else {}
 
 
