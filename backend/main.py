@@ -204,12 +204,12 @@ async def startup_event() -> None:
 
     with session_scope() as db:
         resumable_sites = db.execute(
-            select(Site).where(Site.status.in_(["pending", "crawling", "embedding"]))
-        ).scalars().all()
+            select(Site.id, Site.url).where(Site.status.in_(["pending", "crawling", "embedding"]))
+        ).all()
 
-    for site in resumable_sites:
-        logger.info("Resuming background processing for site %s (%s)", site.id, site.url)
-        _schedule_process_site(site.id, site.url)
+    for site_id, site_url in resumable_sites:
+        logger.info("Resuming background processing for site %s (%s)", site_id, site_url)
+        _schedule_process_site(site_id, site_url)
 
 
 def _serialize_status(site: Site) -> SiteStatusResponse:
