@@ -14,6 +14,10 @@ from playwright.async_api import async_playwright
 from backend.config import CRAWL_DELAY_SECONDS
 
 logger = logging.getLogger(__name__)
+PRIMARY_NAVIGATION_TIMEOUT_MS = 20000
+FALLBACK_NAVIGATION_TIMEOUT_MS = 15000
+POST_COMMIT_WAIT_MS = 3000
+NETWORK_IDLE_TIMEOUT_MS = 8000
 
 REAL_CHROME_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -104,9 +108,25 @@ async def crawl_site(url: str, site_id: str, max_pages: int = 40, max_depth: int
             await asyncio.sleep(CRAWL_DELAY_SECONDS)
 
             try:
-                response = await page.goto(current_url, wait_until="domcontentloaded", timeout=8000)
                 try:
-                    await page.wait_for_load_state("networkidle", timeout=8000)
+                    response = await page.goto(
+                        current_url,
+                        wait_until="domcontentloaded",
+                        timeout=PRIMARY_NAVIGATION_TIMEOUT_MS,
+                    )
+                except PlaywrightTimeoutError:
+                    logger.warning(
+                        "Primary navigation timeout for %s, retrying with commit wait",
+                        current_url,
+                    )
+                    response = await page.goto(
+                        current_url,
+                        wait_until="commit",
+                        timeout=FALLBACK_NAVIGATION_TIMEOUT_MS,
+                    )
+                    await page.wait_for_timeout(POST_COMMIT_WAIT_MS)
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=NETWORK_IDLE_TIMEOUT_MS)
                 except PlaywrightTimeoutError:
                     logger.warning("networkidle timeout for %s", current_url)
 
