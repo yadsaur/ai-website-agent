@@ -4,7 +4,7 @@
     tagline: "The AI sales rep trained on your website",
     appUrl: "https://ai-website-agent-aikinley.onrender.com",
     dashboardUrl: "/dashboard",
-    demoSiteId: "__DEMO_SITE_ID__",
+    demoSiteId: "d94c64af-65d2-410f-a6d4-c9f05f9919c0",
   };
 
   const navLinks = [
@@ -207,7 +207,7 @@
 
   function loadDemoWidget() {
     const mount = document.querySelector("[data-demo-widget]");
-    if (!mount || !siteConfig.demoSiteId || siteConfig.demoSiteId === "__DEMO_SITE_ID__") {
+    if (!mount || !siteConfig.demoSiteId) {
       return;
     }
     const script = document.createElement("script");
