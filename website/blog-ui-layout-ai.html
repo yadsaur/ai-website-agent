@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How we built an AI that understands website UI layout</title>
+  <meta name="description" content="How SiteCloser extracts navigation, buttons, search bars, and layout cues so it can answer where-to-click questions accurately.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/website/styles/main.css">
+</head>
+<body data-page="blog">
+  <div class="site-shell">
+    <div class="noise"></div>
+    <header class="site-nav" data-nav></header>
+    <main class="page">
+      <section class="page-hero">
+        <div class="container article-shell">
+          <div class="post-meta" data-reveal><span>Engineering</span><span>April 2026</span><span>6 min read</span></div>
+          <div class="section-header article-shell" data-reveal>
+            <h1>How we built an AI that understands website UI layout</h1>
+            <p class="lede">Plain text extraction is not enough when visitors ask where the search bar is, which tab holds pricing, or where the footer links live.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container article-shell">
+          <p data-reveal>Most retrieval systems flatten a page into plain text. That works for copy-heavy questions, but it breaks the moment a visitor asks something about location or interface. “Where is the search bar?” is not a text question. It is a structure question.</p>
+          <h2 data-reveal>What we extract beyond plain text</h2>
+          <ul data-reveal>
+            <li>Navigation links and their inferred location.</li>
+            <li>Buttons, CTAs, logos, search inputs, and dropdown menus.</li>
+            <li>Footer links and structural landmarks like header, sidebar, or hero section.</li>
+          </ul>
+          <p data-reveal>Those UI facts get transformed into natural-language guide text and embedded as dedicated chunks. During retrieval, UI-position queries get a score bonus so those chunks surface first. The language model then receives explicit instructions to answer layout questions from that UI context rather than claiming ignorance.</p>
+          <p data-reveal>The result is a chatbot that can guide a visitor through the website instead of only summarizing what the website says.</p>
+        </div>
+      </section>
+    </main>
+    <footer class="footer" data-footer></footer>
+  </div>
+  <script src="/website/js/main.js"></script>
+</body>
+</html>

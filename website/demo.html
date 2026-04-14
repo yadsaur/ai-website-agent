@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteCloser Demo — Try the live AI sales widget</title>
+  <meta name="description" content="This page is the live SiteCloser demo. Ask pricing, product, or getting-started questions and see the widget answer in real time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/website/styles/main.css">
+</head>
+<body data-page="demo">
+  <div class="site-shell">
+    <div class="noise"></div>
+    <header class="site-nav" data-nav></header>
+    <main class="page">
+      <section class="page-hero">
+        <div class="container">
+          <div class="section-header" data-reveal>
+            <span class="eyebrow">Live demo</span>
+            <h1>This page <span class="gradient-text">is the demo</span></h1>
+            <p class="lede">The chatbot below is trained on our own website. Open it and ask about pricing, what the product does, or how to get started.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container demo-grid">
+          <div class="demo-card glass-card" data-reveal>
+            <h3>Try these questions</h3>
+            <p>Use the prompt chips below, or type your own question once the widget opens.</p>
+            <div class="demo-prompts">
+              <button class="prompt-chip" type="button" data-demo-ask="How much does it cost?">→ How much does it cost?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="What does this product do?">→ What does this product do?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="How do I get started?">→ How do I get started?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="Where do I click to start?">→ Where do I click to start?</button>
+            </div>
+            <div style="margin-top: 28px;">
+              <h3>What you’re seeing</h3>
+              <ul class="feature-list">
+                <li>Real streaming answers from the live Render app.</li>
+                <li>Source chips and follow-up suggestions.</li>
+                <li>UI-aware responses trained on the website itself.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="demo-card glass-card demo-widget-shell" data-reveal>
+            <h3>Open the widget in the bottom-right corner</h3>
+            <p>The exact production widget is embedded on this page below.</p>
+            <div data-demo-widget></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer" data-footer></footer>
+  </div>
+  <script src="/website/js/main.js"></script>
+</body>
+</html>

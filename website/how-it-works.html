@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How SiteCloser Works — From URL to live AI sales rep</title>
+  <meta name="description" content="See how SiteCloser crawls your site, extracts content and UI structure, generates embeddings, and powers a live conversion-focused chatbot widget.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/website/styles/main.css">
+</head>
+<body data-page="how-it-works">
+  <div class="site-shell">
+    <div class="noise"></div>
+    <header class="site-nav" data-nav></header>
+    <main class="page">
+      <section class="page-hero">
+        <div class="container">
+          <div class="section-header" data-reveal>
+            <span class="eyebrow">How it works</span>
+            <h1>From pasted URL to <span class="gradient-text">conversion-ready AI</span> in six steps</h1>
+            <p class="lede">SiteCloser is designed to feel effortless on the surface and deeply engineered underneath. Here is the whole flow, from crawl to live widget.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="timeline">
+            <article class="timeline-item glass-card" data-reveal><div class="timeline-badge">1</div><div><h3>Paste your website URL</h3><p>The dashboard validates the root URL, creates a site record, and starts a background processing task so setup never blocks the UI.</p></div></article>
+            <article class="timeline-item glass-card" data-reveal><div class="timeline-badge">2</div><div><h3>Crawl the live website</h3><p>Playwright loads the real rendered site, waits for JavaScript-driven content, follows internal links, and skips admin, checkout, login, and noisy URLs.</p></div></article>
+            <article class="timeline-item glass-card" data-reveal><div class="timeline-badge">3</div><div><h3>Extract content and UI structure</h3><p>Trafilatura and BeautifulSoup extract readable content while a dedicated UI extractor finds nav links, buttons, search bars, logos, dropdowns, and footers.</p></div></article>
+            <article class="timeline-item glass-card" data-reveal><div class="timeline-badge">4</div><div><h3>Chunk and embed</h3><p>Pages become semantically meaningful chunks with heading breadcrumbs. Those chunks are embedded, stored, and loaded into memory when chat starts.</p></div></article>
+            <article class="timeline-item glass-card" data-reveal><div class="timeline-badge">5</div><div><h3>Answer with retrieval + sales prompting</h3><p>When a buyer asks something, SiteCloser retrieves the strongest chunks, classifies intent, and answers in a grounded sales-assistant tone instead of generic summary mode.</p></div></article>
+            <article class="timeline-item glass-card" data-reveal><div class="timeline-badge">6</div><div><h3>Deploy the widget</h3><p>Copy one script tag into any page. The widget streams responses, shows starter prompts, suggests follow-ups, and links the visitor to the most relevant source page.</p></div></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="section-header" data-reveal>
+            <span class="eyebrow">Under the hood</span>
+            <h2>Technical enough for developers, simple enough for founders</h2>
+          </div>
+          <div class="technical-grid">
+            <article class="technical-card glass-card" data-reveal>
+              <h3>Crawl + extraction</h3>
+              <ul class="tech-list">
+                <li>Async Playwright browser crawl.</li>
+                <li>Trafilatura-first content extraction.</li>
+                <li>HTML-aware fallback parsing when needed.</li>
+              </ul>
+            </article>
+            <article class="technical-card glass-card" data-reveal>
+              <h3>Retrieval pipeline</h3>
+              <ul class="tech-list">
+                <li>Semantic chunking with section context.</li>
+                <li>Embeddings + in-memory vector loading.</li>
+                <li>MMR reranking for diverse top results.</li>
+              </ul>
+            </article>
+            <article class="technical-card glass-card" data-reveal>
+              <h3>Conversation layer</h3>
+              <ul class="tech-list">
+                <li>SSE token streaming for responsive chat.</li>
+                <li>Session memory for follow-up questions.</li>
+                <li>OpenRouter-powered answer generation.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-panel glass-card" data-reveal>
+            <div>
+              <span class="eyebrow">Ready to launch</span>
+              <h2 style="margin-top: 18px;">Want to see the whole flow in action?</h2>
+              <p class="lede" style="margin-top: 12px;">Open the demo page or process your own website and watch the assistant train itself.</p>
+            </div>
+            <div class="button-row">
+              <a class="button button-primary" href="/demo">Try the demo</a>
+              <a class="button button-secondary" href="/dashboard">Open dashboard</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer" data-footer></footer>
+  </div>
+  <script src="/website/js/main.js"></script>
+</body>
+</html>

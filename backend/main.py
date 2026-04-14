@@ -14,6 +14,7 @@ import numpy as np
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import delete, select, text
 from sqlalchemy import inspect
 from sqlalchemy.orm import Session
@@ -65,6 +66,7 @@ _suggested_question_cache: dict[str, dict[str, Any]] = {}
 BASE_DIR = Path(__file__).resolve().parent.parent
 WIDGET_PATH = BASE_DIR / "widget" / "agent.js"
 DASHBOARD_PATH = BASE_DIR / "dashboard" / "index.html"
+WEBSITE_DIR = BASE_DIR / "website"
 
 
 def _schedule_process_site(site_id: str, site_url: str) -> None:
@@ -189,6 +191,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/website", StaticFiles(directory=WEBSITE_DIR), name="website")
 
 
 @app.on_event("startup")
@@ -792,9 +795,53 @@ async def widget_script():
     return FileResponse(WIDGET_PATH, media_type="application/javascript")
 
 
+def _website_file(path: str) -> FileResponse:
+    return FileResponse(WEBSITE_DIR / path, media_type="text/html")
+
+
 @app.get("/")
 async def root():
-    return RedirectResponse(url="/dashboard")
+    return _website_file("index.html")
+
+
+@app.get("/features")
+async def website_features():
+    return _website_file("features.html")
+
+
+@app.get("/pricing")
+async def website_pricing():
+    return _website_file("pricing.html")
+
+
+@app.get("/how-it-works")
+async def website_how_it_works():
+    return _website_file("how-it-works.html")
+
+
+@app.get("/demo")
+async def website_demo():
+    return _website_file("demo.html")
+
+
+@app.get("/blog")
+async def website_blog():
+    return _website_file("blog.html")
+
+
+@app.get("/blog/ai-salesman")
+async def blog_ai_salesman():
+    return _website_file("blog-ai-salesman.html")
+
+
+@app.get("/blog/visitor-questions")
+async def blog_visitor_questions():
+    return _website_file("blog-visitor-questions.html")
+
+
+@app.get("/blog/ui-layout-ai")
+async def blog_ui_layout_ai():
+    return _website_file("blog-ui-layout-ai.html")
 
 
 @app.get("/dashboard")
