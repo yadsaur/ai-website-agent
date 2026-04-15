@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteCloser privacy</title>
+  <meta name="description" content="How SiteCloser handles website content, chat usage, and service data in the hosted product.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/website/styles/main.css">
+</head>
+<body data-page="privacy">
+  <div class="site-shell">
+    <div class="noise"></div>
+    <header class="site-nav" data-nav></header>
+    <main class="page">
+      <section class="page-hero">
+        <div class="container legal-shell">
+          <div class="section-header" data-reveal>
+            <span class="eyebrow">Privacy</span>
+            <h1>How SiteCloser handles website and chat data</h1>
+            <p class="lede">This page explains the current hosted product behavior in plain language. It is intended to help teams understand what the product stores and why.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container legal-grid legal-shell">
+          <article class="legal-card glass-card" data-reveal>
+            <h3>Website content you choose to process</h3>
+            <p>When you add a site, SiteCloser crawls public pages from the URL you provide so it can build an assistant around that content.</p>
+          </article>
+          <article class="legal-card glass-card" data-reveal>
+            <h3>Stored product data</h3>
+            <p>The hosted app stores site records, processed pages, content chunks, and vector data required to answer questions inside the product.</p>
+          </article>
+          <article class="legal-card glass-card" data-reveal>
+            <h3>Chat interactions</h3>
+            <p>Short-lived session memory is used to make follow-up answers more coherent inside the widget and workspace test chat.</p>
+          </article>
+          <article class="legal-card glass-card" data-reveal>
+            <h3>Third-party services</h3>
+            <p>The current hosted product uses managed services to run the application, store data, generate embeddings, and produce model responses.</p>
+          </article>
+          <article class="legal-card glass-card" data-reveal>
+            <h3>Public-site assumption</h3>
+            <p>SiteCloser is designed for public website content. Teams should avoid processing pages that contain confidential or regulated information they should not send to hosted services.</p>
+          </article>
+          <article class="legal-card glass-card" data-reveal>
+            <h3>Questions about data handling</h3>
+            <p>If you need clarification on a specific deployment or data path, use the support page to contact the team directly.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="footer" data-footer></footer>
+  </div>
+  <script src="/website/js/main.js"></script>
+</body>
+</html>

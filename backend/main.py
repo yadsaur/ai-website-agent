@@ -183,7 +183,7 @@ def _get_cached_suggested_questions(site_id: str) -> list[str] | None:
 def _set_cached_suggested_questions(site_id: str, questions: list[str]) -> None:
     _suggested_question_cache[site_id] = {"timestamp": time(), "questions": list(questions)}
 
-app = FastAPI(title="AI Website Agent")
+app = FastAPI(title="SiteCloser")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -842,6 +842,31 @@ async def blog_visitor_questions():
 @app.get("/blog/ui-layout-ai")
 async def blog_ui_layout_ai():
     return _website_file("blog-ui-layout-ai.html")
+
+
+@app.get("/privacy")
+async def website_privacy():
+    return _website_file("privacy.html")
+
+
+@app.get("/terms")
+async def website_terms():
+    return _website_file("terms.html")
+
+
+@app.get("/security")
+async def website_security():
+    return _website_file("security.html")
+
+
+@app.get("/support")
+async def website_support():
+    return _website_file("support.html")
+
+
+@app.get("/contact")
+async def website_contact():
+    return RedirectResponse(url="/support", status_code=307)
 
 
 @app.get("/dashboard")

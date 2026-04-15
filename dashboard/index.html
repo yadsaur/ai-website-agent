@@ -3,140 +3,925 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Website Agent Dashboard</title>
+  <title>SiteCloser Workspace</title>
+  <meta name="description" content="Train, test, and launch your SiteCloser assistant from one guided workspace." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <link rel="icon" type="image/svg+xml" href="/website/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/website/styles/main.css" />
   <style>
-    :root { --bg:#f8fafc; --panel:#fff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0; --blue:#2563eb; --soft:#dbeafe; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:system-ui,-apple-system,sans-serif; background:linear-gradient(180deg,#eff6ff 0%,var(--bg) 35%); color:var(--text); }
-    .wrap { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
-    h1,h2 { margin:0 0 12px; }
-    .subtle { color:var(--muted); margin-bottom:24px; }
-    .grid { display:grid; grid-template-columns:1.2fr 1fr; gap:20px; }
-    .card { background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:20px; box-shadow:0 18px 45px rgba(15,23,42,0.06); }
-    form { display:flex; gap:12px; flex-wrap:wrap; }
-    input,select,button { font:inherit; }
-    input,select { width:100%; border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:#fff; color:var(--text); }
-    .grow { flex:1; min-width:260px; }
-    button { border:none; border-radius:12px; padding:12px 16px; background:var(--blue); color:#fff; cursor:pointer; font-weight:600; }
-    button.secondary { background:#0f172a; }
-    button.ghost { background:#eef2ff; color:#1e3a8a; }
-    .status-line { margin-top:14px; color:var(--muted); min-height:24px; }
-    table { width:100%; border-collapse:collapse; margin-top:14px; }
-    th,td { text-align:left; padding:12px 10px; border-bottom:1px solid var(--border); vertical-align:top; font-size:14px; }
-    th { color:var(--muted); font-weight:600; }
-    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; text-transform:capitalize; }
-    .badge.ready { background:#dcfce7; color:#166534; } .badge.embedding { background:#ffedd5; color:#9a3412; } .badge.crawling,.badge.pending { background:var(--soft); color:#1d4ed8; } .badge.error { background:#fee2e2; color:#991b1b; }
-    pre { background:#0f172a; color:#e2e8f0; padding:14px; border-radius:14px; overflow:auto; white-space:pre-wrap; word-break:break-all; }
-    .embed-box { margin-top:16px; display:none; }
-    .chat-shell { border:1px solid var(--border); border-radius:16px; overflow:hidden; background:#fff; display:flex; flex-direction:column; min-height:500px; }
-    .chat-header { padding:14px 16px; background:var(--blue); color:#fff; font-weight:700; }
-    .chat-messages { flex:1; overflow-y:auto; padding:16px; background:#f8fafc; }
-    .chat-row { display:flex; margin-bottom:12px; } .chat-row.user { justify-content:flex-end; } .chat-row.assistant { justify-content:flex-start; flex-direction:column; align-items:flex-start; gap:8px; }
-    .bubble { max-width:85%; border-radius:16px; padding:10px 12px; font-size:14px; line-height:1.45; white-space:pre-wrap; word-break:break-word; }
-    .chat-row.user .bubble { background:var(--blue); color:#fff; } .chat-row.assistant .bubble { background:#e5e7eb; color:#111827; }
-    .chat-row.assistant .assistant-markdown-bubble p { margin:0 0 8px 0; }
-    .chat-row.assistant .assistant-markdown-bubble p:last-child { margin-bottom:0; }
-    .chat-row.assistant .assistant-markdown-bubble strong { font-weight:600; }
-    .chat-row.assistant .assistant-markdown-bubble em { font-style:italic; }
+    :root {
+      --app-bg: #081018;
+      --app-panel: rgba(14, 18, 29, 0.82);
+      --app-panel-strong: rgba(18, 22, 35, 0.9);
+      --app-border: rgba(255, 255, 255, 0.1);
+      --app-muted: #9ca3b8;
+      --app-text: #f4f6ff;
+      --app-blue: #7c3aed;
+      --app-success: #16a34a;
+      --app-warning: #d97706;
+      --app-danger: #dc2626;
+      --app-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(167, 139, 250, 0.12), transparent 24%),
+        var(--app-bg);
+      color: var(--app-text);
+    }
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+    button:disabled, input:disabled, select:disabled { opacity: 0.6; cursor: not-allowed; }
+    .workspace-shell { position: relative; overflow-x: clip; min-height: 100vh; }
+    .workspace-shell::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: radial-gradient(circle at center, black 42%, transparent 90%);
+    }
+    .workspace-container { width: min(calc(100% - 40px), 1240px); margin: 0 auto; position: relative; z-index: 1; }
+    .workspace-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(8, 16, 24, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .workspace-topbar-inner {
+      min-height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .workspace-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      font-size: 1.2rem;
+    }
+    .workspace-brand small {
+      display: block;
+      color: var(--app-muted);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .workspace-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .workspace-links a {
+      color: var(--app-muted);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 999px;
+    }
+    .workspace-links a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffffff;
+    }
+    .workspace-main { padding: 34px 0 72px; }
+    .workspace-hero,
+    .workspace-card {
+      background: var(--app-panel);
+      border: 1px solid var(--app-border);
+      border-radius: 28px;
+      box-shadow: var(--app-shadow);
+      backdrop-filter: blur(16px);
+    }
+    .workspace-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+      gap: 24px;
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .workspace-hero h1 {
+      margin: 18px 0 14px;
+      font-size: clamp(2.8rem, 6vw, 4.4rem);
+      letter-spacing: -0.05em;
+      line-height: 0.98;
+    }
+    .workspace-hero p {
+      margin: 0;
+      color: #d7dcf1;
+      font-size: 1.05rem;
+      max-width: 720px;
+    }
+    .step-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .step-pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: #e8eafe;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .hero-summary { display: grid; gap: 16px; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .summary-tile,
+    .state-card,
+    .tip-card,
+    .launch-card {
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--app-panel-strong);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .summary-tile strong {
+      display: block;
+      font-size: 1.9rem;
+      letter-spacing: -0.05em;
+      margin-bottom: 6px;
+    }
+    .summary-tile span,
+    .support-copy,
+    .card-subtitle,
+    .empty-state p,
+    .status-note,
+    .tip-card p,
+    .state-card p,
+    .launch-card p {
+      color: var(--app-muted);
+      font-size: 14px;
+    }
+    .feedback-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 20px;
+      padding: 14px 18px;
+      border-radius: 18px;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .feedback-banner.visible { display: flex; }
+    .feedback-banner.info { border-color: rgba(124, 58, 237, 0.28); color: #efe9ff; }
+    .feedback-banner.success { border-color: rgba(34, 197, 94, 0.3); color: #dcfce7; }
+    .feedback-banner.error { border-color: rgba(239, 68, 68, 0.3); color: #fee2e2; }
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 20px;
+      margin-bottom: 20px;
+      align-items: start;
+    }
+    .workspace-grid.secondary {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    }
+    .workspace-card { padding: 26px; }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .card-header h2 {
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+    .card-header p { margin: 8px 0 0; color: var(--app-muted); }
+    .overline {
+      margin: 0 0 6px;
+      color: #ddd6fe;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    .setup-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .setup-form input,
+    .chat-toolbar select,
+    .chat-controls input {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 15px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+    .setup-form input::placeholder,
+    .chat-controls input::placeholder {
+      color: #8d93aa;
+    }
+    .primary-button,
+    .secondary-button,
+    .ghost-button {
+      border-radius: 18px;
+      min-height: 54px;
+      padding: 0 18px;
+      font-weight: 700;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+    .primary-button:hover,
+    .secondary-button:hover,
+    .ghost-button:hover {
+      transform: translateY(-1px);
+    }
+    .primary-button {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #ffffff;
+      border: 0;
+      box-shadow: 0 18px 40px rgba(124, 58, 237, 0.26);
+    }
+    .secondary-button {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .ghost-button {
+      background: transparent;
+      color: #ddd6fe;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 24px;
+      color: #e8eafe;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #a78bfa;
+      box-shadow: 0 0 18px rgba(167, 139, 250, 0.7);
+    }
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #7c3aed, #c4b5fd);
+      transition: width 260ms ease;
+    }
+    .workspace-state-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .state-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .state-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .state-step-badge {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .state-step.completed .state-step-badge { background: rgba(34, 197, 94, 0.18); color: #dcfce7; }
+    .state-step.active .state-step-badge { background: rgba(124, 58, 237, 0.22); color: #f5f3ff; }
+    .state-step h4 { margin: 0 0 4px; font-size: 14px; }
+    .state-step p { margin: 0; color: var(--app-muted); font-size: 13px; }
+    .embed-box {
+      display: none;
+      margin-top: 10px;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .embed-box.visible { display: block; }
+    .embed-meta {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    pre {
+      margin: 0;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: #05070f;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #ddd6fe;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .copied-note {
+      color: #dcfce7;
+      font-size: 12px;
+      min-height: 18px;
+      margin-top: 10px;
+    }
+    .tip-stack { display: grid; gap: 14px; }
+    .tip-card h3, .launch-card h3, .state-card h3 { margin: 0 0 8px; font-size: 1.02rem; }
+    .tip-card ul, .launch-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+      display: grid;
+      gap: 10px;
+    }
+    .tip-card li, .launch-card li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--app-muted);
+      font-size: 14px;
+    }
+    .tip-card li::before, .launch-card li::before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #c4b5fd, #7c3aed);
+    }
+    .site-summary-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .summary-chip {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #e8eafe;
+      font-size: 13px;
+    }
+    .table-wrap {
+      overflow: auto;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th, td {
+      padding: 16px 14px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      color: var(--app-muted);
+      font-weight: 600;
+    }
+    tbody tr:last-child td { border-bottom: 0; }
+    .site-name { display: grid; gap: 4px; }
+    .site-name strong { font-size: 15px; }
+    .site-url { color: var(--app-muted); word-break: break-word; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+    .badge.ready { background: rgba(34, 197, 94, 0.14); color: #dcfce7; }
+    .badge.embedding { background: rgba(245, 158, 11, 0.16); color: #fde68a; }
+    .badge.crawling, .badge.pending { background: rgba(124, 58, 237, 0.18); color: #ede9fe; }
+    .badge.error { background: rgba(239, 68, 68, 0.14); color: #fecaca; }
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .row-button {
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: #ede9fe;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .row-button.primary {
+      background: rgba(124, 58, 237, 0.2);
+      border-color: rgba(124, 58, 237, 0.35);
+    }
+    .empty-state {
+      display: none;
+      padding: 18px;
+      margin-bottom: 14px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .empty-state.visible { display: block; }
+    .empty-state h3 { margin: 0 0 8px; }
+    .chat-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .chat-empty-hint {
+      color: var(--app-muted);
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
+    .chat-shell {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(10, 14, 24, 0.96), rgba(7, 10, 18, 0.98));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      min-height: 560px;
+    }
+    .chat-header {
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.96), rgba(91, 33, 182, 0.94));
+      color: #ffffff;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px;
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 28%),
+        linear-gradient(180deg, #0a0f1d, #080b14);
+    }
+    .chat-row { display: flex; margin-bottom: 12px; }
+    .chat-row.user { justify-content: flex-end; }
+    .chat-row.assistant { justify-content: flex-start; flex-direction: column; align-items: flex-start; gap: 8px; }
+    .bubble {
+      max-width: 85%;
+      border-radius: 18px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .chat-row.user .bubble {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #ffffff;
+      border-top-right-radius: 8px;
+      box-shadow: 0 12px 30px rgba(91, 33, 182, 0.18);
+    }
+    .chat-row.assistant .bubble {
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fbff;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-top-left-radius: 8px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    }
+    .chat-row.assistant .assistant-markdown-bubble,
+    .chat-row.assistant .assistant-markdown-bubble * { color: inherit; }
+    .chat-row.assistant .assistant-markdown-bubble p { margin: 0 0 8px 0; }
+    .chat-row.assistant .assistant-markdown-bubble p:last-child { margin-bottom: 0; }
+    .chat-row.assistant .assistant-markdown-bubble strong { font-weight: 600; }
+    .chat-row.assistant .assistant-markdown-bubble em { font-style: italic; }
     .chat-row.assistant .assistant-markdown-bubble ol,
-    .chat-row.assistant .assistant-markdown-bubble ul { margin:6px 0; padding-left:20px; }
-    .chat-row.assistant .assistant-markdown-bubble li { margin-bottom:4px; line-height:1.5; }
+    .chat-row.assistant .assistant-markdown-bubble ul { margin: 6px 0; padding-left: 20px; }
+    .chat-row.assistant .assistant-markdown-bubble li { margin-bottom: 4px; line-height: 1.5; }
     .chat-row.assistant .assistant-markdown-bubble h1,
     .chat-row.assistant .assistant-markdown-bubble h2,
-    .chat-row.assistant .assistant-markdown-bubble h3 { font-size:14px; font-weight:600; margin:8px 0 4px 0; }
-    .sources { margin-top:8px; display:flex; flex-direction:column; gap:8px; }
-    .sources-label { font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); }
-    .source-list { display:flex; flex-wrap:wrap; gap:8px; }
-    .source-chip { display:inline-flex; align-items:center; max-width:100%; padding:6px 10px; border-radius:999px; background:#eff6ff; color:#1d4ed8; text-decoration:none; font-size:12px; font-weight:600; }
-    .source-chip:hover { background:#dbeafe; }
-    .chip-stack { display:flex; flex-direction:column; gap:6px; align-items:flex-start; margin-bottom:12px; }
-    .chip-group { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
-    .chat-chip { display:inline-flex; align-items:center; justify-content:flex-start; width:fit-content; max-width:90%; padding:8px 16px; border:1px solid var(--border); border-radius:20px; background:#fff; color:#374151; cursor:pointer; font-size:13px; text-align:left; }
-    .chat-chip:hover { background:#eff6ff; border-color:#bfdbfe; }
-    .followup-chip { font-size:12px; padding:6px 14px; }
-    .chat-controls { display:flex; gap:10px; padding:12px; border-top:1px solid var(--border); } .chat-footer { padding:10px 12px; border-top:1px solid var(--border); color:var(--muted); font-size:11px; }
-    .stack { display:flex; flex-direction:column; gap:16px; }
-    .actions { display:flex; flex-wrap:wrap; gap:8px; }
-    @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+    .chat-row.assistant .assistant-markdown-bubble h3 { font-size: 14px; font-weight: 600; margin: 8px 0 4px 0; }
+    .sources { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+    .sources-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--app-muted); }
+    .source-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .source-chip {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.14);
+      color: #f3ecff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+    .chip-stack, .chip-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+    .chip-stack { margin-bottom: 12px; }
+    .chat-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      max-width: 90%;
+      padding: 8px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #f0f2ff;
+      cursor: pointer;
+      font-size: 13px;
+      text-align: left;
+    }
+    .chat-chip:hover {
+      background: rgba(124, 58, 237, 0.12);
+      border-color: rgba(167, 139, 250, 0.3);
+    }
+    .followup-chip { font-size: 12px; padding: 6px 14px; }
+    .chat-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(9, 12, 20, 0.96);
+    }
+    .chat-footer {
+      padding: 10px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--app-muted);
+      font-size: 11px;
+      background: rgba(9, 12, 20, 0.96);
+    }
+    @media (max-width: 1100px) {
+      .workspace-hero,
+      .workspace-grid,
+      .workspace-grid.secondary { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 860px) {
+      .workspace-topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 18px 0;
+      }
+      .workspace-links { width: 100%; }
+      .summary-grid,
+      .workspace-state-grid,
+      .setup-form,
+      .chat-toolbar,
+      .chat-controls { grid-template-columns: 1fr; }
+      .table-wrap { border: 0; background: transparent; }
+      table, thead, tbody, th, td, tr { display: block; min-width: 0; }
+      thead { display: none; }
+      tr {
+        margin-bottom: 14px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+      }
+      td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 12px 14px;
+      }
+      td:last-child { border-bottom: 0; }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--app-muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>AI Website Agent</h1>
-    <p class="subtle">Deeply crawl a website, build a semantic knowledge base, and deploy a conversion-focused chat widget.</p>
-    <div class="grid">
-      <section class="card">
-        <h2>Add Website</h2>
-        <p class="subtle">Enter a site URL and the backend will crawl, chunk, embed, and prepare an embeddable chat agent.</p>
-        <form id="site-form">
-          <input class="grow" id="site-url" type="url" placeholder="https://example.com" required />
-          <button type="submit">Process Website</button>
-        </form>
-        <div class="status-line" id="status-line"></div>
-        <div class="embed-box" id="embed-box">
-          <h3>Embed Code</h3>
-          <pre id="embed-code"></pre>
-          <button class="secondary" id="copy-embed" type="button">Copy</button>
-        </div>
-      </section>
-      <section class="card stack">
-        <div>
-          <h2>Test Chat</h2>
-          <p class="subtle">Choose any ready site and test the streaming experience before embedding it elsewhere.</p>
-        </div>
-        <select id="test-site-select"><option value="">Select a ready site</option></select>
-        <div class="chat-shell">
-          <div class="chat-header" id="chat-title">Chat with your site</div>
-          <div class="chat-messages" id="chat-messages"></div>
-          <div class="chat-controls">
-            <input id="chat-input" type="text" placeholder="Ask a question..." />
-            <button id="chat-send" type="button">Send</button>
+  <div class="workspace-shell">
+    <header class="workspace-topbar">
+      <div class="workspace-container workspace-topbar-inner">
+        <a class="workspace-brand" href="/">
+          <span class="brand-mark"></span>
+          <span>
+            <span>SiteCloser</span>
+            <small>Workspace</small>
+          </span>
+        </a>
+        <nav class="workspace-links" aria-label="Workspace navigation">
+          <a href="/">Marketing site</a>
+          <a href="/demo">Live demo</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/security">Security</a>
+          <a href="/support">Support</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="workspace-main">
+      <div class="workspace-container">
+        <section class="workspace-hero">
+          <div>
+            <span class="eyebrow">Guided onboarding</span>
+            <h1>Launch your first SiteCloser assistant</h1>
+            <p>Process a site, review training, copy the embed code, and test answers before you go live. The workspace is designed to make the first launch obvious and low-friction.</p>
+            <div class="step-pills">
+              <span class="step-pill">1. Add website</span>
+              <span class="step-pill">2. Train assistant</span>
+              <span class="step-pill">3. Install widget</span>
+              <span class="step-pill">4. Test live</span>
+            </div>
           </div>
-          <div class="chat-footer">Powered by AI Agent</div>
-        </div>
-      </section>
-    </div>
-    <section class="card" style="margin-top:20px;">
-      <h2>Processed Sites</h2>
-      <p class="subtle">View status, counts, and generate the embed script for any processed website.</p>
-      <table>
-        <thead><tr><th>Name</th><th>URL</th><th>Pages</th><th>Chunks</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody id="site-table-body"></tbody>
-      </table>
-    </section>
+          <div class="hero-summary">
+            <div class="summary-grid">
+              <div class="summary-tile">
+                <strong id="metric-sites">0</strong>
+                <span>Processed sites</span>
+              </div>
+              <div class="summary-tile">
+                <strong id="metric-ready">0</strong>
+                <span>Ready to launch</span>
+              </div>
+              <div class="summary-tile">
+                <strong id="metric-active">0</strong>
+                <span>In progress</span>
+              </div>
+            </div>
+            <div class="launch-card">
+              <h3 id="launch-title">Start by connecting a website</h3>
+              <p id="launch-copy">Once SiteCloser sees your pages, it can build the assistant, generate embed code, and let you pressure-test the chat before launch.</p>
+            </div>
+          </div>
+        </section>
+
+        <div id="feedback-banner" class="feedback-banner" role="status" aria-live="polite"></div>
+
+        <section class="workspace-grid">
+          <section class="workspace-card">
+            <div class="card-header">
+              <div>
+                <p class="overline">Step 1</p>
+                <h2>Add website</h2>
+                <p>Paste a public website URL and SiteCloser will crawl, structure, embed, and prepare an assistant around it.</p>
+              </div>
+            </div>
+            <form id="site-form" class="setup-form">
+              <input id="site-url" type="url" placeholder="https://example.com" required />
+              <button id="site-submit" class="primary-button" type="submit">Start training</button>
+            </form>
+            <div class="status-line"><span class="status-dot"></span><span id="status-line">Ready when you are. Add a site to begin onboarding.</span></div>
+            <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+            <div class="workspace-state-grid">
+              <div class="state-card">
+                <h3>What happens next</h3>
+                <p>Training runs in the background while the workspace stays interactive. When the site is ready, you can copy the widget and test the answers immediately.</p>
+                <div class="state-list" id="onboarding-steps"></div>
+              </div>
+              <div class="state-card">
+                <h3>Launch guidance</h3>
+                <p id="next-step-copy">No sites yet. Your first goal is simple: connect one public site and let the assistant build itself.</p>
+                <div class="state-list">
+                  <div class="state-step">
+                    <span class="state-step-badge">A</span>
+                    <div><h4>Train on the site</h4><p>Use the input above to kick off the first crawl.</p></div>
+                  </div>
+                  <div class="state-step">
+                    <span class="state-step-badge">B</span>
+                    <div><h4>Validate the experience</h4><p>Use the chat lab to ask real buyer questions before launch.</p></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="embed-box" class="embed-box" aria-live="polite">
+              <div class="embed-meta">
+                <div>
+                  <p class="overline">Step 3</p>
+                  <h3 style="margin: 0 0 6px;">Embed code</h3>
+                  <p class="card-subtitle" id="embed-copy">Copy this script into your site where you want the widget available.</p>
+                </div>
+                <button id="copy-embed" class="secondary-button" type="button">Copy script</button>
+              </div>
+              <pre id="embed-code"></pre>
+              <div id="copied-note" class="copied-note"></div>
+            </div>
+          </section>
+
+          <aside class="workspace-card">
+            <div class="card-header">
+              <div>
+                <p class="overline">Workspace guide</p>
+                <h2>First-run checklist</h2>
+                <p>Everything a first-time user needs is here: onboarding, validation, and launch.</p>
+              </div>
+            </div>
+            <div class="tip-stack">
+              <div class="tip-card">
+                <h3>Best first site</h3>
+                <p>Start with a product or landing site that already has your core positioning, pricing, and CTA paths in place.</p>
+              </div>
+              <div class="tip-card">
+                <h3>Best questions to test</h3>
+                <ul>
+                  <li>What does this product do?</li>
+                  <li>How much does it cost?</li>
+                  <li>How do I get started?</li>
+                  <li>Where do I click to begin?</li>
+                </ul>
+              </div>
+              <div class="tip-card">
+                <h3>Need rollout help?</h3>
+                <p class="support-copy">Use the support page for onboarding guidance, product questions, and deployment details.</p>
+                <div class="button-row">
+                  <a class="button button-secondary" href="/support">Open support</a>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="workspace-grid secondary">
+          <section class="workspace-card">
+            <div class="card-header">
+              <div>
+                <p class="overline">Processed sites</p>
+                <h2>Your portfolio</h2>
+                <p>Track training state, open embed code, retry failures, and keep every site launch-ready.</p>
+              </div>
+            </div>
+            <div id="site-summary-row" class="site-summary-row"></div>
+            <div id="empty-sites-state" class="empty-state">
+              <h3>No sites yet</h3>
+              <p>Your processed sites will appear here once you add the first URL. This table becomes your launch control center for retries, embed code, and testing.</p>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>URL</th>
+                    <th>Pages</th>
+                    <th>Chunks</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="site-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="workspace-card">
+            <div class="card-header">
+              <div>
+                <p class="overline">Step 4</p>
+                <h2>Test chat</h2>
+                <p>Use the built-in chat lab before you ship the widget. It mirrors the live assistant flow and shows source chips when a real page supports the answer.</p>
+              </div>
+            </div>
+            <div class="chat-toolbar">
+              <select id="test-site-select" aria-label="Select a site to test">
+                <option value="">Select a ready site</option>
+              </select>
+              <button id="open-selected-embed" class="ghost-button" type="button">Get embed code</button>
+            </div>
+            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Good first prompts: pricing, setup, support, and where-to-click questions.</div>
+            <div class="chat-shell">
+              <div class="chat-header" id="chat-title">Chat with your site</div>
+              <div class="chat-messages" id="chat-messages"></div>
+              <div class="chat-controls">
+                <input id="chat-input" type="text" placeholder="Ask a question..." />
+                <button id="chat-send" class="primary-button" type="button">Send</button>
+              </div>
+              <div class="chat-footer">Powered by SiteCloser</div>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
   </div>
   <script>
-    const FALLBACK_MESSAGE = "I don't have that information on this website. You might want to contact the team directly.";
+    const FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
     let markedLoader = null;
     const state = {
       pollTimer: null,
       sites: [],
       activeEventSource: null,
-      sessionId: "aiwa-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
+      sessionId: "sitecloser-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
       suggestedQuestionsCache: {},
       suggestedQuestionsRequested: {},
-      starterDismissed: false
+      starterDismissed: false,
+      currentStatusSiteId: null,
+      submitting: false
     };
+
     const form = document.getElementById("site-form");
     const siteUrl = document.getElementById("site-url");
+    const siteSubmit = document.getElementById("site-submit");
     const statusLine = document.getElementById("status-line");
+    const progressFill = document.getElementById("progress-fill");
+    const feedbackBanner = document.getElementById("feedback-banner");
+    const launchTitle = document.getElementById("launch-title");
+    const launchCopy = document.getElementById("launch-copy");
+    const nextStepCopy = document.getElementById("next-step-copy");
+    const onboardingSteps = document.getElementById("onboarding-steps");
+    const siteSummaryRow = document.getElementById("site-summary-row");
+    const emptySitesState = document.getElementById("empty-sites-state");
     const siteTableBody = document.getElementById("site-table-body");
     const embedBox = document.getElementById("embed-box");
     const embedCode = document.getElementById("embed-code");
+    const embedCopy = document.getElementById("embed-copy");
     const copyEmbed = document.getElementById("copy-embed");
+    const copiedNote = document.getElementById("copied-note");
+    const metricSites = document.getElementById("metric-sites");
+    const metricReady = document.getElementById("metric-ready");
+    const metricActive = document.getElementById("metric-active");
     const testSiteSelect = document.getElementById("test-site-select");
+    const openSelectedEmbed = document.getElementById("open-selected-embed");
     const chatTitle = document.getElementById("chat-title");
     const chatMessages = document.getElementById("chat-messages");
     const chatInput = document.getElementById("chat-input");
     const chatSend = document.getElementById("chat-send");
+    const chatEmptyHint = document.getElementById("chat-empty-hint");
+
+    function setFeedback(message, tone) {
+      if (!message) {
+        feedbackBanner.className = "feedback-banner";
+        feedbackBanner.textContent = "";
+        return;
+      }
+      feedbackBanner.className = "feedback-banner visible " + (tone || "info");
+      feedbackBanner.textContent = message;
+    }
+
+    function setSubmitting(isSubmitting) {
+      state.submitting = isSubmitting;
+      siteSubmit.disabled = isSubmitting;
+      siteUrl.disabled = isSubmitting;
+      siteSubmit.textContent = isSubmitting ? "Starting..." : "Start training";
+    }
 
     function loadMarked() {
-      if (window.marked && typeof window.marked.parse === "function") {
-        return Promise.resolve(window.marked);
-      }
+      if (window.marked && typeof window.marked.parse === "function") return Promise.resolve(window.marked);
       if (markedLoader) return markedLoader;
       markedLoader = new Promise(function (resolve, reject) {
-        const existing = document.querySelector('script[data-aiwa-marked="true"]');
+        const existing = document.querySelector('script[data-sitecloser-marked="true"]');
         if (existing) {
           existing.addEventListener("load", function () { resolve(window.marked); }, { once: true });
           existing.addEventListener("error", reject, { once: true });
@@ -145,7 +930,7 @@
         const markedScript = document.createElement("script");
         markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
         markedScript.async = true;
-        markedScript.setAttribute("data-aiwa-marked", "true");
+        markedScript.setAttribute("data-sitecloser-marked", "true");
         markedScript.onload = function () { resolve(window.marked); };
         markedScript.onerror = reject;
         document.head.appendChild(markedScript);
@@ -172,160 +957,299 @@
       return fallback;
     }
 
-    function renderStatusBadge(status) { return '<span class="badge ' + status + '">' + status + "</span>"; }
-    function renderSites() {
-      siteTableBody.innerHTML = "";
-      if (!state.sites.length) siteTableBody.innerHTML = '<tr><td colspan="6">No sites processed yet.</td></tr>';
-      state.sites.forEach(function (site) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = [
-          "<td>" + (site.name || "Untitled site") + "</td>",
-          "<td>" + site.url + "</td>",
-          "<td>" + site.page_count + "</td>",
-          "<td>" + site.chunk_count + "</td>",
-          "<td>" + renderStatusBadge(site.status) + "</td>",
-          '<td><div class="actions"><button class="ghost" type="button" data-action="embed" data-site-id="' + site.site_id + '">Get Embed Code</button>' +
-          (site.status === "ready" ? '<button class="secondary" type="button" data-action="reprocess-ui" data-site-id="' + site.site_id + '">Reprocess UI</button>' : "") +
-          (site.status === "error" ? '<button class="secondary" type="button" data-action="retry" data-site-id="' + site.site_id + '">Retry</button>' : "") +
-          "</div></td>"
-        ].join("");
-        siteTableBody.appendChild(tr);
-      });
+    function progressValue(status) {
+      if (status === "pending") return 8;
+      if (status === "crawling") return 38;
+      if (status === "embedding") return 76;
+      if (status === "ready" || status === "error") return 100;
+      return 0;
+    }
+
+    function progressText(site) {
+      if (!site) return "Ready when you are. Add a site to begin onboarding.";
+      if (site.status === "crawling") return "Training in progress: crawling pages and gathering source material.";
+      if (site.status === "embedding") return "Almost there: embedding the site so answers are ready to retrieve.";
+      if (site.status === "ready") return "This site is ready to test and launch.";
+      if (site.status === "error") return "Training needs attention: " + (site.error_msg || "Unknown error");
+      return "Queued and waiting to begin.";
+    }
+
+    function renderMetrics() {
+      const readyCount = state.sites.filter(function (site) { return site.status === "ready"; }).length;
+      const activeCount = state.sites.filter(function (site) { return ["pending", "crawling", "embedding"].includes(site.status); }).length;
+      metricSites.textContent = String(state.sites.length);
+      metricReady.textContent = String(readyCount);
+      metricActive.textContent = String(activeCount);
+    }
+
+    function latestImportantSite() {
+      return state.sites.length ? state.sites[0] : null;
+    }
+
+    function renderLaunchSummary() {
+      const site = latestImportantSite();
+      if (!site) {
+        launchTitle.textContent = "Start by connecting a website";
+        launchCopy.textContent = "Once SiteCloser sees your pages, it can build the assistant, generate embed code, and let you pressure-test the chat before launch.";
+        nextStepCopy.textContent = "No sites yet. Your first goal is simple: connect one public site and let the assistant build itself.";
+        statusLine.textContent = progressText(null);
+        progressFill.style.width = "0%";
+        return;
+      }
+      statusLine.textContent = progressText(site);
+      progressFill.style.width = progressValue(site.status) + "%";
+      if (site.status === "ready") {
+        launchTitle.textContent = "A site is ready to launch";
+        launchCopy.textContent = "Copy the embed code, run a few final questions in the chat lab, and place the widget anywhere you want buyer help to appear.";
+        nextStepCopy.textContent = "Your next best move is to copy the script and pressure-test a few real buyer questions.";
+      } else if (site.status === "error") {
+        launchTitle.textContent = "One site needs attention";
+        launchCopy.textContent = "A previous run failed. Use retry to process it again, or refresh UI structure if you only need better layout guidance.";
+        nextStepCopy.textContent = "Retry the failed site, then test the assistant once the status returns to ready.";
+      } else {
+        launchTitle.textContent = "Training is underway";
+        launchCopy.textContent = "SiteCloser is processing the website now. Stay here while the status updates, then move straight to embed code and chat testing.";
+        nextStepCopy.textContent = "Wait for the ready state, then select the site in the chat lab and validate real questions.";
+      }
+    }
+
+    function renderOnboardingSteps() {
+      const site = latestImportantSite();
+      const steps = [
+        { title: "Add a website", body: "Connect a public URL to create the first assistant.", state: site ? "completed" : "active" },
+        { title: "Train the assistant", body: "Let SiteCloser crawl, chunk, and embed the site.", state: site && site.status === "ready" ? "completed" : site ? "active" : "pending" },
+        { title: "Copy the widget", body: "Generate a production-ready embed script.", state: embedBox.classList.contains("visible") ? "completed" : site && site.status === "ready" ? "active" : "pending" },
+        { title: "Test before launch", body: "Use the chat lab to validate buyer questions.", state: testSiteSelect.value ? "active" : site && site.status === "ready" ? "pending" : "pending" }
+      ];
+      onboardingSteps.innerHTML = steps.map(function (step, index) {
+        return '<div class="state-step ' + step.state + '"><span class="state-step-badge">' + (index + 1) + '</span><div><h4>' + step.title + '</h4><p>' + step.body + '</p></div></div>';
+      }).join("");
+    }
+
+    function renderSiteSummary() {
+      if (!state.sites.length) {
+        siteSummaryRow.innerHTML = "";
+        emptySitesState.classList.add("visible");
+        return;
+      }
+      emptySitesState.classList.remove("visible");
+      const readyCount = state.sites.filter(function (site) { return site.status === "ready"; }).length;
+      const errorCount = state.sites.filter(function (site) { return site.status === "error"; }).length;
+      const activeCount = state.sites.filter(function (site) { return ["pending", "crawling", "embedding"].includes(site.status); }).length;
+      siteSummaryRow.innerHTML = [
+        '<span class="summary-chip">' + state.sites.length + ' total site' + (state.sites.length === 1 ? "" : "s") + '</span>',
+        '<span class="summary-chip">' + readyCount + ' ready</span>',
+        '<span class="summary-chip">' + activeCount + ' in progress</span>',
+        '<span class="summary-chip">' + errorCount + ' need attention</span>'
+      ].join("");
+    }
+
+    function renderStatusBadge(status) {
+      return '<span class="badge ' + status + '">' + status + "</span>";
+    }
+
+    function ensureSelectedReadySite() {
+      const readySites = state.sites.filter(function (site) { return site.status === "ready"; });
       testSiteSelect.innerHTML = '<option value="">Select a ready site</option>';
-      state.sites.filter(function (site) { return site.status === "ready"; }).forEach(function (site) {
+      readySites.forEach(function (site) {
         const option = document.createElement("option");
         option.value = site.site_id;
         option.textContent = (site.name || site.url) + " (" + site.url + ")";
         testSiteSelect.appendChild(option);
       });
+      if (!readySites.length) testSiteSelect.value = "";
+      else if (!readySites.some(function (site) { return site.site_id === testSiteSelect.value; })) testSiteSelect.value = readySites[0].site_id;
+      updateChatAvailability();
     }
+
+    function renderSites() {
+      siteTableBody.innerHTML = "";
+      state.sites.forEach(function (site) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = [
+          '<td data-label="Name"><div class="site-name"><strong>' + (site.name || "Untitled site") + '</strong><span class="site-url">' + (site.error_msg && site.status === "error" ? site.error_msg : "Ready for onboarding, testing, and launch.") + '</span></div></td>',
+          '<td data-label="URL"><span class="site-url">' + site.url + "</span></td>",
+          '<td data-label="Pages">' + site.page_count + "</td>",
+          '<td data-label="Chunks">' + site.chunk_count + "</td>",
+          '<td data-label="Status">' + renderStatusBadge(site.status) + "</td>",
+          '<td data-label="Actions"><div class="row-actions">' +
+            (site.status === "ready" ? '<button class="row-button primary" type="button" data-action="select" data-site-id="' + site.site_id + '">Test chat</button>' : "") +
+            '<button class="row-button" type="button" data-action="embed" data-site-id="' + site.site_id + '">Embed code</button>' +
+            (site.status === "ready" ? '<button class="row-button" type="button" data-action="reprocess-ui" data-site-id="' + site.site_id + '">Refresh UI</button>' : "") +
+            (site.status === "error" ? '<button class="row-button" type="button" data-action="retry" data-site-id="' + site.site_id + '">Retry</button>' : "") +
+          "</div></td>"
+        ].join("");
+        siteTableBody.appendChild(tr);
+      });
+      ensureSelectedReadySite();
+      renderMetrics();
+      renderLaunchSummary();
+      renderOnboardingSteps();
+      renderSiteSummary();
+    }
+
     async function fetchSites() {
       try {
         const response = await fetch("/api/sites");
         const data = await response.json();
         state.sites = data.sites || [];
-        localStorage.setItem("aiwa-sites", JSON.stringify(state.sites));
+        localStorage.setItem("sitecloser-sites", JSON.stringify(state.sites));
         renderSites();
       } catch (err) {
-        statusLine.textContent = "Unable to reach the backend. Make sure the FastAPI server is running.";
+        setFeedback("Unable to reach the backend. Make sure the FastAPI server is running.", "error");
       }
     }
+
     function loadCachedSites() {
       try {
-        const cached = JSON.parse(localStorage.getItem("aiwa-sites") || "[]");
-        if (Array.isArray(cached)) { state.sites = cached; renderSites(); }
+        const cached = JSON.parse(localStorage.getItem("sitecloser-sites") || "[]");
+        if (Array.isArray(cached)) {
+          state.sites = cached;
+          renderSites();
+        }
       } catch (err) {}
     }
-    function progressText(site) {
-      if (site.status === "crawling") return "Crawling... (" + site.page_count + " pages found)";
-      if (site.status === "embedding") return "Embedding... (" + site.chunk_count + " chunks built)";
-      if (site.status === "ready") return "Ready!";
-      if (site.status === "error") return "Error: " + (site.error_msg || "Unknown error");
-      return "Pending...";
-    }
+
     async function pollStatus(siteId) {
+      state.currentStatusSiteId = siteId;
       if (state.pollTimer) window.clearInterval(state.pollTimer);
       async function tick() {
         try {
           const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/status");
+          const site = await response.json();
           if (!response.ok) {
-            statusLine.textContent = "Unable to fetch status right now.";
+            setFeedback("Unable to fetch status right now.", "error");
             return;
           }
-          const site = await response.json();
           statusLine.textContent = progressText(site);
+          progressFill.style.width = progressValue(site.status) + "%";
           await fetchSites();
+          if (site.status === "ready") setFeedback("Site is ready. Copy the embed code or start testing in the chat lab.", "success");
+          else if (site.status === "error") setFeedback("Training hit an error. Review the site row and retry when ready.", "error");
           if (site.status === "ready" || site.status === "error") {
             window.clearInterval(state.pollTimer);
             state.pollTimer = null;
+            setSubmitting(false);
           }
         } catch (err) {
-          statusLine.textContent = "Status polling failed. Please check that the backend is still running.";
+          setFeedback("Status polling failed. Check that the backend is still running.", "error");
+          setSubmitting(false);
         }
       }
       await tick();
       state.pollTimer = window.setInterval(tick, 3000);
     }
+
     async function handleCreateSite(event) {
       event.preventDefault();
-      embedBox.style.display = "none";
-      statusLine.textContent = "Submitting...";
+      embedBox.classList.remove("visible");
+      copiedNote.textContent = "";
+      setSubmitting(true);
+      setFeedback("Training has started. SiteCloser is now processing your website.", "info");
       try {
-        const response = await fetch("/api/sites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: siteUrl.value.trim() }) });
+        const response = await fetch("/api/sites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: siteUrl.value.trim() })
+        });
         const data = await response.json();
         if (!response.ok) {
-          statusLine.textContent = formatApiError(data, "Unable to process website.");
+          setSubmitting(false);
+          setFeedback(formatApiError(data, "Unable to process website."), "error");
           return;
         }
-        statusLine.textContent = "Pending...";
+        statusLine.textContent = "Queued and waiting to begin.";
+        progressFill.style.width = "8%";
+        await fetchSites();
         await pollStatus(data.site_id);
         form.reset();
       } catch (err) {
-        statusLine.textContent = "Unable to reach the backend. Make sure the FastAPI server is running.";
+        setSubmitting(false);
+        setFeedback("Unable to reach the backend. Make sure the FastAPI server is running.", "error");
       }
     }
+
     async function showEmbedCode(siteId) {
       try {
         const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/embed-script");
         const data = await response.json();
         if (!response.ok) {
-          statusLine.textContent = formatApiError(data, "Unable to generate embed code.");
+          setFeedback(formatApiError(data, "Unable to generate embed code."), "error");
           return;
         }
+        const selected = state.sites.find(function (site) { return site.site_id === siteId; });
         embedCode.textContent = data.script_tag;
-        embedBox.style.display = "block";
+        embedCopy.textContent = "Copy this script into the page where you want the widget available" + (selected ? (" for " + (selected.name || selected.url)) : "") + ".";
+        embedBox.classList.add("visible");
+        copiedNote.textContent = "";
+        renderOnboardingSteps();
+        setFeedback("Embed code is ready to copy.", "success");
       } catch (err) {
-        statusLine.textContent = "Unable to reach the backend while generating embed code.";
+        setFeedback("Unable to reach the backend while generating embed code.", "error");
       }
     }
+
     async function reprocessUi(siteId) {
-      statusLine.textContent = "Reprocessing UI structure...";
+      setFeedback("Refreshing UI structure for this site...", "info");
       try {
         const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/reprocess-ui", { method: "POST" });
         const data = await response.json();
         if (!response.ok) {
-          statusLine.textContent = formatApiError(data, "Unable to reprocess UI.");
+          setFeedback(formatApiError(data, "Unable to refresh UI structure."), "error");
           return;
         }
-        statusLine.textContent = "UI reprocessed. Added " + (data.ui_chunks_added || 0) + " UI chunks.";
+        setFeedback("UI structure refreshed. Added " + (data.ui_chunks_added || 0) + " UI chunks.", "success");
         await fetchSites();
       } catch (err) {
-        statusLine.textContent = "Unable to reach the backend while reprocessing UI.";
+        setFeedback("Unable to reach the backend while refreshing UI structure.", "error");
       }
     }
+
     async function retrySite(siteId) {
-      statusLine.textContent = "Retrying site processing...";
+      setFeedback("Retrying site processing...", "info");
       try {
         const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/retry", { method: "POST" });
         const data = await response.json();
         if (!response.ok) {
-          statusLine.textContent = formatApiError(data, "Unable to retry website.");
+          setFeedback(formatApiError(data, "Unable to retry website."), "error");
           return;
         }
-        statusLine.textContent = "Pending...";
+        await fetchSites();
         await pollStatus(siteId);
       } catch (err) {
-        statusLine.textContent = "Unable to reach the backend while retrying.";
+        setFeedback("Unable to reach the backend while retrying.", "error");
       }
     }
+
     function scrollChatToBottom() {
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+
+    function closeExistingEventSource() {
+      if (state.activeEventSource) {
+        state.activeEventSource.close();
+        state.activeEventSource = null;
+      }
+    }
+
     function resetChatPanel() {
       closeExistingEventSource();
       chatMessages.innerHTML = "";
       chatInput.value = "";
-      state.sessionId = "aiwa-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      state.sessionId = "sitecloser-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
       state.starterDismissed = false;
     }
+
     function removeStarterChips() {
       const node = chatMessages.querySelector(".starter-chip-stack");
       if (node) node.remove();
       state.starterDismissed = true;
     }
+
     function clearFollowupChips() {
       chatMessages.querySelectorAll(".followup-chip-stack").forEach(function (node) { node.remove(); });
     }
+
     function addChatMessage(role, text) {
       const row = document.createElement("div");
       row.className = "chat-row " + role;
@@ -342,18 +1266,18 @@
       scrollChatToBottom();
       return { row, bubble };
     }
+
     function normalizeSources(payload) {
       let sources = [];
-      if (payload && payload.sources && payload.sources.length) {
-        sources = payload.sources.slice(0, 1);
-      } else if (payload && payload.urls && payload.urls.length) {
-        const displayUrls = payload.urls.slice(0, 1);
-        sources = displayUrls.map(function (url, index) {
+      if (payload && payload.sources && payload.sources.length) sources = payload.sources.slice(0, 1);
+      else if (payload && payload.urls && payload.urls.length) {
+        sources = payload.urls.slice(0, 1).map(function (url, index) {
           return { url: url, title: "Source " + (index + 1), section: "" };
         });
       }
       return sources.slice(0, 1);
     }
+
     function appendSourceLinks(container, payload) {
       const sources = normalizeSources(payload);
       if (!sources.length) return;
@@ -378,12 +1302,11 @@
       container.appendChild(wrap);
       scrollChatToBottom();
     }
-    function closeExistingEventSource() {
-      if (state.activeEventSource) { state.activeEventSource.close(); state.activeEventSource = null; }
-    }
+
     function isFallbackAnswer(text) {
       return (text || "").trim() === FALLBACK_MESSAGE;
     }
+
     async function ensureStarterSuggestions() {
       const siteId = testSiteSelect.value;
       if (!siteId || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
@@ -400,9 +1323,9 @@
         if (!data.questions || !data.questions.length) return;
         state.suggestedQuestionsCache[siteId] = data.questions.slice(0, 3);
         renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
-      } catch (err) {
-      }
+      } catch (err) {}
     }
+
     function renderStarterSuggestions(questions) {
       if (!questions || !questions.length || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
       if (chatMessages.querySelector(".starter-chip-stack")) return;
@@ -412,7 +1335,7 @@
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "chat-chip";
-        chip.textContent = "\u2192 " + question;
+        chip.textContent = "-> " + question;
         chip.addEventListener("click", function () {
           removeStarterChips();
           chatInput.value = question;
@@ -423,6 +1346,7 @@
       chatMessages.appendChild(wrap);
       scrollChatToBottom();
     }
+
     function appendFollowupChips(container, questions) {
       if (!questions || !questions.length) return;
       const wrap = document.createElement("div");
@@ -431,7 +1355,7 @@
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "chat-chip followup-chip";
-        chip.textContent = "\u2192 " + question;
+        chip.textContent = "-> " + question;
         chip.addEventListener("click", function () {
           wrap.remove();
           sendChat(question, { preserveFollowups: true, preserveStarter: true });
@@ -441,6 +1365,7 @@
       container.appendChild(wrap);
       scrollChatToBottom();
     }
+
     async function fetchFollowupChips(lastQuestion, lastAnswer, container) {
       const siteId = testSiteSelect.value;
       if (!siteId) return;
@@ -458,9 +1383,20 @@
         const data = await response.json();
         if (!data.questions || !data.questions.length) return;
         appendFollowupChips(container, data.questions);
-      } catch (err) {
-      }
+      } catch (err) {}
     }
+
+    function updateChatAvailability() {
+      const selected = state.sites.find(function (site) { return site.site_id === testSiteSelect.value; });
+      chatTitle.textContent = "Chat with " + (selected ? (selected.name || selected.url) : "your site");
+      const enabled = !!selected;
+      chatInput.disabled = !enabled;
+      chatSend.disabled = !enabled;
+      openSelectedEmbed.disabled = !enabled;
+      chatEmptyHint.style.display = enabled ? "none" : "block";
+      if (enabled) ensureStarterSuggestions();
+    }
+
     function sendChat(forcedQuestion, options) {
       options = options || {};
       const siteId = testSiteSelect.value;
@@ -477,9 +1413,7 @@
       let hadNoAnswer = false;
       const source = new EventSource("/api/chat?site_id=" + encodeURIComponent(siteId) + "&q=" + encodeURIComponent(question) + "&session_id=" + encodeURIComponent(state.sessionId));
       state.activeEventSource = source;
-      loadMarked().then(function () {
-        renderAssistantContent(assistantBubble, answerText);
-      }).catch(function () {});
+      loadMarked().then(function () { renderAssistantContent(assistantBubble, answerText); }).catch(function () {});
       source.onmessage = function (event) {
         try {
           const data = JSON.parse(event.data);
@@ -512,6 +1446,7 @@
         state.activeEventSource = null;
       };
     }
+
     form.addEventListener("submit", handleCreateSite);
     siteTableBody.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-site-id]");
@@ -520,26 +1455,41 @@
       const action = button.getAttribute("data-action");
       if (action === "reprocess-ui") reprocessUi(siteId);
       else if (action === "retry") retrySite(siteId);
-      else showEmbedCode(siteId);
+      else if (action === "select") {
+        testSiteSelect.value = siteId;
+        resetChatPanel();
+        updateChatAvailability();
+        document.querySelector(".chat-shell").scrollIntoView({ behavior: "smooth", block: "start" });
+      } else showEmbedCode(siteId);
     });
     copyEmbed.addEventListener("click", async function () {
       await navigator.clipboard.writeText(embedCode.textContent);
+      copiedNote.textContent = "Script copied to clipboard.";
       copyEmbed.textContent = "Copied";
-      window.setTimeout(function () { copyEmbed.textContent = "Copy"; }, 1200);
+      renderOnboardingSteps();
+      window.setTimeout(function () { copyEmbed.textContent = "Copy script"; }, 1200);
     });
     testSiteSelect.addEventListener("change", function () {
-      const selected = state.sites.find(function (site) { return site.site_id === testSiteSelect.value; });
-      chatTitle.textContent = "Chat with " + (selected ? (selected.name || selected.url) : "your site");
       resetChatPanel();
-      ensureStarterSuggestions();
+      updateChatAvailability();
+    });
+    openSelectedEmbed.addEventListener("click", function () {
+      if (testSiteSelect.value) showEmbedCode(testSiteSelect.value);
     });
     chatSend.addEventListener("click", function () { sendChat(); });
     chatInput.addEventListener("keydown", function (event) {
-      if (event.key === "Enter") { event.preventDefault(); sendChat(); }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendChat();
+      }
     });
+
     loadCachedSites();
     fetchSites();
     loadMarked().catch(function () {});
+    if (new URLSearchParams(window.location.search).get("onboarding")) {
+      window.setTimeout(function () { siteUrl.focus(); }, 200);
+    }
   </script>
 </body>
 </html>

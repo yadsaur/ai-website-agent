@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SiteCloser Demo — Try the live AI sales widget</title>
-  <meta name="description" content="This page is the live SiteCloser demo. Ask pricing, product, or getting-started questions and see the widget answer in real time.">
+  <title>SiteCloser demo - Try the live assistant</title>
+  <meta name="description" content="Experience the live SiteCloser widget trained on the product website and try real pricing, product, and onboarding questions.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -18,9 +20,9 @@
       <section class="page-hero">
         <div class="container">
           <div class="section-header" data-reveal>
-            <span class="eyebrow">Live demo</span>
-            <h1>This page <span class="gradient-text">is the demo</span></h1>
-            <p class="lede">The chatbot below is trained on our own website. Open it and ask about pricing, what the product does, or how to get started.</p>
+            <span class="eyebrow">Interactive demo</span>
+            <h1>Try the live product, not a recorded walkthrough</h1>
+            <p class="lede">The widget on this page is trained on the live SiteCloser website. Ask pricing questions, product questions, or onboarding questions and watch the production assistant respond in real time.</p>
           </div>
         </div>
       </section>
@@ -28,28 +30,64 @@
       <section class="section">
         <div class="container demo-grid">
           <div class="demo-card glass-card" data-reveal>
-            <h3>Try these questions</h3>
-            <p>Use the prompt chips below, or type your own question once the widget opens.</p>
+            <h3>What to try first</h3>
+            <p>Open the widget in the lower-right corner, then use one of these prompts to feel how the product handles real buyer intent.</p>
             <div class="demo-prompts">
-              <button class="prompt-chip" type="button" data-demo-ask="How much does it cost?">→ How much does it cost?</button>
-              <button class="prompt-chip" type="button" data-demo-ask="What does this product do?">→ What does this product do?</button>
-              <button class="prompt-chip" type="button" data-demo-ask="How do I get started?">→ How do I get started?</button>
-              <button class="prompt-chip" type="button" data-demo-ask="Where do I click to start?">→ Where do I click to start?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="How much does it cost?">&rarr; How much does it cost?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="What does this product do?">&rarr; What does this product do?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="How do I get started?">&rarr; How do I get started?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="Where do I click to start?">&rarr; Where do I click to start?</button>
             </div>
-            <div style="margin-top: 28px;">
-              <h3>What you’re seeing</h3>
+            <div style="margin-top: 30px;">
+              <h3>What to look for</h3>
               <ul class="feature-list">
-                <li>Real streaming answers from the live Render app.</li>
-                <li>Source chips and follow-up suggestions.</li>
-                <li>UI-aware responses trained on the website itself.</li>
+                <li>Streaming responses that feel fast.</li>
+                <li>Source chips when a real supporting page exists.</li>
+                <li>Follow-up suggestions after grounded answers.</li>
+                <li>UI-aware guidance for where-to-click questions.</li>
               </ul>
             </div>
           </div>
 
           <div class="demo-card glass-card demo-widget-shell" data-reveal>
-            <h3>Open the widget in the bottom-right corner</h3>
-            <p>The exact production widget is embedded on this page below.</p>
+            <h3>Live widget, same as production</h3>
+            <p>This is the exact embeddable widget used on customer sites. Open it, ask something meaningful, and see how the experience holds up in real conditions.</p>
             <div data-demo-widget></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="detail-grid">
+            <article class="detail-card glass-card" data-reveal>
+              <h3>Understand the product fast</h3>
+              <p>The demo is designed to show how quickly a visitor can learn what the product does and whether it fits them.</p>
+            </article>
+            <article class="detail-card glass-card" data-reveal>
+              <h3>Pressure-test the quality</h3>
+              <p>Ask about pricing, support, or where to click and see whether the assistant stays grounded and helpful.</p>
+            </article>
+            <article class="detail-card glass-card" data-reveal>
+              <h3>Move straight into onboarding</h3>
+              <p>Once the experience feels right, jump into the workspace and process your own site without losing momentum.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <div class="cta-panel glass-card" data-reveal>
+            <div>
+              <span class="eyebrow">Next step</span>
+              <h2 style="margin-top: 18px;">Ready to train the assistant on your own website?</h2>
+              <p class="lede" style="margin-top: 12px;">The workspace will guide you through your first site, show training progress, and give you production-ready embed code.</p>
+            </div>
+            <div class="button-row">
+              <a class="button button-primary" href="/dashboard?onboarding=1">Start onboarding</a>
+              <a class="button button-secondary" href="/pricing">See pricing</a>
+            </div>
           </div>
         </div>
       </section>

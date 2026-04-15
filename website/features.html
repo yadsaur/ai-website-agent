@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SiteCloser Features — Everything your AI sales rep needs</title>
-  <meta name="description" content="Explore SiteCloser's full feature set: deep crawling, UI-aware answers, sales-focused prompting, follow-ups, starter chips, and markdown-rich responses.">
+  <title>SiteCloser features - Grounded answers for real buyers</title>
+  <meta name="description" content="Explore SiteCloser's website crawling, UI-aware guidance, sales-focused answer strategy, follow-up prompts, and launch workflow.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -19,45 +21,44 @@
         <div class="container">
           <div class="section-header article-shell" data-reveal>
             <span class="eyebrow">Feature deep dive</span>
-            <h1>Built to answer questions the moment <span class="gradient-text">buying intent shows up</span></h1>
-            <p class="lede">SiteCloser is more than a chat bubble. It is a site-trained AI sales rep with retrieval, UI understanding, conversation memory, and conversion-friendly prompting under the hood.</p>
+            <h1>Built to answer the questions that decide whether a visitor <span class="gradient-text">keeps moving or leaves</span></h1>
+            <p class="lede">SiteCloser combines content understanding, UI awareness, and conversion-focused answer strategy so the assistant feels useful from the very first conversation.</p>
           </div>
         </div>
       </section>
 
       <section class="section">
         <div class="container">
-          <div class="split-feature" id="sales" data-reveal>
+          <div class="split-feature" data-reveal>
             <div class="split-copy">
-              <span class="eyebrow">Deep website knowledge</span>
-              <h2>It reads your website like a top rep reads your pitch deck</h2>
-              <p>We crawl the site, extract useful content, build a semantic knowledge base, and keep heading context attached so the assistant knows not just the words, but where they came from.</p>
+              <span class="eyebrow">Outcome first</span>
+              <h2>It understands the site you already have</h2>
+              <p>SiteCloser crawls public pages, extracts the content that matters, and preserves heading context so answers stay grounded instead of generic.</p>
               <ul class="feature-list">
-                <li>JavaScript-aware crawling with Playwright.</li>
-                <li>Semantic chunking with breadcrumb context.</li>
-                <li>Grounded answers using retrieval, reranking, and source links.</li>
+                <li>JavaScript-aware crawling for modern sites.</li>
+                <li>Structured extraction with fallback parsing when a page is messy.</li>
+                <li>Chunking that keeps page title and section context attached.</li>
               </ul>
             </div>
             <div class="split-visual glass-card">
               <div class="visual-terminal">
-                <div class="terminal-line">→ Crawl site: /pricing /features /docs /faq</div>
-                <div class="terminal-line">→ Extract content + headings + metadata</div>
-                <div class="terminal-line">→ Build chunks with section context</div>
-                <div class="terminal-line">→ Embed and load into vector memory</div>
-                <div class="terminal-line">→ Ready for grounded chat</div>
+                <div class="terminal-line">Crawl site -> pricing, features, docs, FAQs</div>
+                <div class="terminal-line">Extract content, headings, metadata, and UI structure</div>
+                <div class="terminal-line">Build semantic chunks with source context</div>
+                <div class="terminal-line">Embed and load the site for grounded chat</div>
               </div>
             </div>
           </div>
 
-          <div class="split-feature reverse" id="ui-awareness" data-reveal>
+          <div class="split-feature reverse" data-reveal>
             <div class="split-copy">
-              <span class="eyebrow">UI-aware answers</span>
-              <h2>Answers “where do I click?” without making it up</h2>
-              <p>Most chatbots lose layout context. SiteCloser extracts UI facts from the DOM, so it can answer navigation and positioning questions with precision.</p>
+              <span class="eyebrow">Navigation guidance</span>
+              <h2>It can answer where to click, not just what the page says</h2>
+              <p>Because SiteCloser extracts UI structure from the DOM, it can guide visitors to menus, search bars, footer links, and primary CTAs with much more confidence.</p>
               <ul class="feature-list">
-                <li>Search bars, nav links, CTAs, footers, logos, and dropdowns.</li>
-                <li>Location-aware responses like “top navigation” or “footer at the bottom.”</li>
-                <li>Perfect for onboarding, navigation, and action-oriented visitors.</li>
+                <li>Navigation links, logos, CTAs, search bars, and dropdowns.</li>
+                <li>Human-readable locations like header, top navigation, or footer.</li>
+                <li>Useful for onboarding, help, and conversion-driven pages.</li>
               </ul>
             </div>
             <div class="split-visual glass-card">
@@ -65,67 +66,10 @@
                 <div class="window-header"><span></span><span></span><span></span></div>
                 <div class="window-body">
                   <div class="signal-list">
-                    <div class="signal-row"><strong>“Pricing” link</strong><span class="signal-tag">top navigation</span></div>
-                    <div class="signal-row"><strong>Search bar</strong><span class="signal-tag">header area</span></div>
-                    <div class="signal-row"><strong>“Get started” button</strong><span class="signal-tag">hero section</span></div>
-                    <div class="signal-row"><strong>Logo</strong><span class="signal-tag">top left</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="split-feature" id="pricing-intent" data-reveal>
-            <div class="split-copy">
-              <span class="eyebrow">Intent-aware selling</span>
-              <h2>Pricing and trust questions get treated like <span class="gradient-text">conversion moments</span></h2>
-              <p>The assistant classifies visitor intent, boosts the right chunks, and changes how it answers based on what the buyer is trying to decide.</p>
-              <ul class="feature-list">
-                <li>Pricing, trust, security, integrations, support, and getting-started flows.</li>
-                <li>Natural value framing instead of robotic summaries.</li>
-                <li>Clear next-step suggestions when visitors are close to acting.</li>
-              </ul>
-            </div>
-            <div class="split-visual glass-card">
-              <div class="visual-pricing">
-                <div class="window-header"><span></span><span></span><span></span></div>
-                <div class="window-body">
-                  <div class="mini-card-row">
-                    <div class="pricing-tile"><strong>Intent</strong><p>pricing</p></div>
-                    <div class="pricing-tile"><strong>Boosted chunks</strong><p>/pricing /plans /billing</p></div>
-                    <div class="pricing-tile"><strong>Answer style</strong><p>Direct, short, action-ready</p></div>
-                    <div class="pricing-tile"><strong>CTA</strong><p>Free trial or sign-up prompt</p></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="split-feature reverse" id="support" data-reveal>
-            <div class="split-copy">
-              <span class="eyebrow">Conversation momentum</span>
-              <h2>Starter chips and follow-up prompts keep the conversation moving</h2>
-              <p>Blank-state friction kills engagement. SiteCloser solves it with suggested first questions and contextual follow-up suggestions after every answer.</p>
-              <ul class="feature-list">
-                <li>Three suggested starter questions on first open.</li>
-                <li>Contextual follow-up questions after every real answer.</li>
-                <li>Session memory for cleaner multi-turn conversations.</li>
-              </ul>
-            </div>
-            <div class="split-visual glass-card">
-              <div class="visual-stack">
-                <div class="window-body">
-                  <div class="mock-suggestions" style="margin-bottom: 16px;">
-                    <span class="mock-suggestion">→ What does this product do?</span>
-                    <span class="mock-suggestion">→ Is there a free trial?</span>
-                    <span class="mock-suggestion">→ How do I get started?</span>
-                  </div>
-                  <div class="mock-msg assistant" style="max-width: 100%;">
-                    Growth is the best fit for a small team because it covers five websites, 5,000 chats, analytics, and priority support.
-                  </div>
-                  <div class="mock-suggestions" style="margin-top: 16px;">
-                    <span class="mock-suggestion">→ What is included in Growth?</span>
-                    <span class="mock-suggestion">→ Can I switch plans later?</span>
+                    <div class="signal-row"><strong>Pricing link</strong><span class="signal-tag">top navigation</span></div>
+                    <div class="signal-row"><strong>Search bar</strong><span class="signal-tag">header</span></div>
+                    <div class="signal-row"><strong>Get started button</strong><span class="signal-tag">hero section</span></div>
+                    <div class="signal-row"><strong>Footer links</strong><span class="signal-tag">bottom of page</span></div>
                   </div>
                 </div>
               </div>
@@ -134,26 +78,24 @@
 
           <div class="split-feature" data-reveal>
             <div class="split-copy">
-              <span class="eyebrow">Polished experience</span>
-              <h2>Responses feel premium, not improvised</h2>
-              <p>Markdown rendering, source chips, streaming responses, and clean widget behavior make the assistant look like a product, not a hack.</p>
+              <span class="eyebrow">Conversion-aware responses</span>
+              <h2>Pricing, support, and trust questions get different answer strategies</h2>
+              <p>Not every question should be answered the same way. SiteCloser classifies visitor intent and adjusts retrieval plus response style so a pricing question feels different from a trust or support question.</p>
               <ul class="feature-list">
-                <li>Streaming SSE responses for fast perceived performance.</li>
-                <li>Markdown support inside assistant bubbles.</li>
-                <li>Source filtering so synthetic chunks never look like fake citations.</li>
+                <li>Pricing, trust, security, integrations, support, and getting-started intent buckets.</li>
+                <li>Cleaner, shorter answers for high-intent buying moments.</li>
+                <li>Action-oriented next steps when the visitor is ready.</li>
               </ul>
             </div>
             <div class="split-visual glass-card">
-              <div class="visual-window">
+              <div class="visual-pricing">
                 <div class="window-header"><span></span><span></span><span></span></div>
                 <div class="window-body">
-                  <div class="mock-msg assistant" style="max-width: 100%;">
-                    <strong>Growth</strong> is the best fit if you manage multiple sites or expect steady traffic.
-                    <ol style="margin: 10px 0 0; padding-left: 18px;">
-                      <li>5 websites</li>
-                      <li>5,000 chats/month</li>
-                      <li>Priority support + analytics</li>
-                    </ol>
+                  <div class="mini-card-row">
+                    <div class="pricing-tile"><strong>Intent</strong><p>pricing</p></div>
+                    <div class="pricing-tile"><strong>Boosted pages</strong><p>pricing, plans, billing</p></div>
+                    <div class="pricing-tile"><strong>Style</strong><p>Direct, short, action-ready</p></div>
+                    <div class="pricing-tile"><strong>Next step</strong><p>Try, compare, or start</p></div>
                   </div>
                 </div>
               </div>
@@ -162,21 +104,79 @@
 
           <div class="split-feature reverse" data-reveal>
             <div class="split-copy">
-              <span class="eyebrow">Made for teams</span>
-              <h2>Deploy on any site with one script tag</h2>
-              <p>Use the dashboard to process a website, copy the embed script, and drop it into any HTML page. No frontend framework required.</p>
+              <span class="eyebrow">Conversation momentum</span>
+              <h2>Starter prompts and follow-up chips keep visitors from stalling</h2>
+              <p>Instead of opening into a blank chat, SiteCloser suggests useful first questions. After each real answer, it can suggest relevant follow-ups that keep the buying journey moving.</p>
               <ul class="feature-list">
-                <li>Embeddable vanilla JS widget.</li>
-                <li>Works across domains with permissive CORS.</li>
-                <li>Dashboard and test chat included out of the box.</li>
+                <li>Suggested starter questions on first open.</li>
+                <li>Contextual follow-up prompts after supported answers.</li>
+                <li>Short session memory for cleaner multi-turn context.</li>
+              </ul>
+            </div>
+            <div class="split-visual glass-card">
+              <div class="visual-stack">
+                <div class="window-body">
+                  <div class="mock-suggestions" style="margin-bottom: 16px;">
+                    <span class="mock-suggestion">&rarr; What does this product do?</span>
+                    <span class="mock-suggestion">&rarr; Is there a free trial?</span>
+                    <span class="mock-suggestion">&rarr; How do I get started?</span>
+                  </div>
+                  <div class="mock-msg assistant" style="max-width: 100%;">
+                    Growth is the best fit for a small team because it covers multiple sites, higher chat volume, and stronger support.
+                  </div>
+                  <div class="mock-suggestions" style="margin-top: 16px;">
+                    <span class="mock-suggestion">&rarr; What is included in Growth?</span>
+                    <span class="mock-suggestion">&rarr; Can I switch plans later?</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="split-feature" data-reveal>
+            <div class="split-copy">
+              <span class="eyebrow">Trust and clarity</span>
+              <h2>Answers stay grounded, and unsupported claims are avoided</h2>
+              <p>When SiteCloser has a real supporting page, it can show a source chip. When it does not, it falls back instead of pretending it knows more than the site actually says.</p>
+              <ul class="feature-list">
+                <li>Source filtering keeps synthetic chunks out of the citation layer.</li>
+                <li>No-answer responses stay clear and honest.</li>
+                <li>Markdown-rich formatting makes long answers easier to scan.</li>
+              </ul>
+            </div>
+            <div class="split-visual glass-card">
+              <div class="visual-window">
+                <div class="window-header"><span></span><span></span><span></span></div>
+                <div class="window-body">
+                  <div class="metric-list">
+                    <div class="metric-item"><strong>Grounded</strong><p>Uses the processed site, not generic product lore.</p></div>
+                    <div class="metric-item"><strong>Source-backed</strong><p>Shows a real page when one supports the answer.</p></div>
+                    <div class="metric-item"><strong>UI-aware</strong><p>Can answer location and navigation questions.</p></div>
+                    <div class="metric-item"><strong>Consistent</strong><p>Uses the same product voice across widget and workspace.</p></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="split-feature reverse" data-reveal>
+            <div class="split-copy">
+              <span class="eyebrow">Launch workflow</span>
+              <h2>From processing to embed code without the admin-tool feeling</h2>
+              <p>The workspace is designed to guide first-time users through training, validation, embed code, and live testing so launch feels controlled rather than improvised.</p>
+              <ul class="feature-list">
+                <li>Guided first-run onboarding.</li>
+                <li>Clear empty, loading, success, and failure states.</li>
+                <li>Built-in test chat before you ship the widget.</li>
               </ul>
             </div>
             <div class="split-visual glass-card">
               <div class="visual-flow">
                 <div class="flow-grid">
-                  <div class="flow-node"><strong>1. Process site</strong><p>Paste URL into dashboard</p></div>
-                  <div class="flow-node"><strong>2. Copy script</strong><p>One line of embed code</p></div>
-                  <div class="flow-node"><strong>3. Launch widget</strong><p>Live on your site instantly</p></div>
+                  <div class="flow-node"><strong>1. Add website</strong><p>Paste the URL and start training.</p></div>
+                  <div class="flow-node"><strong>2. Watch progress</strong><p>See crawl and embed status update live.</p></div>
+                  <div class="flow-node"><strong>3. Copy script</strong><p>Get a production-ready embed tag.</p></div>
+                  <div class="flow-node"><strong>4. Test live</strong><p>Use the built-in chat lab before launch.</p></div>
                 </div>
               </div>
             </div>
@@ -188,13 +188,13 @@
         <div class="container">
           <div class="cta-panel glass-card" data-reveal>
             <div>
-              <span class="eyebrow">See it yourself</span>
-              <h2 style="margin-top: 18px;">Ready to see your website turn into a <span class="gradient-text">24/7 closer</span>?</h2>
-              <p class="lede" style="margin-top: 12px;">Process a site in the dashboard, or jump straight into the live demo.</p>
+              <span class="eyebrow">Ready to try it</span>
+              <h2 style="margin-top: 18px;">See the product live, then launch your own assistant</h2>
+              <p class="lede" style="margin-top: 12px;">Use the demo to feel the experience, or go straight into the workspace and process your first site.</p>
             </div>
             <div class="button-row">
-              <a class="button button-primary" href="/dashboard">Start Free →</a>
-              <a class="button button-secondary" href="/demo">Open demo</a>
+              <a class="button button-primary" href="/demo">Try the demo</a>
+              <a class="button button-secondary" href="/dashboard?onboarding=1">Start onboarding</a>
             </div>
           </div>
         </div>

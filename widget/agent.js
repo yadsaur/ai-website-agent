@@ -10,7 +10,7 @@
   if (!siteId) return;
 
   var baseUrl = new URL(currentScript.src, window.location.href).origin;
-  var FALLBACK_MESSAGE = "I don't have that information on this website. You might want to contact the team directly.";
+  var FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
   var state = {
     open: false,
     siteName: "this site",
@@ -26,7 +26,7 @@
   var root = document.createElement("div");
   root.id = "aiwa-widget";
   root.innerHTML = [
-    '<button id="aiwa-toggle" type="button" aria-label="Open chat">AI</button>',
+    '<button id="aiwa-toggle" type="button" aria-label="Open SiteCloser chat">SC</button>',
     '<div id="aiwa-panel" aria-hidden="true">',
     '  <div id="aiwa-header">',
     '    <div id="aiwa-title">Chat with this site</div>',
@@ -37,7 +37,7 @@
     '    <input id="aiwa-input" type="text" placeholder="Ask a question..." />',
     '    <button id="aiwa-send" type="button">Send</button>',
     "  </div>",
-    '  <div id="aiwa-footer">Powered by AI Agent</div>',
+    '  <div id="aiwa-footer">Powered by SiteCloser</div>',
     "</div>"
   ].join("");
 
@@ -45,25 +45,29 @@
   style.textContent = [
     "#aiwa-widget { all: initial; font-family: system-ui, -apple-system, sans-serif; }",
     "#aiwa-widget, #aiwa-widget * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }",
-    "#aiwa-widget { position: fixed; right: 20px; bottom: 20px; z-index: 9999; color: #111827; }",
+    "#aiwa-widget { position: fixed; right: 20px; bottom: 20px; z-index: 9999; color: #f8fafc; }",
     "#aiwa-widget button, #aiwa-widget input { border: none; outline: none; font: inherit; }",
-    "#aiwa-toggle { width: 56px; height: 56px; border-radius: 999px; background: #2563eb; color: #ffffff; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35); cursor: pointer; font-weight: 700; }",
-    "#aiwa-panel { position: absolute; right: 0; bottom: 72px; width: 350px; height: 500px; background: #ffffff; border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 12px; box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18); display: none; overflow: hidden; transform: translateY(12px); opacity: 0; }",
+    "#aiwa-toggle { width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #ffffff; box-shadow: 0 16px 38px rgba(91, 33, 182, 0.42); cursor: pointer; font-weight: 800; letter-spacing: 0.04em; }",
+    "#aiwa-toggle:hover { transform: translateY(-2px); }",
+    "#aiwa-panel { position: absolute; right: 0; bottom: 74px; width: 380px; height: 560px; background: linear-gradient(180deg, rgba(10, 14, 24, 0.98), rgba(7, 10, 18, 0.98)); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 22px; box-shadow: 0 28px 80px rgba(2, 6, 23, 0.52); display: none; overflow: hidden; transform: translateY(12px); opacity: 0; }",
     "#aiwa-panel.aiwa-open { display: flex; flex-direction: column; animation: aiwa-slide-up 0.2s ease forwards; }",
-    "#aiwa-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #2563eb; color: #ffffff; }",
-    "#aiwa-title { font-size: 14px; font-weight: 600; }",
+    "#aiwa-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(91, 33, 182, 0.92)); color: #ffffff; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }",
+    "#aiwa-title { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }",
     "#aiwa-close { background: transparent; color: #ffffff; cursor: pointer; font-size: 22px; line-height: 1; }",
-    "#aiwa-messages { flex: 1; overflow-y: auto; padding: 14px; background: #f8fafc; }",
-    "#aiwa-input-row { display: flex; gap: 8px; padding: 12px; border-top: 1px solid #e5e7eb; background: #ffffff; }",
-    "#aiwa-input { flex: 1; min-width: 0; border: 1px solid #d1d5db; border-radius: 999px; padding: 10px 12px; background: #ffffff; color: #111827; }",
-    "#aiwa-send { background: #2563eb; color: #ffffff; border-radius: 999px; padding: 10px 14px; cursor: pointer; }",
-    "#aiwa-footer { padding: 10px 12px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 11px; background: #ffffff; }",
+    "#aiwa-messages { flex: 1; overflow-y: auto; padding: 16px; background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 28%), linear-gradient(180deg, #0a0f1d, #080b14); }",
+    "#aiwa-input-row { display: flex; gap: 10px; padding: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(9, 12, 20, 0.96); }",
+    "#aiwa-input { flex: 1; min-width: 0; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; padding: 12px 14px; background: rgba(255, 255, 255, 0.05); color: #f8fafc; }",
+    "#aiwa-input::placeholder { color: #8f9ab8; }",
+    "#aiwa-send { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #ffffff; border-radius: 999px; padding: 10px 16px; cursor: pointer; font-weight: 700; }",
+    "#aiwa-footer { padding: 10px 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; font-size: 11px; background: rgba(9, 12, 20, 0.96); }",
     "#aiwa-widget .aiwa-row { display: flex; margin-bottom: 10px; }",
     "#aiwa-widget .aiwa-row.user { justify-content: flex-end; }",
     "#aiwa-widget .aiwa-row.assistant { justify-content: flex-start; flex-direction: column; align-items: flex-start; gap: 8px; }",
-    "#aiwa-widget .aiwa-bubble { max-width: 85%; padding: 10px 12px; border-radius: 16px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }",
+    "#aiwa-widget .aiwa-bubble { max-width: 85%; padding: 12px 14px; border-radius: 18px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }",
     "#aiwa-widget .aiwa-row.user .aiwa-bubble { background: #2563eb; color: #ffffff; }",
-    "#aiwa-widget .aiwa-row.assistant .aiwa-bubble { background: #e5e7eb; color: #111827; }",
+    "#aiwa-widget .aiwa-row.user .aiwa-bubble { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #ffffff; border-top-right-radius: 8px; box-shadow: 0 12px 30px rgba(91, 33, 182, 0.18); }",
+    "#aiwa-widget .aiwa-row.assistant .aiwa-bubble { background: rgba(255, 255, 255, 0.08); color: #f8fbff; border: 1px solid rgba(255, 255, 255, 0.08); border-top-left-radius: 8px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18); }",
+    "#aiwa-widget .aiwa-assistant-bubble, #aiwa-widget .aiwa-assistant-bubble * { color: inherit; }",
     "#aiwa-widget .aiwa-assistant-bubble p { margin: 0 0 8px 0; }",
     "#aiwa-widget .aiwa-assistant-bubble p:last-child { margin-bottom: 0; }",
     "#aiwa-widget .aiwa-assistant-bubble strong { font-weight: 600; }",
@@ -72,18 +76,18 @@
     "#aiwa-widget .aiwa-assistant-bubble li { margin-bottom: 4px; line-height: 1.5; }",
     "#aiwa-widget .aiwa-assistant-bubble h1, #aiwa-widget .aiwa-assistant-bubble h2, #aiwa-widget .aiwa-assistant-bubble h3 { font-size: 14px; font-weight: 600; margin: 8px 0 4px 0; }",
     "#aiwa-widget .aiwa-sources { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }",
-    "#aiwa-widget .aiwa-sources-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #64748b; }",
+    "#aiwa-widget .aiwa-sources-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #94a3b8; }",
     "#aiwa-widget .aiwa-source-list { display: flex; flex-wrap: wrap; gap: 8px; }",
-    "#aiwa-widget .aiwa-source-link { display: inline-flex; align-items: center; max-width: 100%; padding: 6px 10px; border-radius: 999px; background: #eff6ff; color: #1d4ed8; text-decoration: none; font-size: 12px; font-weight: 600; }",
-    "#aiwa-widget .aiwa-source-link:hover { background: #dbeafe; }",
+    "#aiwa-widget .aiwa-source-link { display: inline-flex; align-items: center; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: rgba(124, 58, 237, 0.14); color: #efe9ff; text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid rgba(167, 139, 250, 0.22); }",
+    "#aiwa-widget .aiwa-source-link:hover { background: rgba(124, 58, 237, 0.22); }",
     "#aiwa-widget .aiwa-chip-stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; margin-bottom: 12px; }",
     "#aiwa-widget .aiwa-chip-group { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }",
-    "#aiwa-widget .aiwa-chip { display: inline-flex; align-items: center; justify-content: flex-start; width: fit-content; max-width: 90%; padding: 8px 16px; border-radius: 20px; border: 1px solid #e2e8f0; background: #ffffff; color: #374151; cursor: pointer; font-size: 13px; line-height: 1.3; text-align: left; }",
-    "#aiwa-widget .aiwa-chip:hover { background: #eff6ff; border-color: #bfdbfe; }",
+    "#aiwa-widget .aiwa-chip { display: inline-flex; align-items: center; justify-content: flex-start; width: fit-content; max-width: 90%; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); color: #eef2ff; cursor: pointer; font-size: 13px; line-height: 1.35; text-align: left; }",
+    "#aiwa-widget .aiwa-chip:hover { background: rgba(124, 58, 237, 0.12); border-color: rgba(167, 139, 250, 0.32); }",
     "#aiwa-widget .aiwa-followup-chip { font-size: 12px; padding: 6px 14px; }",
-    "#aiwa-widget .aiwa-typing { opacity: 0.7; font-style: italic; }",
+    "#aiwa-widget .aiwa-typing { opacity: 0.78; font-style: italic; color: #d7ddf6; }",
     "@keyframes aiwa-slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }",
-    "@media (max-width: 479px) { #aiwa-panel { width: 90vw; right: 0; } }"
+    "@media (max-width: 479px) { #aiwa-panel { width: 92vw; height: min(78vh, 560px); right: 0; } }"
   ].join("\n");
 
   document.head.appendChild(style);

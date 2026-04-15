@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How we built an AI that understands website UI layout</title>
-  <meta name="description" content="How SiteCloser extracts navigation, buttons, search bars, and layout cues so it can answer where-to-click questions accurately.">
+  <title>How we taught an assistant to understand website layout</title>
+  <meta name="description" content="Why UI-aware extraction matters when visitors ask where the search bar, pricing link, or primary CTA actually lives.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -17,25 +19,43 @@
     <main class="page">
       <section class="page-hero">
         <div class="container article-shell">
-          <div class="post-meta" data-reveal><span>Engineering</span><span>April 2026</span><span>6 min read</span></div>
+          <div class="post-meta" data-reveal><span>Product</span><span>April 2026</span><span>6 min read</span></div>
           <div class="section-header article-shell" data-reveal>
-            <h1>How we built an AI that understands website UI layout</h1>
-            <p class="lede">Plain text extraction is not enough when visitors ask where the search bar is, which tab holds pricing, or where the footer links live.</p>
+            <h1>How we taught an assistant to understand website layout</h1>
+            <p class="lede">Plain text retrieval is not enough when a visitor asks where the search bar is or which menu holds the pricing link. Those are structure questions, not just content questions.</p>
           </div>
         </div>
       </section>
 
       <section class="section">
-        <div class="container article-shell">
-          <p data-reveal>Most retrieval systems flatten a page into plain text. That works for copy-heavy questions, but it breaks the moment a visitor asks something about location or interface. “Where is the search bar?” is not a text question. It is a structure question.</p>
-          <h2 data-reveal>What we extract beyond plain text</h2>
-          <ul data-reveal>
-            <li>Navigation links and their inferred location.</li>
-            <li>Buttons, CTAs, logos, search inputs, and dropdown menus.</li>
-            <li>Footer links and structural landmarks like header, sidebar, or hero section.</li>
-          </ul>
-          <p data-reveal>Those UI facts get transformed into natural-language guide text and embedded as dedicated chunks. During retrieval, UI-position queries get a score bonus so those chunks surface first. The language model then receives explicit instructions to answer layout questions from that UI context rather than claiming ignorance.</p>
-          <p data-reveal>The result is a chatbot that can guide a visitor through the website instead of only summarizing what the website says.</p>
+        <div class="container article-grid">
+          <div class="article-content">
+            <p data-reveal>Most website assistants flatten a page into text and lose everything about layout. That works for product copy, but it fails the moment the visitor asks something operational: Where do I click? Is pricing in the top navigation? Where is the logo? Those answers depend on the structure of the page, not just the words on it.</p>
+            <h2 data-reveal>What SiteCloser extracts beyond text</h2>
+            <ul data-reveal>
+              <li>Navigation links and their inferred location.</li>
+              <li>Buttons, CTAs, logos, search bars, and dropdown menus.</li>
+              <li>Footer links and page landmarks such as header or main content area.</li>
+            </ul>
+            <p data-reveal>Those UI facts are turned into natural-language guide text and stored alongside the regular content chunks. During retrieval, position-oriented questions get a boost so the assistant sees the layout guide first instead of pretending the answer is missing.</p>
+            <p data-reveal>The result is simple but powerful: a visitor can ask where something lives on the site and get a direct answer that feels like guidance from a product specialist, not a shrug from a chatbot.</p>
+          </div>
+          <aside class="article-side">
+            <div class="glass-card" data-reveal>
+              <h3>More to explore</h3>
+              <div class="insight-link-list">
+                <a href="/features">Explore the full feature set</a>
+                <a href="/how-it-works">See the end-to-end workflow</a>
+              </div>
+            </div>
+            <div class="glass-card" data-reveal>
+              <h3>See it live</h3>
+              <p>Open the demo and ask where the start button or pricing page lives to see UI-aware guidance in action.</p>
+              <div class="button-row">
+                <a class="button button-primary" href="/demo">Open demo</a>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
     </main>

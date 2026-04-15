@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiteCloser hero preview</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060912;
+      --panel: rgba(14, 18, 29, 0.8);
+      --border: rgba(255, 255, 255, 0.08);
+      --muted: #98a2b9;
+      --text: #f5f7ff;
+      --accent: #7c3aed;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 28%),
+        linear-gradient(180deg, #070b14, #05070d);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    body {
+      padding: 22px;
+      position: relative;
+    }
+
+    .preview-page {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(200px, 0.95fr);
+      gap: 18px;
+      min-height: 100vh;
+      align-items: start;
+    }
+
+    .preview-card {
+      padding: 22px;
+      border-radius: 24px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(167, 139, 250, 0.16);
+      background: rgba(124, 58, 237, 0.12);
+      color: #e9ddff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .prompt-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .prompt-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: fit-content;
+      max-width: 100%;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: #eef2ff;
+      font-size: 13px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #f8faff;
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 16px; }
+      .preview-page { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-page">
+    <section class="preview-card">
+      <span class="eyebrow">Live website preview</span>
+      <h1>Ask what buyers actually ask</h1>
+      <p>This is the real widget running inside the homepage hero. Open it and try a pricing, product, or onboarding question.</p>
+      <div class="prompt-list">
+        <div class="prompt-chip">→ What does this product do?</div>
+        <div class="prompt-chip">→ How much does it cost?</div>
+        <div class="prompt-chip">→ How do I get started?</div>
+      </div>
+    </section>
+    <aside class="stack">
+      <div class="mini-card">
+        <strong>Real widget</strong>
+        <p>Same assistant, same streaming behavior, same source chips.</p>
+      </div>
+      <div class="mini-card">
+        <strong>Grounded answers</strong>
+        <p>The assistant answers from processed website content and falls back when support is missing.</p>
+      </div>
+    </aside>
+  </div>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var siteId = params.get("site_id") || "d94c64af-65d2-410f-a6d4-c9f05f9919c0";
+      var appUrl = params.get("app_url") || window.location.origin;
+      var script = document.createElement("script");
+      script.src = appUrl + "/widget/agent.js";
+      script.setAttribute("data-site-id", siteId);
+      script.onload = function () {
+        window.setTimeout(function () {
+          var toggle = document.getElementById("aiwa-toggle");
+          if (toggle) toggle.click();
+        }, 500);
+      };
+      document.body.appendChild(script);
+    })();
+  </script>
+</body>
+</html>
