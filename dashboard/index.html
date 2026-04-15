@@ -435,6 +435,14 @@
     .site-name { display: grid; gap: 4px; }
     .site-name strong { font-size: 15px; }
     .site-url { color: var(--app-muted); word-break: break-word; }
+    .site-note {
+      color: var(--app-muted);
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
     .badge {
       display: inline-flex;
       align-items: center;
@@ -1048,6 +1056,26 @@
       return '<span class="badge ' + status + '">' + status + "</span>";
     }
 
+    function escapeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function summarizeSiteNote(site) {
+      if (site.status === "error" && site.error_msg) {
+        const message = String(site.error_msg).trim();
+        return message.length > 120 ? message.slice(0, 117) + "..." : message;
+      }
+      if (site.status === "ready") return "Ready for onboarding, testing, and launch.";
+      if (site.status === "embedding") return "Building embeddings and preparing the live assistant.";
+      if (site.status === "crawling") return "Crawling pages and structuring site knowledge.";
+      return "Waiting for the next launch step.";
+    }
+
     function ensureSelectedReadySite() {
       const readySites = state.sites.filter(function (site) { return site.status === "ready"; });
       testSiteSelect.innerHTML = '<option value="">Select a ready site</option>';
@@ -1066,9 +1094,13 @@
       siteTableBody.innerHTML = "";
       state.sites.forEach(function (site) {
         const tr = document.createElement("tr");
+        const siteName = escapeHtml(site.name || "Untitled site");
+        const siteUrl = escapeHtml(site.url || "");
+        const siteNote = escapeHtml(summarizeSiteNote(site));
+        const siteNoteTitle = escapeHtml(site.status === "error" && site.error_msg ? site.error_msg : summarizeSiteNote(site));
         tr.innerHTML = [
-          '<td data-label="Name"><div class="site-name"><strong>' + (site.name || "Untitled site") + '</strong><span class="site-url">' + (site.error_msg && site.status === "error" ? site.error_msg : "Ready for onboarding, testing, and launch.") + '</span></div></td>',
-          '<td data-label="URL"><span class="site-url">' + site.url + "</span></td>",
+          '<td data-label="Name"><div class="site-name"><strong>' + siteName + '</strong><span class="site-note" title="' + siteNoteTitle + '">' + siteNote + '</span></div></td>',
+          '<td data-label="URL"><span class="site-url">' + siteUrl + "</span></td>",
           '<td data-label="Pages">' + site.page_count + "</td>",
           '<td data-label="Chunks">' + site.chunk_count + "</td>",
           '<td data-label="Status">' + renderStatusBadge(site.status) + "</td>",
