@@ -313,25 +313,11 @@
     }
 
     try {
-      const frameDoc = iframe.contentDocument || iframe.contentWindow.document;
-      const toggle = frameDoc.querySelector("#aiwa-toggle");
-      const panel = frameDoc.querySelector("#aiwa-panel");
-      const input = frameDoc.querySelector("#aiwa-input");
-      const send = frameDoc.querySelector("#aiwa-send");
-
-      if (toggle && panel && !panel.classList.contains("aiwa-open")) {
-        toggle.click();
-      }
-
-      window.setTimeout(() => {
-        if (!input || !send) {
-          return;
-        }
-        input.value = question;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        send.click();
-      }, 220);
-
+      const targetOrigin = new URL(iframe.src, window.location.href).origin;
+      iframe.contentWindow.postMessage(
+        { type: "sitecloser:ask", question },
+        targetOrigin
+      );
       return true;
     } catch (error) {
       return false;

@@ -288,13 +288,8 @@
     scrollToBottom();
   }
 
-  async function ensureStarterSuggestions() {
-    if (state.starterDismissed || hasConversationMessages()) return;
-    if (Array.isArray(state.suggestedQuestions)) {
-      renderStarterSuggestions(state.suggestedQuestions);
-      return;
-    }
-    if (state.suggestedQuestionsRequested) return;
+  async function prefetchStarterSuggestions() {
+    if (state.suggestedQuestionsRequested || Array.isArray(state.suggestedQuestions)) return;
     state.suggestedQuestionsRequested = true;
     try {
       var response = await fetch(baseUrl + "/api/sites/" + encodeURIComponent(siteId) + "/suggested-questions");
@@ -304,6 +299,14 @@
       state.suggestedQuestions = data.questions.slice(0, 3);
       renderStarterSuggestions(state.suggestedQuestions);
     } catch (err) {
+    }
+  }
+
+  async function ensureStarterSuggestions() {
+    if (state.starterDismissed || hasConversationMessages()) return;
+    prefetchStarterSuggestions();
+    if (Array.isArray(state.suggestedQuestions)) {
+      renderStarterSuggestions(state.suggestedQuestions);
     }
   }
 
@@ -428,5 +431,6 @@
   });
 
   loadSiteName();
+  prefetchStarterSuggestions();
   loadMarked().catch(function () {});
 })();

@@ -282,6 +282,17 @@
       margin-bottom: 14px;
       font-size: 14px;
     }
+    .progress-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: -4px 0 18px;
+      color: var(--app-muted);
+      font-size: 13px;
+    }
+    .progress-meta strong { color: #eef2ff; font-weight: 600; }
+    .progress-meta span { color: rgba(255, 255, 255, 0.22); }
     .status-dot {
       width: 10px;
       height: 10px;
@@ -346,6 +357,9 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .embed-box.visible { display: block; }
+    .attention-glow {
+      animation: workspaceGlow 1.8s ease;
+    }
     .embed-meta {
       display: flex;
       align-items: flex-start;
@@ -410,7 +424,7 @@
       font-size: 13px;
     }
     .table-wrap {
-      overflow: auto;
+      overflow: hidden;
       border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: rgba(255, 255, 255, 0.03);
@@ -418,10 +432,17 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 760px;
+      min-width: 0;
+      table-layout: fixed;
     }
+    th:nth-child(1), td:nth-child(1) { width: 31%; }
+    th:nth-child(2), td:nth-child(2) { width: 21%; }
+    th:nth-child(3), td:nth-child(3) { width: 9%; }
+    th:nth-child(4), td:nth-child(4) { width: 10%; }
+    th:nth-child(5), td:nth-child(5) { width: 11%; }
+    th:nth-child(6), td:nth-child(6) { width: 18%; }
     th, td {
-      padding: 16px 14px;
+      padding: 16px 12px;
       text-align: left;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       vertical-align: top;
@@ -433,8 +454,23 @@
     }
     tbody tr:last-child td { border-bottom: 0; }
     .site-name { display: grid; gap: 4px; }
-    .site-name strong { font-size: 15px; }
-    .site-url { color: var(--app-muted); word-break: break-word; }
+    .site-name strong {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: 15px;
+      line-height: 1.38;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    .site-url {
+      color: var(--app-muted);
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.42;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      word-break: break-word;
+    }
     .site-note {
       color: var(--app-muted);
       word-break: break-word;
@@ -461,17 +497,18 @@
     .row-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
     .row-button {
       min-height: 36px;
-      padding: 0 12px;
+      padding: 0 10px;
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       background: rgba(255, 255, 255, 0.04);
       color: #ede9fe;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
+      white-space: nowrap;
     }
     .row-button.primary {
       background: rgba(124, 58, 237, 0.2);
@@ -492,6 +529,24 @@
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       margin-bottom: 14px;
+      align-items: stretch;
+    }
+    .chat-toolbar select,
+    .chat-toolbar select option {
+      color: #f8fbff;
+      background: #0f1722;
+    }
+    .chat-toolbar select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #c4b5fd 50%),
+        linear-gradient(135deg, #c4b5fd 50%, transparent 50%);
+      background-position:
+        calc(100% - 22px) calc(50% - 3px),
+        calc(100% - 16px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 40px;
     }
     .chat-empty-hint {
       color: var(--app-muted);
@@ -617,6 +672,11 @@
       font-size: 11px;
       background: rgba(9, 12, 20, 0.96);
     }
+    @keyframes workspaceGlow {
+      0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); border-color: rgba(255, 255, 255, 0.08); }
+      18% { box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.38), 0 0 42px rgba(124, 58, 237, 0.26); border-color: rgba(167, 139, 250, 0.62); }
+      100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); border-color: rgba(255, 255, 255, 0.08); }
+    }
     @media (max-width: 1100px) {
       .workspace-hero,
       .workspace-grid,
@@ -736,6 +796,7 @@
             </form>
             <div class="status-line"><span class="status-dot"></span><span id="status-line">Ready when you are. Add a site to begin onboarding.</span></div>
             <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+            <div id="progress-meta" class="progress-meta"><strong>Pages crawled:</strong> 0 <span>&bull;</span> <strong>Chunks created:</strong> 0 <span>&bull;</span> <strong>ETA:</strong> waiting to start</div>
             <div class="workspace-state-grid">
               <div class="state-card">
                 <h3>What happens next</h3>
@@ -850,7 +911,7 @@
               <button id="open-selected-embed" class="ghost-button" type="button">Get embed code</button>
             </div>
             <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Good first prompts: pricing, setup, support, and where-to-click questions.</div>
-            <div class="chat-shell">
+            <div id="chat-shell" class="chat-shell">
               <div class="chat-header" id="chat-title">Chat with your site</div>
               <div class="chat-messages" id="chat-messages"></div>
               <div class="chat-controls">
@@ -876,7 +937,9 @@
       suggestedQuestionsRequested: {},
       starterDismissed: false,
       currentStatusSiteId: null,
-      submitting: false
+      submitting: false,
+      pendingSiteUrl: "",
+      trainingStartedAt: 0
     };
 
     const form = document.getElementById("site-form");
@@ -884,6 +947,7 @@
     const siteSubmit = document.getElementById("site-submit");
     const statusLine = document.getElementById("status-line");
     const progressFill = document.getElementById("progress-fill");
+    const progressMeta = document.getElementById("progress-meta");
     const feedbackBanner = document.getElementById("feedback-banner");
     const launchTitle = document.getElementById("launch-title");
     const launchCopy = document.getElementById("launch-copy");
@@ -907,6 +971,7 @@
     const chatInput = document.getElementById("chat-input");
     const chatSend = document.getElementById("chat-send");
     const chatEmptyHint = document.getElementById("chat-empty-hint");
+    const chatShell = document.getElementById("chat-shell");
 
     function setFeedback(message, tone) {
       if (!message) {
@@ -921,8 +986,9 @@
     function setSubmitting(isSubmitting) {
       state.submitting = isSubmitting;
       siteSubmit.disabled = isSubmitting;
-      siteUrl.disabled = isSubmitting;
-      siteSubmit.textContent = isSubmitting ? "Starting..." : "Start training";
+      siteUrl.readOnly = isSubmitting;
+      siteUrl.setAttribute("aria-busy", isSubmitting ? "true" : "false");
+      siteSubmit.textContent = isSubmitting ? "Training..." : "Start training";
     }
 
     function loadMarked() {
@@ -965,11 +1031,12 @@
       return fallback;
     }
 
-    function progressValue(status) {
-      if (status === "pending") return 8;
-      if (status === "crawling") return 38;
-      if (status === "embedding") return 76;
-      if (status === "ready" || status === "error") return 100;
+    function progressValue(site) {
+      if (!site || !site.status) return 0;
+      if (site.status === "pending") return 8;
+      if (site.status === "crawling") return Math.min(58, 14 + ((site.page_count || 0) * 7));
+      if (site.status === "embedding") return Math.min(92, 66 + Math.min((site.chunk_count || 0) * 0.28, 24));
+      if (site.status === "ready" || site.status === "error") return 100;
       return 0;
     }
 
@@ -980,6 +1047,59 @@
       if (site.status === "ready") return "This site is ready to test and launch.";
       if (site.status === "error") return "Training needs attention: " + (site.error_msg || "Unknown error");
       return "Queued and waiting to begin.";
+    }
+
+    function etaText(site) {
+      if (!site || !site.status || site.status === "pending") return "estimating";
+      if (site.status === "crawling") {
+        if ((site.page_count || 0) <= 1) return "about 1-2 min";
+        if ((site.page_count || 0) <= 4) return "about 1 min";
+        return "under a minute";
+      }
+      if (site.status === "embedding") {
+        if ((site.chunk_count || 0) < 25) return "about 45 sec";
+        if ((site.chunk_count || 0) < 90) return "about 30 sec";
+        return "finishing up";
+      }
+      if (site.status === "ready") return "complete";
+      if (site.status === "error") return "needs attention";
+      return "estimating";
+    }
+
+    function setProgressState(site, overrideText) {
+      statusLine.textContent = overrideText || progressText(site);
+      progressFill.style.width = progressValue(site) + "%";
+      progressMeta.innerHTML =
+        "<strong>Pages crawled:</strong> " + (site && site.page_count ? site.page_count : 0) +
+        " <span>&bull;</span> <strong>Chunks created:</strong> " + (site && site.chunk_count ? site.chunk_count : 0) +
+        " <span>&bull;</span> <strong>ETA:</strong> " + etaText(site);
+    }
+
+    function settleTrainingInput(clearValue) {
+      setSubmitting(false);
+      state.trainingStartedAt = 0;
+      state.pendingSiteUrl = "";
+      if (clearValue) {
+        siteUrl.value = "";
+      }
+    }
+
+    function highlightElement(element) {
+      if (!element) return;
+      element.classList.remove("attention-glow");
+      void element.offsetWidth;
+      element.classList.add("attention-glow");
+      window.setTimeout(function () {
+        element.classList.remove("attention-glow");
+      }, 1800);
+    }
+
+    function scrollAndHighlight(element) {
+      if (!element) return;
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(function () {
+        highlightElement(element);
+      }, 120);
     }
 
     function renderMetrics() {
@@ -1000,12 +1120,14 @@
         launchTitle.textContent = "Start by connecting a website";
         launchCopy.textContent = "Once SiteCloser sees your pages, it can build the assistant, generate embed code, and let you pressure-test the chat before launch.";
         nextStepCopy.textContent = "No sites yet. Your first goal is simple: connect one public site and let the assistant build itself.";
-        statusLine.textContent = progressText(null);
-        progressFill.style.width = "0%";
+        if (!state.submitting) {
+          setProgressState(null);
+        }
         return;
       }
-      statusLine.textContent = progressText(site);
-      progressFill.style.width = progressValue(site.status) + "%";
+      if (!state.submitting || state.currentStatusSiteId === site.site_id) {
+        setProgressState(site);
+      }
       if (site.status === "ready") {
         launchTitle.textContent = "A site is ready to launch";
         launchCopy.textContent = "Copy the embed code, run a few final questions in the chat lab, and place the widget anywhere you want buyer help to appear.";
@@ -1153,19 +1275,31 @@
             setFeedback("Unable to fetch status right now.", "error");
             return;
           }
-          statusLine.textContent = progressText(site);
-          progressFill.style.width = progressValue(site.status) + "%";
+          const previousStatus = state.sites.find(function (item) { return item.site_id === siteId; });
+          const previousValue = previousStatus ? previousStatus.status : "";
+          setProgressState(site);
           await fetchSites();
-          if (site.status === "ready") setFeedback("Site is ready. Copy the embed code or start testing in the chat lab.", "success");
-          else if (site.status === "error") setFeedback("Training hit an error. Review the site row and retry when ready.", "error");
+          if (site.status === "ready") {
+            setFeedback("Site is ready. Copy the embed code or start testing in the chat lab.", "success");
+          } else if (site.status === "error") {
+            setFeedback("Training hit an error. Review the site row and retry when ready.", "error");
+          }
           if (site.status === "ready" || site.status === "error") {
             window.clearInterval(state.pollTimer);
             state.pollTimer = null;
-            setSubmitting(false);
+            settleTrainingInput(true);
+            if (site.status === "ready") {
+              testSiteSelect.value = site.site_id;
+              resetChatPanel();
+              updateChatAvailability();
+              window.setTimeout(function () {
+                scrollAndHighlight(chatShell);
+              }, 220);
+            }
           }
         } catch (err) {
           setFeedback("Status polling failed. Check that the backend is still running.", "error");
-          setSubmitting(false);
+          settleTrainingInput(false);
         }
       }
       await tick();
@@ -1176,27 +1310,28 @@
       event.preventDefault();
       embedBox.classList.remove("visible");
       copiedNote.textContent = "";
+      const submittedUrl = siteUrl.value.trim();
+      state.pendingSiteUrl = submittedUrl;
+      state.trainingStartedAt = Date.now();
       setSubmitting(true);
       setFeedback("Training has started. SiteCloser is now processing your website.", "info");
+      setProgressState({ status: "pending", page_count: 0, chunk_count: 0 }, "Starting crawl and reserving your processing slot.");
       try {
         const response = await fetch("/api/sites", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: siteUrl.value.trim() })
+          body: JSON.stringify({ url: submittedUrl })
         });
         const data = await response.json();
         if (!response.ok) {
-          setSubmitting(false);
+          settleTrainingInput(false);
           setFeedback(formatApiError(data, "Unable to process website."), "error");
           return;
         }
-        statusLine.textContent = "Queued and waiting to begin.";
-        progressFill.style.width = "8%";
         await fetchSites();
         await pollStatus(data.site_id);
-        form.reset();
       } catch (err) {
-        setSubmitting(false);
+        settleTrainingInput(false);
         setFeedback("Unable to reach the backend. Make sure the FastAPI server is running.", "error");
       }
     }
@@ -1216,6 +1351,7 @@
         copiedNote.textContent = "";
         renderOnboardingSteps();
         setFeedback("Embed code is ready to copy.", "success");
+        scrollAndHighlight(embedBox);
       } catch (err) {
         setFeedback("Unable to reach the backend while generating embed code.", "error");
       }
@@ -1342,8 +1478,14 @@
     async function ensureStarterSuggestions() {
       const siteId = testSiteSelect.value;
       if (!siteId || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
+      prefetchStarterSuggestions(siteId);
+      if (!state.suggestedQuestionsCache[siteId]) return;
+      renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
+    }
+
+    async function prefetchStarterSuggestions(siteId) {
+      if (!siteId) return;
       if (state.suggestedQuestionsCache[siteId]) {
-        renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
         return;
       }
       if (state.suggestedQuestionsRequested[siteId]) return;
@@ -1354,7 +1496,6 @@
         const data = await response.json();
         if (!data.questions || !data.questions.length) return;
         state.suggestedQuestionsCache[siteId] = data.questions.slice(0, 3);
-        renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
       } catch (err) {}
     }
 
@@ -1426,7 +1567,10 @@
       chatSend.disabled = !enabled;
       openSelectedEmbed.disabled = !enabled;
       chatEmptyHint.style.display = enabled ? "none" : "block";
-      if (enabled) ensureStarterSuggestions();
+      if (enabled) {
+        prefetchStarterSuggestions(testSiteSelect.value);
+        ensureStarterSuggestions();
+      }
     }
 
     function sendChat(forcedQuestion, options) {
@@ -1491,7 +1635,7 @@
         testSiteSelect.value = siteId;
         resetChatPanel();
         updateChatAvailability();
-        document.querySelector(".chat-shell").scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollAndHighlight(chatShell);
       } else showEmbedCode(siteId);
     });
     copyEmbed.addEventListener("click", async function () {
