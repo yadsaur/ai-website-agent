@@ -31,6 +31,7 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -44,10 +45,13 @@ body {
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body.page-ready {
-  animation: page-fade 420ms ease;
+  animation: none;
 }
 
 a {
@@ -84,12 +88,11 @@ button {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.2;
+  opacity: 0.1;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 72px 72px;
-  mask-image: radial-gradient(circle at center, black 42%, transparent 90%);
 }
 
 .page {
@@ -1391,23 +1394,18 @@ li {
 }
 
 [data-reveal] {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 380ms ease,
+    transform 380ms ease;
+  will-change: opacity, transform;
 }
 
 [data-reveal].revealed {
-  animation: reveal-up 420ms ease both;
-}
-
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
 }
 
 @keyframes pulse {
@@ -1431,6 +1429,19 @@ li {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
   }
 }
 
