@@ -150,9 +150,20 @@
       const handleScroll = () => {
         nav.classList.toggle("scrolled", window.scrollY > 8);
       };
+      let navTicking = false;
+      const onScroll = () => {
+        if (navTicking) {
+          return;
+        }
+        navTicking = true;
+        window.requestAnimationFrame(() => {
+          handleScroll();
+          navTicking = false;
+        });
+      };
 
       handleScroll();
-      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("scroll", onScroll, { passive: true });
     }
 
     if (footerHost) {
@@ -165,22 +176,9 @@
     if (!nodes.length) {
       return;
     }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("revealed");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.14, rootMargin: "0px 0px -36px 0px" }
-    );
-
-    nodes.forEach((node, index) => {
-      node.style.transitionDelay = `${Math.min(index * 50, 260)}ms`;
-      observer.observe(node);
+    nodes.forEach((node) => {
+      node.classList.add("revealed");
+      node.style.transitionDelay = "0ms";
     });
   }
 

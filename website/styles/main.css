@@ -126,7 +126,6 @@ button {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(16px);
 }
 
 .eyebrow {
@@ -285,7 +284,7 @@ li {
   position: absolute;
   border-radius: 999px;
   pointer-events: none;
-  filter: blur(50px);
+  filter: blur(30px);
 }
 
 .hero-glow {
@@ -1214,13 +1213,12 @@ li {
   top: 0;
   z-index: 30;
   border-bottom: 1px solid transparent;
-  transition: background 180ms ease, border-color 180ms ease, backdrop-filter 180ms ease;
+  transition: background 180ms ease, border-color 180ms ease;
 }
 
 .site-nav.scrolled {
   background: rgba(10, 10, 15, 0.72);
   border-color: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
 }
 
 .nav-inner {
@@ -1394,17 +1392,15 @@ li {
 }
 
 [data-reveal] {
-  opacity: 0;
-  transform: translate3d(0, 18px, 0);
-  transition:
-    opacity 380ms ease,
-    transform 380ms ease;
-  will-change: opacity, transform;
+  opacity: 1;
+  transform: none;
+  transition: none;
+  will-change: auto;
 }
 
 [data-reveal].revealed {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
+  transform: none;
   will-change: auto;
 }
 
@@ -1435,13 +1431,6 @@ li {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  [data-reveal] {
-    opacity: 1;
-    transform: none;
-    transition: none;
-    will-change: auto;
   }
 }
 
