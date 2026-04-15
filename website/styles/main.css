@@ -1054,26 +1054,30 @@ li {
 }
 
 .demo-card.demo-widget-shell {
-  min-height: 720px;
+  min-height: 560px;
 }
 
-.demo-card [data-demo-widget] {
-  display: block;
-  height: 620px;
+.demo-widget-stage {
+  display: grid;
+  gap: 18px;
   margin-top: 20px;
+  padding: 22px;
   border-radius: 22px;
-  overflow: hidden;
   background:
     radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 28%),
     linear-gradient(180deg, #0a0f1d, #080b14);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.demo-widget-frame {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: transparent;
+.demo-widget-stage-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.demo-widget-stage-copy strong {
+  color: #f6f7ff;
+  font-size: 1.12rem;
+  letter-spacing: -0.02em;
 }
 
 .demo-prompts {

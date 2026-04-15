@@ -57,6 +57,7 @@
   const pageName = document.body.dataset.page || "";
   const year = new Date().getFullYear();
   let demoConfigPromise = null;
+  let demoWidgetReadyPromise = null;
 
   function buildNav() {
     return `
@@ -266,22 +267,33 @@
   }
 
   async function loadDemoWidget() {
-    const mount = document.querySelector("[data-demo-widget]");
-    if (!mount) {
+    if (pageName !== "demo") {
       return;
     }
 
     const demoConfig = await resolveDemoConfig();
-    const iframe = document.createElement("iframe");
-    iframe.className = "demo-widget-frame";
-    iframe.loading = "lazy";
-    iframe.title = "Interactive SiteCloser demo";
-    iframe.setAttribute("allow", "clipboard-read; clipboard-write");
-    iframe.src =
-      `${siteConfig.heroPreviewPath}?site_id=${encodeURIComponent(demoConfig.siteId)}` +
-      `&app_url=${encodeURIComponent(demoConfig.appUrl)}`;
-    mount.innerHTML = "";
-    mount.appendChild(iframe);
+    if (document.querySelector('script[data-sitecloser-demo-widget="true"]')) {
+      return;
+    }
+
+    demoWidgetReadyPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = `${demoConfig.appUrl}/widget/agent.js`;
+      script.setAttribute("data-site-id", demoConfig.siteId);
+      script.setAttribute("data-sitecloser-demo-widget", "true");
+      script.onload = () => {
+        window.setTimeout(() => {
+          const toggle = document.getElementById("aiwa-toggle");
+          const panel = document.getElementById("aiwa-panel");
+          if (toggle && panel && !panel.classList.contains("aiwa-open")) {
+            toggle.click();
+          }
+          resolve();
+        }, 240);
+      };
+      script.onerror = reject;
+      document.body.appendChild(script);
+    }).catch(() => {});
   }
 
   async function loadHeroPreview() {
@@ -297,7 +309,7 @@
     iframe.title = "Interactive SiteCloser preview";
     iframe.setAttribute("allow", "clipboard-read; clipboard-write");
     iframe.src =
-      `${siteConfig.heroPreviewPath}?site_id=${encodeURIComponent(demoConfig.siteId)}` +
+      `${siteConfig.heroPreviewPath}?mode=hero&site_id=${encodeURIComponent(demoConfig.siteId)}` +
       `&app_url=${encodeURIComponent(demoConfig.appUrl)}`;
     mount.innerHTML = "";
     mount.appendChild(iframe);
@@ -308,20 +320,54 @@
       document.querySelector("[data-demo-widget] iframe") ||
       document.querySelector("[data-hero-preview] iframe");
 
-    if (!iframe) {
-      return false;
+    if (iframe) {
+      try {
+        const targetOrigin = new URL(iframe.src, window.location.href).origin;
+        iframe.contentWindow.postMessage(
+          { type: "sitecloser:ask", question },
+          targetOrigin
+        );
+        return true;
+      } catch (error) {
+        return false;
+      }
     }
 
-    try {
-      const targetOrigin = new URL(iframe.src, window.location.href).origin;
-      iframe.contentWindow.postMessage(
-        { type: "sitecloser:ask", question },
-        targetOrigin
-      );
+    const tryRealWidget = () => {
+      const toggle = document.querySelector("#aiwa-toggle");
+      const panel = document.querySelector("#aiwa-panel");
+      const input = document.querySelector("#aiwa-input");
+      const send = document.querySelector("#aiwa-send");
+
+      if (!toggle || !input || !send) {
+        return false;
+      }
+
+      if (panel && !panel.classList.contains("aiwa-open")) {
+        toggle.click();
+      }
+
+      window.setTimeout(() => {
+        input.value = question;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        send.click();
+      }, 180);
+
       return true;
-    } catch (error) {
-      return false;
+    };
+
+    if (tryRealWidget()) {
+      return true;
     }
+
+    if (demoWidgetReadyPromise) {
+      demoWidgetReadyPromise.then(() => {
+        tryRealWidget();
+      });
+      return true;
+    }
+
+    return false;
   }
 
   function wirePromptChips() {
@@ -331,20 +377,6 @@
         if (sendPromptToEmbeddedWidget(question)) {
           return;
         }
-        const toggle = document.querySelector("#aiwa-toggle");
-        const input = document.querySelector("#aiwa-input");
-        const send = document.querySelector("#aiwa-send");
-        if (toggle) {
-          toggle.click();
-        }
-        window.setTimeout(() => {
-          if (!input || !send) {
-            return;
-          }
-          input.value = question;
-          input.dispatchEvent(new Event("input", { bubbles: true }));
-          send.click();
-        }, 180);
       });
     });
   }
