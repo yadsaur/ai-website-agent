@@ -1,7 +1,7 @@
 (function () {
   const siteConfig = {
-    brand: "SiteCloser",
-    tagline: "Grounded website sales assistant",
+    brand: "5minbot",
+    tagline: "Launch your website chatbot in 5 minutes",
     dashboardUrl: "/dashboard?onboarding=1",
     workspaceUrl: "/dashboard",
     fallbackDemoSiteId: "d94c64af-65d2-410f-a6d4-c9f05f9919c0",
@@ -48,7 +48,7 @@
       title: "Get started",
       links: [
         { href: "/dashboard?onboarding=1", label: "Start onboarding" },
-        { href: "/demo", label: "Try the live assistant" },
+        { href: "/demo", label: "Try the live chatbot" },
         { href: "/support", label: "Talk to support" },
       ],
     },
@@ -106,7 +106,7 @@
             <span class="brand-mark"></span>
             <span>${siteConfig.brand}</span>
           </a>
-          <p>${siteConfig.brand} turns your website into a grounded, conversion-focused assistant that can answer buyer questions, guide visitors, and help teams launch faster.</p>
+          <p>${siteConfig.brand} turns your website into a grounded chatbot your team can set up fast, so visitors get clear answers and you can launch with less friction.</p>
           <div class="footer-actions">
             <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free &rarr;</a>
             <a class="button button-ghost" href="/support">Get help</a>
@@ -126,7 +126,7 @@
           .join("")}
       </div>
       <div class="container footer-bottom">
-        <p>&copy; ${year} ${siteConfig.brand}. Clear answers. Sharper buying journeys.</p>
+        <p>&copy; ${year} ${siteConfig.brand}. Clear answers. Fast launch. Better first conversations.</p>
       </div>
     `;
   }
@@ -213,7 +213,7 @@
           return (
             url.includes("ai-website-agent-aikinley.onrender.com") ||
             url.includes(currentHost) ||
-            name.includes("sitecloser")
+            name.includes("sitecloser") || name.includes("5minbot")
           );
         }) || readySites[0];
 
@@ -304,7 +304,7 @@
     const iframe = document.createElement("iframe");
     iframe.className = "hero-preview-frame";
     iframe.loading = "lazy";
-    iframe.title = "Interactive SiteCloser preview";
+    iframe.title = "Interactive 5minbot preview";
     iframe.setAttribute("allow", "clipboard-read; clipboard-write");
     iframe.src =
       `${siteConfig.heroPreviewPath}?mode=hero&site_id=${encodeURIComponent(demoConfig.siteId)}` +

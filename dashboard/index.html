@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SiteCloser Workspace</title>
-  <meta name="description" content="Train, test, and launch your SiteCloser assistant from one guided workspace." />
+  <title>5minbot Workspace</title>
+  <meta name="description" content="Train, test, and launch your 5minbot chatbot from one guided workspace." />
   <meta name="theme-color" content="#0a0a0f" />
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -729,7 +729,7 @@
         <a class="workspace-brand" href="/">
           <span class="brand-mark"></span>
           <span>
-            <span>SiteCloser</span>
+            <span>5minbot</span>
             <small>Workspace</small>
           </span>
         </a>
@@ -748,11 +748,11 @@
         <section class="workspace-hero">
           <div>
             <span class="eyebrow">Guided onboarding</span>
-            <h1>Launch your first SiteCloser assistant</h1>
-            <p>Process a site, review training, copy the embed code, and test answers before you go live. The workspace is designed to make the first launch obvious and low-friction.</p>
+            <h1>Launch your first 5minbot chatbot</h1>
+            <p>Process a site, review training, copy the embed code, and test answers before you go live. The workspace is designed to make the first chatbot launch obvious and low-friction.</p>
             <div class="step-pills">
               <span class="step-pill">1. Add website</span>
-              <span class="step-pill">2. Train assistant</span>
+              <span class="step-pill">2. Train chatbot</span>
               <span class="step-pill">3. Install widget</span>
               <span class="step-pill">4. Test live</span>
             </div>
@@ -774,7 +774,7 @@
             </div>
             <div class="launch-card">
               <h3 id="launch-title">Start by connecting a website</h3>
-              <p id="launch-copy">Once SiteCloser sees your pages, it can build the assistant, generate embed code, and let you pressure-test the chat before launch.</p>
+              <p id="launch-copy">Once 5minbot sees your pages, it can build the chatbot, generate embed code, and let you pressure-test the chat before launch.</p>
             </div>
           </div>
         </section>
@@ -787,7 +787,7 @@
               <div>
                 <p class="overline">Step 1</p>
                 <h2>Add website</h2>
-                <p>Paste a public website URL and SiteCloser will crawl, structure, embed, and prepare an assistant around it.</p>
+                <p>Paste a public website URL and 5minbot will crawl, structure, embed, and prepare a chatbot around it.</p>
               </div>
             </div>
             <form id="site-form" class="setup-form">
@@ -800,12 +800,12 @@
             <div class="workspace-state-grid">
               <div class="state-card">
                 <h3>What happens next</h3>
-                <p>Training runs in the background while the workspace stays interactive. When the site is ready, you can copy the widget and test the answers immediately.</p>
+                <p>Training runs in the background while the workspace stays interactive. When the site is ready, you can copy the widget and test the chatbot immediately.</p>
                 <div class="state-list" id="onboarding-steps"></div>
               </div>
               <div class="state-card">
                 <h3>Launch guidance</h3>
-                <p id="next-step-copy">No sites yet. Your first goal is simple: connect one public site and let the assistant build itself.</p>
+                <p id="next-step-copy">No sites yet. Your first goal is simple: connect one public site and let the chatbot build itself.</p>
                 <div class="state-list">
                   <div class="state-step">
                     <span class="state-step-badge">A</span>
@@ -813,7 +813,7 @@
                   </div>
                   <div class="state-step">
                     <span class="state-step-badge">B</span>
-                    <div><h4>Validate the experience</h4><p>Use the chat lab to ask real buyer questions before launch.</p></div>
+                    <div><h4>Validate the experience</h4><p>Use the chat lab to ask real visitor questions before launch.</p></div>
                   </div>
                 </div>
               </div>
@@ -823,7 +823,7 @@
                 <div>
                   <p class="overline">Step 3</p>
                   <h3 style="margin: 0 0 6px;">Embed code</h3>
-                  <p class="card-subtitle" id="embed-copy">Copy this script into your site where you want the widget available.</p>
+                  <p class="card-subtitle" id="embed-copy">Copy this script into your site where you want the chatbot available.</p>
                 </div>
                 <button id="copy-embed" class="secondary-button" type="button">Copy script</button>
               </div>
@@ -901,7 +901,7 @@
               <div>
                 <p class="overline">Step 4</p>
                 <h2>Test chat</h2>
-                <p>Use the built-in chat lab before you ship the widget. It mirrors the live assistant flow and shows source chips when a real page supports the answer.</p>
+                <p>Use the built-in chat lab before you ship the widget. It mirrors the live chatbot flow and shows source chips when a real page supports the answer.</p>
               </div>
             </div>
             <div class="chat-toolbar">
@@ -918,7 +918,7 @@
                 <input id="chat-input" type="text" placeholder="Ask a question..." />
                 <button id="chat-send" class="primary-button" type="button">Send</button>
               </div>
-              <div class="chat-footer">Powered by SiteCloser</div>
+              <div class="chat-footer">Powered by 5minbot</div>
             </div>
           </section>
         </section>
@@ -1118,8 +1118,8 @@
       const site = latestImportantSite();
       if (!site) {
         launchTitle.textContent = "Start by connecting a website";
-        launchCopy.textContent = "Once SiteCloser sees your pages, it can build the assistant, generate embed code, and let you pressure-test the chat before launch.";
-        nextStepCopy.textContent = "No sites yet. Your first goal is simple: connect one public site and let the assistant build itself.";
+      launchCopy.textContent = "Once 5minbot sees your pages, it can build the chatbot, generate embed code, and let you pressure-test the chat before launch.";
+      nextStepCopy.textContent = "No sites yet. Your first goal is simple: connect one public site and let the chatbot build itself.";
         if (!state.submitting) {
           setProgressState(null);
         }
@@ -1135,10 +1135,10 @@
       } else if (site.status === "error") {
         launchTitle.textContent = "One site needs attention";
         launchCopy.textContent = "A previous run failed. Use retry to process it again, or refresh UI structure if you only need better layout guidance.";
-        nextStepCopy.textContent = "Retry the failed site, then test the assistant once the status returns to ready.";
+      nextStepCopy.textContent = "Retry the failed site, then test the chatbot once the status returns to ready.";
       } else {
         launchTitle.textContent = "Training is underway";
-        launchCopy.textContent = "SiteCloser is processing the website now. Stay here while the status updates, then move straight to embed code and chat testing.";
+      launchCopy.textContent = "5minbot is processing the website now. Stay here while the status updates, then move straight to embed code and chat testing.";
         nextStepCopy.textContent = "Wait for the ready state, then select the site in the chat lab and validate real questions.";
       }
     }
@@ -1146,8 +1146,8 @@
     function renderOnboardingSteps() {
       const site = latestImportantSite();
       const steps = [
-        { title: "Add a website", body: "Connect a public URL to create the first assistant.", state: site ? "completed" : "active" },
-        { title: "Train the assistant", body: "Let SiteCloser crawl, chunk, and embed the site.", state: site && site.status === "ready" ? "completed" : site ? "active" : "pending" },
+      { title: "Add a website", body: "Connect a public URL to create the first chatbot.", state: site ? "completed" : "active" },
+      { title: "Train the chatbot", body: "Let 5minbot crawl, chunk, and embed the site.", state: site && site.status === "ready" ? "completed" : site ? "active" : "pending" },
         { title: "Copy the widget", body: "Generate a production-ready embed script.", state: embedBox.classList.contains("visible") ? "completed" : site && site.status === "ready" ? "active" : "pending" },
         { title: "Test before launch", body: "Use the chat lab to validate buyer questions.", state: testSiteSelect.value ? "active" : site && site.status === "ready" ? "pending" : "pending" }
       ];
@@ -1193,7 +1193,7 @@
         return message.length > 120 ? message.slice(0, 117) + "..." : message;
       }
       if (site.status === "ready") return "Ready for onboarding, testing, and launch.";
-      if (site.status === "embedding") return "Building embeddings and preparing the live assistant.";
+      if (site.status === "embedding") return "Building embeddings and preparing the live chatbot.";
       if (site.status === "crawling") return "Crawling pages and structuring site knowledge.";
       return "Waiting for the next launch step.";
     }
@@ -1314,7 +1314,7 @@
       state.pendingSiteUrl = submittedUrl;
       state.trainingStartedAt = Date.now();
       setSubmitting(true);
-      setFeedback("Training has started. SiteCloser is now processing your website.", "info");
+      setFeedback("Training has started. 5minbot is now processing your website.", "info");
       setProgressState({ status: "pending", page_count: 0, chunk_count: 0 }, "Starting crawl and reserving your processing slot.");
       try {
         const response = await fetch("/api/sites", {
