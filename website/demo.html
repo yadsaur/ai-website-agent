@@ -109,5 +109,56 @@
     <footer class="footer" data-footer></footer>
   </div>
   <script src="/website/js/main.js"></script>
+  <script>
+    (function () {
+      async function bootstrapDemoWidget() {
+        if (document.getElementById("aiwa-widget")) {
+          return;
+        }
+
+        const fallbackSiteId = "fc067e83-d493-43e5-a97d-022a65738ba1";
+        let siteId = fallbackSiteId;
+
+        try {
+          const response = await fetch("/api/sites");
+          if (response.ok) {
+            const payload = await response.json();
+            const sites = Array.isArray(payload.sites) ? payload.sites : [];
+            const readySite =
+              sites.find((site) => site && site.status === "ready" && String(site.url || "").includes("5minbot.com")) ||
+              sites.find((site) => site && site.status === "ready");
+            if (readySite && readySite.site_id) {
+              siteId = readySite.site_id;
+            }
+          }
+        } catch (error) {}
+
+        if (document.querySelector('script[data-5minbot-demo-inline="true"]')) {
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = window.location.origin + "/widget/agent.js";
+        script.setAttribute("data-site-id", siteId);
+        script.setAttribute("data-5minbot-demo-inline", "true");
+        script.onload = function () {
+          window.setTimeout(function () {
+            const toggle = document.getElementById("aiwa-toggle");
+            const panel = document.getElementById("aiwa-panel");
+            if (toggle && panel && !panel.classList.contains("aiwa-open")) {
+              toggle.click();
+            }
+          }, 320);
+        };
+        document.body.appendChild(script);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", bootstrapDemoWidget);
+      } else {
+        bootstrapDemoWidget();
+      }
+    })();
+  </script>
 </body>
 </html>
