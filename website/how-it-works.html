@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How 5minBot works - From URL to live chatbot</title>
-  <meta name="description" content="See how 5minBot trains on your website, tests answers, and turns into a production-ready widget with a guided launch flow.">
-  <meta property="og:title" content="How 5minBot works - From URL to live chatbot">
-  <meta property="og:description" content="See how 5minBot trains on your website, tests answers, and turns into a production-ready widget with a guided launch flow.">
+  <title>How 5minBot works | From website URL to live chatbot</title>
+  <meta name="description" content="See how 5minBot crawls your public website, prepares grounded answers, lets you test in the workspace, and launches with one script tag.">
+  <meta property="og:title" content="How 5minBot works | From website URL to live chatbot">
+  <meta property="og:description" content="A clean four-step flow from site URL to source-grounded AI chatbot.">
   <meta property="og:site_name" content="5minBot">
   <meta name="theme-color" content="#f7f8fc">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
@@ -22,36 +22,41 @@
     <main class="page">
       <section class="page-hero">
         <div class="container">
-          <div class="section-header" data-reveal>
+          <div class="section-header centered" data-reveal>
             <span class="eyebrow">How it works</span>
-            <h1>From website URL to live chatbot in <span class="gradient-text">about 5 minutes</span></h1>
-            <p class="lede">Paste your URL, let 5minBot train on the pages that matter, test the answers, and install one script tag when you are ready.</p>
+            <h1>From public website to live chatbot in a <span class="gradient-text">simple rollout flow</span></h1>
+            <p class="lede">5minBot is designed to keep the first setup easy: train on your site, test the experience, and launch only when it feels ready.</p>
           </div>
         </div>
       </section>
 
       <section class="section">
         <div class="container">
-          <div class="section-header" data-reveal>
-            <span class="eyebrow">The customer journey</span>
-            <h2>What launch looks like from your side</h2>
-          </div>
           <div class="step-line">
             <div class="step-grid">
               <article class="step-card glass-card" data-reveal>
                 <span class="step-number">1</span>
-                <h3>Add your website</h3>
-                <p>Paste a public URL and start the first run from a guided workspace instead of a bare admin screen.</p>
+                <h3>Paste your website URL</h3>
+                <p>Start with a public marketing or product site that already explains what you sell, how it works, and where users should go next.</p>
               </article>
               <article class="step-card glass-card" data-reveal>
                 <span class="step-number">2</span>
-                <h3>Watch training progress</h3>
-                <p>See clear status changes, counts, and next steps while 5minBot crawls, extracts, and prepares the chatbot.</p>
+                <h3>Let 5minBot train on the pages</h3>
+                <p>The app crawls the site, extracts useful content, and prepares the chatbot for grounded answers and UI-aware guidance.</p>
               </article>
               <article class="step-card glass-card" data-reveal>
                 <span class="step-number">3</span>
                 <h3>Test before launch</h3>
-                <p>Use the built-in chat lab to check real questions before you ever paste the widget on your site.</p>
+                <p>Use the built-in chat lab to ask pricing, onboarding, and where-to-click questions before the widget goes live.</p>
+              </article>
+            </div>
+          </div>
+          <div class="step-line" style="margin-top: 22px;">
+            <div class="step-grid" style="grid-template-columns: minmax(0, 1fr); max-width: 420px; margin: 0 auto;">
+              <article class="step-card glass-card" data-reveal>
+                <span class="step-number">4</span>
+                <h3>Copy the script tag and publish</h3>
+                <p>Install the embed code on your site and let the chatbot handle the first layer of buyer questions around the clock.</p>
               </article>
             </div>
           </div>
@@ -60,91 +65,57 @@
 
       <section class="section">
         <div class="container">
+          <div class="section-header" data-reveal>
+            <span class="eyebrow">Under the hood</span>
+            <h2>The product work that keeps the experience clear and trustworthy</h2>
+          </div>
           <div class="timeline">
             <article class="timeline-item glass-card" data-reveal>
               <div class="timeline-badge">1</div>
               <div>
-                <h3>Normalize the site and start background processing</h3>
-                <p>The workspace validates the URL, creates the site record, and starts a background task so the interface stays responsive while processing begins.</p>
+                <h3>Rendered-site crawl</h3>
+                <p>5minBot reads the real website surface, including JavaScript-rendered pages, so it can work from what visitors actually see.</p>
               </div>
             </article>
             <article class="timeline-item glass-card" data-reveal>
               <div class="timeline-badge">2</div>
               <div>
-                <h3>Crawl the rendered site</h3>
-                <p>Playwright loads the real website, follows internal links, and waits for JavaScript content so 5minBot sees the same surface your visitors see.</p>
+                <h3>Content and structure extraction</h3>
+                <p>Readable copy, page metadata, and UI elements like navigation, buttons, and search bars are captured as part of the site understanding layer.</p>
               </div>
             </article>
             <article class="timeline-item glass-card" data-reveal>
               <div class="timeline-badge">3</div>
               <div>
-                <h3>Extract text and UI structure</h3>
-                <p>Readable content is extracted from each page while a dedicated UI layer identifies navigation, search, buttons, logos, and other layout cues.</p>
+                <h3>Semantic chunking and retrieval</h3>
+                <p>Pages are turned into structured chunks so the chatbot can retrieve the right answer quickly instead of relying on generic summarization.</p>
               </div>
             </article>
             <article class="timeline-item glass-card" data-reveal>
               <div class="timeline-badge">4</div>
               <div>
-                <h3>Chunk, embed, and store site knowledge</h3>
-                <p>Pages are turned into semantic chunks with section breadcrumbs, then embedded so retrieval can surface the right answer quickly when chat starts.</p>
-              </div>
-            </article>
-            <article class="timeline-item glass-card" data-reveal>
-              <div class="timeline-badge">5</div>
-              <div>
-                <h3>Answer with retrieval and response strategy</h3>
-                <p>When a visitor asks something, 5minBot retrieves relevant chunks, recognizes the intent, and answers in a concise product-aware voice.</p>
-              </div>
-            </article>
-            <article class="timeline-item glass-card" data-reveal>
-              <div class="timeline-badge">6</div>
-              <div>
-                <h3>Launch the widget</h3>
-                <p>Once the site is ready, you copy one embed tag, place it on your site, and let the widget handle the first layer of buyer questions live.</p>
+                <h3>Intent-aware reply strategy</h3>
+                <p>Pricing, support, trust, security, and onboarding questions are treated differently so responses feel better aligned to what the visitor actually needs.</p>
               </div>
             </article>
           </div>
         </div>
       </section>
 
-      <section class="section">
+      <section class="section-tight">
         <div class="container">
-          <div class="section-header" data-reveal>
-            <span class="eyebrow">Under the hood</span>
-            <h2>The technical work that keeps answers accurate</h2>
-          </div>
-          <div class="technical-grid">
-            <article class="technical-card glass-card" data-reveal>
-              <h3>Crawling and extraction</h3>
-              <ul class="tech-list">
-                <li>Async browser crawl with Playwright.</li>
-                <li>Primary extraction through Trafilatura.</li>
-                <li>Fallback parsing for noisy pages.</li>
-              </ul>
+          <div class="detail-grid">
+            <article class="detail-card glass-card" data-reveal>
+              <h3>Fast setup</h3>
+              <p>Built for teams that want a working first version quickly, not a long AI ops project.</p>
             </article>
-            <article class="technical-card glass-card" data-reveal>
-              <h3>Retrieval quality</h3>
-              <ul class="tech-list">
-                <li>Semantic chunking with breadcrumb context.</li>
-                <li>Embeddings and reranking for stronger recall.</li>
-                <li>Dedicated UI layout chunks for where-to-click questions.</li>
-              </ul>
+            <article class="detail-card glass-card" data-reveal>
+              <h3>Controlled launch</h3>
+              <p>You can test the answers before the widget ever reaches production traffic.</p>
             </article>
-            <article class="technical-card glass-card" data-reveal>
-              <h3>Conversation layer</h3>
-              <ul class="tech-list">
-                <li>Streaming responses over SSE.</li>
-                <li>Starter prompts and follow-up suggestions.</li>
-                <li>Session memory for cleaner multi-turn context.</li>
-              </ul>
-            </article>
-            <article class="technical-card glass-card" data-reveal>
-              <h3>Launch workflow</h3>
-              <ul class="tech-list">
-                <li>Production-ready embed tag generation.</li>
-                <li>Built-in test chat before launch.</li>
-                <li>Clear retry and reprocess flows when needed.</li>
-              </ul>
+            <article class="detail-card glass-card" data-reveal>
+              <h3>Grounded by default</h3>
+              <p>The product is designed to answer from processed public pages and fall back when support is missing.</p>
             </article>
           </div>
         </div>
@@ -154,12 +125,12 @@
         <div class="container">
           <div class="cta-panel glass-card" data-reveal>
             <div>
-              <span class="eyebrow">Ready to try the flow</span>
-              <h2 style="margin-top: 18px;">See the demo, then train the bot on your own site</h2>
-              <p class="lede" style="margin-top: 12px;">The fastest way to understand 5minBot is to test the live demo and then add one website of your own.</p>
+              <span class="eyebrow">See it in action</span>
+              <h2 style="margin-top: 18px;">Open the demo, then run the same flow on your own site</h2>
+              <p class="lede" style="margin-top: 12px;">The easiest way to understand 5minBot is to test the live product first and then process one site of your own.</p>
             </div>
             <div class="button-row">
-              <a class="button button-primary" href="/demo">Open the demo</a>
+              <a class="button button-primary" href="/demo">Try the demo</a>
               <a class="button button-secondary" href="/dashboard?onboarding=1">Add your site</a>
             </div>
           </div>

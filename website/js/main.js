@@ -1,7 +1,6 @@
 (function () {
   const siteConfig = {
     brand: "5minBot",
-    tagline: "Website chatbot in 5 minutes",
     dashboardUrl: "/dashboard?onboarding=1",
     workspaceUrl: "/dashboard",
     fallbackDemoSiteId: "d94c64af-65d2-410f-a6d4-c9f05f9919c0",
@@ -15,6 +14,7 @@
     { href: "/pricing", label: "Pricing", page: "pricing" },
     { href: "/how-it-works", label: "How it works", page: "how-it-works" },
     { href: "/demo", label: "Demo", page: "demo" },
+    { href: "/blog", label: "Insights", page: "blog" },
   ];
 
   const footerColumns = [
@@ -23,22 +23,22 @@
       links: [
         { href: "/features", label: "Features" },
         { href: "/pricing", label: "Pricing" },
-        { href: "/how-it-works", label: "How it works" },
-        { href: "/demo", label: "Interactive demo" },
+        { href: "/demo", label: "Demo" },
+        { href: "/dashboard", label: "Workspace" },
       ],
     },
     {
       title: "Resources",
       links: [
-        { href: "/blog", label: "Blog" },
+        { href: "/how-it-works", label: "How it works" },
+        { href: "/blog", label: "Insights" },
         { href: "/support", label: "Support" },
-        { href: "/security", label: "Security" },
-        { href: "/dashboard", label: "Dashboard" },
       ],
     },
     {
-      title: "Legal",
+      title: "Trust",
       links: [
+        { href: "/security", label: "Security" },
         { href: "/privacy", label: "Privacy" },
         { href: "/terms", label: "Terms" },
       ],
@@ -46,9 +46,9 @@
     {
       title: "Get started",
       links: [
-        { href: "/dashboard?onboarding=1", label: "Start onboarding" },
-        { href: "/demo", label: "See live demo" },
-        { href: "/support", label: "Talk to support" },
+        { href: "/dashboard?onboarding=1", label: "Add your site" },
+        { href: "/demo", label: "Try the live demo" },
+        { href: "/pricing", label: "See pricing" },
       ],
     },
   ];
@@ -56,7 +56,6 @@
   const pageName = document.body.dataset.page || "";
   const year = new Date().getFullYear();
   let demoConfigPromise = null;
-  let demoWidgetReadyPromise = null;
 
   function buildNav() {
     return `
@@ -68,28 +67,20 @@
           </a>
           <nav class="nav-links" aria-label="Primary navigation">
             ${navLinks
-              .map(
-                (link) =>
-                  `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`
-              )
+              .map((link) => `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`)
               .join("")}
           </nav>
           <div class="nav-cta">
-            <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Dashboard</a>
-            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Add your site &rarr;</a>
+            <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Workspace</a>
+            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Add your site</a>
             <button class="nav-mobile-toggle" type="button" aria-label="Open menu">&#9776;</button>
           </div>
         </div>
         <div class="nav-panel" aria-label="Mobile navigation">
-          ${navLinks
-            .map(
-              (link) =>
-                `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`
-            )
-            .join("")}
-          <a href="/blog">Blog</a>
-          <a href="${siteConfig.workspaceUrl}" class="button button-ghost">Dashboard</a>
-          <a href="${siteConfig.dashboardUrl}" class="button button-primary">Add your site &rarr;</a>
+          ${navLinks.map((link) => `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`).join("")}
+          <a href="/support">Support</a>
+          <a href="${siteConfig.workspaceUrl}" class="button button-ghost">Workspace</a>
+          <a href="${siteConfig.dashboardUrl}" class="button button-primary">Add your site</a>
         </div>
       </div>
     `;
@@ -103,10 +94,10 @@
             <span class="brand-mark"></span>
             <span>${siteConfig.brand}</span>
           </a>
-          <p>${siteConfig.brand} helps founders and website owners launch a chatbot trained on their own site in about five minutes, with one script tag and minimal setup.</p>
+          <p>Deploy a chatbot trained on your public website in about five minutes. It answers buyer questions, guides visitors to the next click, and helps teams launch a cleaner conversion experience without a long setup project.</p>
           <div class="footer-actions">
-            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Add your site &rarr;</a>
-            <a class="button button-ghost" href="/support">Get help</a>
+            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Add your site</a>
+            <a class="button button-ghost" href="/demo">Try the demo</a>
           </div>
         </div>
         ${footerColumns
@@ -123,7 +114,7 @@
           .join("")}
       </div>
       <div class="container footer-bottom">
-        <p>&copy; ${year} ${siteConfig.brand}. Trained on your website. Live in minutes.</p>
+        <p>&copy; ${year} ${siteConfig.brand}. Public-site chatbot deployment in minutes.</p>
       </div>
     `;
   }
@@ -134,33 +125,21 @@
 
     if (navHost) {
       navHost.innerHTML = buildNav();
-      const nav = navHost;
       const panel = navHost.querySelector(".nav-panel");
       const toggle = navHost.querySelector(".nav-mobile-toggle");
 
       if (toggle && panel) {
-        toggle.addEventListener("click", () => {
+        toggle.addEventListener("click", function () {
           panel.classList.toggle("open");
         });
       }
 
-      const handleScroll = () => {
-        nav.classList.toggle("scrolled", window.scrollY > 8);
-      };
-      let navTicking = false;
-      const onScroll = () => {
-        if (navTicking) {
-          return;
-        }
-        navTicking = true;
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          navTicking = false;
-        });
+      const setScrolled = () => {
+        navHost.classList.toggle("scrolled", window.scrollY > 8);
       };
 
-      handleScroll();
-      window.addEventListener("scroll", onScroll, { passive: true });
+      setScrolled();
+      window.addEventListener("scroll", setScrolled, { passive: true });
     }
 
     if (footerHost) {
@@ -169,11 +148,7 @@
   }
 
   function setupRevealAnimations() {
-    const nodes = document.querySelectorAll("[data-reveal]");
-    if (!nodes.length) {
-      return;
-    }
-    nodes.forEach((node) => {
+    document.querySelectorAll("[data-reveal]").forEach((node) => {
       node.classList.add("revealed");
       node.style.transitionDelay = "0ms";
     });
@@ -184,7 +159,7 @@
       return demoConfigPromise;
     }
 
-    demoConfigPromise = (async () => {
+    demoConfigPromise = (async function () {
       const fallback = {
         appUrl: siteConfig.fallbackAppUrl,
         siteId: siteConfig.fallbackDemoSiteId,
@@ -195,7 +170,6 @@
         if (!response.ok) {
           return fallback;
         }
-
         const payload = await response.json();
         const sites = Array.isArray(payload) ? payload : Array.isArray(payload.sites) ? payload.sites : [];
         const readySites = sites.filter((site) => site && site.status === "ready" && site.site_id);
@@ -204,15 +178,12 @@
         }
 
         const currentHost = window.location.hostname.toLowerCase();
-        const preferred = readySites.find((site) => {
-          const url = String(site.url || "").toLowerCase();
-          const name = String(site.name || "").toLowerCase();
-          return (
-            url.includes("ai-website-agent-aikinley.onrender.com") ||
-            url.includes(currentHost) ||
-            name.includes("sitecloser") || name.includes("5minbot")
-          );
-        }) || readySites[0];
+        const preferred =
+          readySites.find((site) => {
+            const url = String(site.url || "").toLowerCase();
+            const name = String(site.name || "").toLowerCase();
+            return url.includes(currentHost) || url.includes("5minbot.com") || name.includes("5minbot");
+          }) || readySites[0];
 
         return {
           appUrl: window.location.origin,
@@ -233,7 +204,6 @@
     }
 
     const cards = document.querySelectorAll("[data-plan]");
-
     const update = (mode) => {
       toggle.querySelectorAll("button").forEach((button) => {
         button.classList.toggle("active", button.dataset.billing === mode);
@@ -250,7 +220,7 @@
       });
     };
 
-    toggle.addEventListener("click", (event) => {
+    toggle.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-billing]");
       if (!button) {
         return;
@@ -261,38 +231,8 @@
     update("monthly");
   }
 
-  async function loadDemoWidget() {
-    if (pageName !== "demo") {
-      return;
-    }
-
-    const demoConfig = await resolveDemoConfig();
-    if (document.querySelector('script[data-sitecloser-demo-widget="true"]')) {
-      return;
-    }
-
-    demoWidgetReadyPromise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = `${demoConfig.appUrl}/widget/agent.js`;
-      script.setAttribute("data-site-id", demoConfig.siteId);
-      script.setAttribute("data-sitecloser-demo-widget", "true");
-      script.onload = () => {
-        window.setTimeout(() => {
-          const toggle = document.getElementById("aiwa-toggle");
-          const panel = document.getElementById("aiwa-panel");
-          if (toggle && panel && !panel.classList.contains("aiwa-open")) {
-            toggle.click();
-          }
-          resolve();
-        }, 240);
-      };
-      script.onerror = reject;
-      document.body.appendChild(script);
-    }).catch(() => {});
-  }
-
-  async function loadHeroPreview() {
-    const mount = document.querySelector("[data-hero-preview]");
+  async function mountPreview(targetSelector, mode) {
+    const mount = document.querySelector(targetSelector);
     if (!mount) {
       return;
     }
@@ -301,10 +241,10 @@
     const iframe = document.createElement("iframe");
     iframe.className = "hero-preview-frame";
     iframe.loading = "lazy";
-    iframe.title = "Interactive 5minBot preview";
+    iframe.title = mode === "demo" ? "Interactive 5minBot demo" : "Interactive 5minBot preview";
     iframe.setAttribute("allow", "clipboard-read; clipboard-write");
     iframe.src =
-      `${siteConfig.heroPreviewPath}?mode=hero&site_id=${encodeURIComponent(demoConfig.siteId)}` +
+      `${siteConfig.heroPreviewPath}?mode=${encodeURIComponent(mode)}&site_id=${encodeURIComponent(demoConfig.siteId)}` +
       `&app_url=${encodeURIComponent(demoConfig.appUrl)}`;
     mount.innerHTML = "";
     mount.appendChild(iframe);
@@ -315,73 +255,34 @@
       document.querySelector("[data-demo-widget] iframe") ||
       document.querySelector("[data-hero-preview] iframe");
 
-    if (iframe) {
-      try {
-        const targetOrigin = new URL(iframe.src, window.location.href).origin;
-        iframe.contentWindow.postMessage(
-          { type: "sitecloser:ask", question },
-          targetOrigin
-        );
-        return true;
-      } catch (error) {
-        return false;
-      }
+    if (!iframe || !iframe.contentWindow) {
+      return false;
     }
 
-    const tryRealWidget = () => {
-      const toggle = document.querySelector("#aiwa-toggle");
-      const panel = document.querySelector("#aiwa-panel");
-      const input = document.querySelector("#aiwa-input");
-      const send = document.querySelector("#aiwa-send");
-
-      if (!toggle || !input || !send) {
-        return false;
-      }
-
-      if (panel && !panel.classList.contains("aiwa-open")) {
-        toggle.click();
-      }
-
-      window.setTimeout(() => {
-        input.value = question;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        send.click();
-      }, 180);
-
+    try {
+      const targetOrigin = new URL(iframe.src, window.location.href).origin;
+      iframe.contentWindow.postMessage({ type: "sitecloser:ask", question }, targetOrigin);
       return true;
-    };
-
-    if (tryRealWidget()) {
-      return true;
+    } catch (error) {
+      return false;
     }
-
-    if (demoWidgetReadyPromise) {
-      demoWidgetReadyPromise.then(() => {
-        tryRealWidget();
-      });
-      return true;
-    }
-
-    return false;
   }
 
   function wirePromptChips() {
     document.querySelectorAll("[data-demo-ask]").forEach((chip) => {
-      chip.addEventListener("click", () => {
+      chip.addEventListener("click", function () {
         const question = chip.dataset.demoAsk || "";
-        if (sendPromptToEmbeddedWidget(question)) {
-          return;
-        }
+        sendPromptToEmbeddedWidget(question);
       });
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", function () {
     mountSharedChrome();
     setupRevealAnimations();
     setupPricingToggle();
-    loadDemoWidget();
-    loadHeroPreview();
+    mountPreview("[data-hero-preview]", "hero");
+    mountPreview("[data-demo-widget]", "demo");
     wirePromptChips();
     document.body.classList.add("page-ready");
   });

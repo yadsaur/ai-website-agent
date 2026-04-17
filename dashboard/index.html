@@ -1269,33 +1269,33 @@
       <div class="workspace-container">
         <section class="workspace-hero">
           <div>
-            <span class="eyebrow">For founders and website owners</span>
-            <h1>Add a chatbot trained on your website in 5 minutes</h1>
-            <p>Paste your URL, let 5minBot learn your pages, then copy one script tag to put the chatbot live on your site.</p>
+            <span class="eyebrow">Workspace</span>
+            <h1>Launch a website chatbot without the messy setup process</h1>
+            <p>Paste one public URL, let 5minBot train on the pages that matter, test the answers, and copy the live embed code when the site is ready.</p>
             <div class="step-pills">
-              <span class="step-pill">1. Add website</span>
-              <span class="step-pill">2. Train chatbot</span>
-              <span class="step-pill">3. Copy code and test</span>
+              <span class="step-pill">Add website</span>
+              <span class="step-pill">Train and review</span>
+              <span class="step-pill">Test and publish</span>
             </div>
           </div>
           <div class="hero-summary">
             <div class="summary-grid">
               <div class="summary-tile">
                 <strong id="metric-sites">0</strong>
-                <span>Sites</span>
+                <span>Sites in workspace</span>
               </div>
               <div class="summary-tile">
                 <strong id="metric-ready">0</strong>
-                <span>Ready</span>
+                <span>Ready to launch</span>
               </div>
               <div class="summary-tile">
                 <strong id="metric-active">0</strong>
-                <span>Training</span>
+                <span>Training now</span>
               </div>
             </div>
             <div class="launch-card">
-              <h3 id="launch-title">Start with your main product website</h3>
-              <p id="launch-copy">The best first launch uses pages that already explain your product, pricing, and primary call to action.</p>
+              <h3 id="launch-title">Start with your highest-intent website</h3>
+              <p id="launch-copy">The cleanest first rollout uses the website that already explains your product, pricing, and call to action clearly.</p>
             </div>
           </div>
         </section>
@@ -1307,44 +1307,38 @@
             <div class="card-header">
               <div>
                 <p class="overline">Step 1</p>
-                <h2>Add website</h2>
-                <p>Paste the public URL you want the chatbot to learn from. 5minBot will read the pages and prepare the live widget.</p>
+                <h2>Add your website</h2>
+                <p>Use one public URL. 5minBot will crawl the site, prepare grounded answers, and get it ready for testing.</p>
               </div>
             </div>
+
             <form id="site-form" class="setup-form">
-              <input id="site-url" type="url" placeholder="https://example.com" required />
+              <input id="site-url" type="url" placeholder="https://yourwebsite.com" required />
               <button id="site-submit" class="primary-button" type="submit">Add your site</button>
             </form>
-            <div class="status-line"><span class="status-dot"></span><span id="status-line">Ready when you are. Add a site to begin onboarding.</span></div>
+
+            <div class="status-line"><span class="status-dot"></span><span id="status-line">Ready when you are. Add a site to begin training.</span></div>
             <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
             <div id="progress-meta" class="progress-meta"><strong>Pages crawled:</strong> 0 <span>&bull;</span> <strong>Chunks created:</strong> 0 <span>&bull;</span> <strong>ETA:</strong> waiting to start</div>
+
             <div class="workspace-state-grid">
               <div class="state-card">
-                <h3>What happens next</h3>
-                <p>Training runs in the background. When the site is ready, copy the script and test the bot before you publish it.</p>
+                <h3>Current rollout path</h3>
+                <p>Keep the first launch simple: process the site, inspect the script, then test the same prompts real buyers ask.</p>
                 <div class="state-list" id="onboarding-steps"></div>
               </div>
               <div class="state-card">
                 <h3>Best next step</h3>
-                <p id="next-step-copy">Add one public site first, then use the chat lab to test the questions real visitors ask.</p>
-                <div class="state-list">
-                  <div class="state-step">
-                    <span class="state-step-badge">A</span>
-                    <div><h4>Train on the site</h4><p>Start with the URL above.</p></div>
-                  </div>
-                  <div class="state-step">
-                    <span class="state-step-badge">B</span>
-                    <div><h4>Validate the experience</h4><p>Ask pricing, setup, and CTA questions before launch.</p></div>
-                  </div>
-                </div>
+                <p id="next-step-copy">Add one public site first, then use the chat lab to test pricing, onboarding, and CTA questions.</p>
               </div>
             </div>
+
             <div id="embed-box" class="embed-box" aria-live="polite">
               <div class="embed-meta">
                 <div>
-                  <p class="overline">Step 3</p>
+                  <p class="overline">Step 2</p>
                   <h3 style="margin: 0 0 6px;">Embed code</h3>
-                  <p class="card-subtitle" id="embed-copy">Copy this script tag into your site where you want the chatbot available.</p>
+                  <p class="card-subtitle" id="embed-copy">Copy this script tag into the page where you want the chatbot available.</p>
                 </div>
                 <button id="copy-embed" class="secondary-button" type="button">Copy script</button>
               </div>
@@ -1356,15 +1350,15 @@
           <aside class="workspace-card">
             <div class="card-header">
               <div>
-                <p class="overline">Best results</p>
+                <p class="overline">Launch checklist</p>
                 <h2>What to use first</h2>
-                <p>Start simple. The best first launch uses pages that already explain the product clearly.</p>
+                <p>Start with a website that already answers the questions buyers ask before they click sign up or contact sales.</p>
               </div>
             </div>
             <div class="tip-stack">
               <div class="tip-card">
-                <h3>Best first website</h3>
-                <p>Use your main marketing or product site, especially if it already has pricing and signup pages live.</p>
+                <h3>Best first site</h3>
+                <p>Your main marketing or product website is usually the right first rollout because it already covers value, pricing, and setup.</p>
               </div>
               <div class="tip-card">
                 <h3>Best questions to test</h3>
@@ -1376,8 +1370,8 @@
                 </ul>
               </div>
               <div class="tip-card">
-                <h3>Need help?</h3>
-                <p class="support-copy">If you want rollout help or need support, use the support page and we will point you in the right direction.</p>
+                <h3>Need rollout help?</h3>
+                <p class="support-copy">Use the support page if you want help choosing the first website or pressure-testing the chatbot before launch.</p>
                 <div class="button-row">
                   <a class="button button-secondary" href="/support">Open support</a>
                 </div>
@@ -1390,25 +1384,9 @@
           <section class="workspace-card">
             <div class="card-header">
               <div>
-                <p class="overline">Your sites</p>
-                <h2>Pick a site and launch faster</h2>
-                <p>Copy code or test a ready bot from here.</p>
-              </div>
-            </div>
-            <div id="site-summary-row" class="site-summary-row"></div>
-            <div id="empty-sites-state" class="empty-state">
-              <h3>No sites yet</h3>
-              <p>Add your first website above and it will appear here as soon as training starts.</p>
-            </div>
-            <div id="site-list" class="site-list"></div>
-          </section>
-
-          <section class="workspace-card">
-            <div class="card-header">
-              <div>
-                <p class="overline">Step 4</p>
-                <h2>Test chat</h2>
-                <p>Test the same chatbot experience your visitors will see before you put it live on your site.</p>
+                <p class="overline">Step 3</p>
+                <h2>Test the chatbot</h2>
+                <p>Run the same conversation your visitors will see before you put the widget live on your site.</p>
               </div>
             </div>
             <div class="chat-toolbar">
@@ -1417,7 +1395,7 @@
               </select>
               <button id="open-selected-embed" class="ghost-button" type="button">Show code</button>
             </div>
-            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Good first prompts: pricing, setup, and where-to-click questions.</div>
+            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Strong first prompts: pricing, setup, feature fit, and where-to-click questions.</div>
             <div id="chat-shell" class="chat-shell">
               <div class="chat-header" id="chat-title">Chat with your site</div>
               <div class="chat-messages" id="chat-messages"></div>
@@ -1427,6 +1405,22 @@
               </div>
               <div class="chat-footer">Powered by 5minBot</div>
             </div>
+          </section>
+
+          <section class="workspace-card">
+            <div class="card-header">
+              <div>
+                <p class="overline">Your websites</p>
+                <h2>Processed sites</h2>
+                <p>Pick a ready site to test, copy code, retry a failed run, or refresh UI guidance.</p>
+              </div>
+            </div>
+            <div id="site-summary-row" class="site-summary-row"></div>
+            <div id="empty-sites-state" class="empty-state">
+              <h3>No sites yet</h3>
+              <p>Add your first website above and it will appear here as soon as training begins.</p>
+            </div>
+            <div id="site-list" class="site-list"></div>
           </section>
         </section>
       </div>

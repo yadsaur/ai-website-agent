@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5minBot demo - Try the live AI sales chatbot</title>
-  <meta name="description" content="Experience the live 5minBot widget trained on the product website and try real pricing, product, and onboarding questions.">
-  <meta property="og:title" content="5minBot demo - Try the live AI sales chatbot">
-  <meta property="og:description" content="Experience the live 5minBot widget trained on the product website and try real pricing, product, and onboarding questions.">
+  <title>5minBot demo | Try the live website chatbot</title>
+  <meta name="description" content="Try the live 5minBot demo. Ask real pricing, setup, and navigation questions, and see what grounded website chat feels like before you launch.">
+  <meta property="og:title" content="5minBot demo | Try the live website chatbot">
+  <meta property="og:description" content="A live, interactive demo of 5minBot trained on the product website.">
   <meta property="og:site_name" content="5minBot">
   <meta name="theme-color" content="#f7f8fc">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
@@ -22,68 +22,66 @@
     <main class="page">
       <section class="page-hero">
         <div class="container">
-          <div class="section-header" data-reveal>
+          <div class="section-header centered" data-reveal>
             <span class="eyebrow">Interactive demo</span>
-            <h1>Ask the live chatbot what a real buyer would ask</h1>
-            <p class="lede">This demo uses the same 5minBot experience you would add to your own website. Ask about pricing, setup, or where to click next.</p>
+            <h1>Try the chatbot the way a real <span class="gradient-text">website visitor</span> would</h1>
+            <p class="lede">This page uses the same 5minBot experience you can put on your own site. Ask about pricing, setup, and where to click next, then decide whether it feels ready for your website.</p>
           </div>
         </div>
       </section>
 
       <section class="section">
         <div class="container demo-grid">
-          <div class="demo-card glass-card" data-reveal>
+          <article class="demo-card glass-card" data-reveal>
             <h3>What to try first</h3>
-            <p>Use the real widget on this page, then try one of these prompts to feel how the product handles real buyer intent.</p>
+            <p>Use one of these prompts to see how the chatbot handles high-intent product questions. These are the same kinds of questions that shape whether a visitor keeps moving or leaves.</p>
             <div class="demo-prompts">
-              <button class="prompt-chip" type="button" data-demo-ask="How much does it cost?">&rarr; How much does it cost?</button>
-              <button class="prompt-chip" type="button" data-demo-ask="What does this product do?">&rarr; What does this product do?</button>
-              <button class="prompt-chip" type="button" data-demo-ask="How do I get started?">&rarr; How do I get started?</button>
-              <button class="prompt-chip" type="button" data-demo-ask="Where do I click to start?">&rarr; Where do I click to start?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="How much does it cost?">How much does it cost?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="What does this product do?">What does this product do?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="How do I get started?">How do I get started?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="Where do I click to start?">Where do I click to start?</button>
             </div>
-            <div style="margin-top: 30px;">
-              <h3>What to look for</h3>
-              <ul class="feature-list">
-                <li>Streaming responses that feel fast.</li>
-                <li>Source chips when a real supporting page exists.</li>
-                <li>Follow-up suggestions after grounded answers.</li>
-                <li>UI-aware guidance for where-to-click questions.</li>
-              </ul>
-            </div>
-          </div>
 
-          <div class="demo-card glass-card demo-widget-shell" data-reveal>
-            <h3>Real widget, same as production</h3>
-            <p>The actual embeddable widget loads on this page and opens automatically. Use the prompt chips on the left or type directly into the widget to test the production experience.</p>
-            <div class="demo-widget-stage">
-              <div class="demo-widget-stage-copy">
-                <strong>Live widget active</strong>
-                <p>Look to the bottom-right corner. This is the same floating widget that appears on customer websites.</p>
-              </div>
-              <div class="mini-chip-row">
-                <span class="mini-chip">Streaming replies</span>
-                <span class="mini-chip">Follow-up prompts</span>
-                <span class="mini-chip">Source chips</span>
+            <div class="detail-grid" style="grid-template-columns:1fr; gap:14px; margin-top: 10px;">
+              <article class="detail-card glass-card" style="padding:20px;">
+                <h3>What good looks like</h3>
+                <p>Look for short, grounded answers, source chips when a real page supports the reply, and cleaner follow-up prompts that keep the conversation moving.</p>
+              </article>
+              <article class="detail-card glass-card" style="padding:20px;">
+                <h3>What to test next</h3>
+                <p>Try pricing, onboarding, trust, support, and where-to-click questions. That gives you the best signal on whether the product will feel useful on your site.</p>
+              </article>
+            </div>
+          </article>
+
+          <article class="demo-card glass-card demo-widget-shell" data-reveal>
+            <h3>Live product preview</h3>
+            <p>This is a contained version of the real chat experience, designed to let you test the product without leaving the page.</p>
+            <div class="demo-widget-stage" data-demo-widget>
+              <div class="preview-loader">
+                <div class="preview-loader-orb"></div>
+                <strong>Loading live demo</strong>
+                <p>Preparing the full 5minBot widget preview.</p>
               </div>
             </div>
-          </div>
+          </article>
         </div>
       </section>
 
-      <section class="section">
+      <section class="section-tight">
         <div class="container">
           <div class="detail-grid">
             <article class="detail-card glass-card" data-reveal>
-              <h3>Understand the product fast</h3>
-              <p>The demo is designed to show how quickly a visitor can learn what the product does and whether it fits them.</p>
+              <h3>See pricing handling</h3>
+              <p>Test whether the chatbot answers high-intent buying questions clearly and without unnecessary filler.</p>
             </article>
             <article class="detail-card glass-card" data-reveal>
-              <h3>Pressure-test the quality</h3>
-              <p>Ask about pricing, support, or where to click and see whether the chatbot stays grounded and helpful.</p>
+              <h3>Pressure-test trust</h3>
+              <p>Ask where to click, how setup works, or what happens next to see how grounded the replies feel.</p>
             </article>
             <article class="detail-card glass-card" data-reveal>
               <h3>Move straight into onboarding</h3>
-              <p>Once the experience feels right, jump into the workspace and process your own site without losing momentum.</p>
+              <p>Once the quality feels right, add your own site and run the same test flow in the workspace.</p>
             </article>
           </div>
         </div>
@@ -94,11 +92,11 @@
           <div class="cta-panel glass-card" data-reveal>
             <div>
               <span class="eyebrow">Next step</span>
-              <h2 style="margin-top: 18px;">Ready to deploy the chatbot on your own website?</h2>
-              <p class="lede" style="margin-top: 12px;">The workspace will guide you through your first site, show training progress, and give you production-ready embed code.</p>
+              <h2 style="margin-top: 18px;">Ready to put the same chatbot on your own website?</h2>
+              <p class="lede" style="margin-top: 12px;">The workspace lets you process one site, inspect the answers, and launch only when the experience feels production-ready.</p>
             </div>
             <div class="button-row">
-            <a class="button button-primary" href="/dashboard?onboarding=1">Add your site</a>
+              <a class="button button-primary" href="/dashboard?onboarding=1">Add your site</a>
               <a class="button button-secondary" href="/pricing">See pricing</a>
             </div>
           </div>
