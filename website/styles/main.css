@@ -120,15 +120,15 @@ button {
 }
 
 .section {
-  padding: 84px 0;
+  padding: 72px 0;
 }
 
 .section-tight {
-  padding: 56px 0;
+  padding: 44px 0;
 }
 
 .page-hero {
-  padding: 118px 0 36px;
+  padding: 106px 0 28px;
 }
 
 .section-header {
@@ -392,7 +392,7 @@ li {
 }
 
 .hero {
-  padding: 120px 0 74px;
+  padding: 110px 0 62px;
 }
 
 .hero-grid {
@@ -739,6 +739,10 @@ li {
   color: #ffffff;
   font-weight: 800;
   box-shadow: 0 16px 32px rgba(37, 99, 235, 0.18);
+}
+
+.use-case-grid .detail-card {
+  gap: 10px;
 }
 
 .proof-tags,
@@ -1148,6 +1152,14 @@ li {
 .demo-card {
   display: grid;
   gap: 18px;
+}
+
+body[data-page="demo"] {
+  padding-bottom: 120px;
+}
+
+body[data-page="demo"] .section:last-of-type {
+  padding-bottom: 90px;
 }
 
 .demo-prompts {

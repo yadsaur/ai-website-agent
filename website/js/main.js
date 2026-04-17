@@ -56,6 +56,8 @@
   const pageName = document.body.dataset.page || "";
   const year = new Date().getFullYear();
   let demoConfigPromise = null;
+  let demoWidgetReadyPromise = null;
+  let demoWidgetBootstrapped = false;
 
   function buildNav() {
     return `
@@ -250,10 +252,76 @@
     mount.appendChild(iframe);
   }
 
+  async function loadDemoFloatingWidget() {
+    if (pageName !== "demo") {
+      return;
+    }
+
+    const demoConfig = await resolveDemoConfig();
+    if (demoWidgetBootstrapped || document.querySelector('script[data-5minbot-demo-widget="true"]')) {
+      return;
+    }
+    demoWidgetBootstrapped = true;
+
+    demoWidgetReadyPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = `${demoConfig.appUrl}/widget/agent.js`;
+      script.setAttribute("data-site-id", demoConfig.siteId);
+      script.setAttribute("data-5minbot-demo-widget", "true");
+      script.onload = function () {
+        window.setTimeout(function () {
+          const toggle = document.getElementById("aiwa-toggle");
+          const panel = document.getElementById("aiwa-panel");
+          if (toggle && panel && !panel.classList.contains("aiwa-open")) {
+            toggle.click();
+          }
+          resolve();
+        }, 260);
+      };
+      script.onerror = function (error) {
+        demoWidgetBootstrapped = false;
+        reject(error);
+      };
+      document.body.appendChild(script);
+    }).catch(function () {});
+  }
+
   function sendPromptToEmbeddedWidget(question) {
-    const iframe =
-      document.querySelector("[data-demo-widget] iframe") ||
-      document.querySelector("[data-hero-preview] iframe");
+    const tryRealWidget = () => {
+      const toggle = document.querySelector("#aiwa-toggle");
+      const panel = document.querySelector("#aiwa-panel");
+      const input = document.querySelector("#aiwa-input");
+      const send = document.querySelector("#aiwa-send");
+
+      if (!toggle || !input || !send) {
+        return false;
+      }
+
+      if (panel && !panel.classList.contains("aiwa-open")) {
+        toggle.click();
+      }
+
+      window.setTimeout(function () {
+        input.value = question;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        send.click();
+      }, 180);
+
+      return true;
+    };
+
+    if (tryRealWidget()) {
+      return true;
+    }
+
+    if (demoWidgetReadyPromise) {
+      demoWidgetReadyPromise.then(function () {
+        tryRealWidget();
+      });
+      return true;
+    }
+
+    const iframe = document.querySelector("[data-hero-preview] iframe");
 
     if (!iframe || !iframe.contentWindow) {
       return false;
@@ -282,7 +350,7 @@
     setupRevealAnimations();
     setupPricingToggle();
     mountPreview("[data-hero-preview]", "hero");
-    mountPreview("[data-demo-widget]", "demo");
+    loadDemoFloatingWidget();
     wirePromptChips();
     document.body.classList.add("page-ready");
   });
