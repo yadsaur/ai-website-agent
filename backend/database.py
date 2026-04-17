@@ -39,7 +39,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, futu
 
 def init_db() -> None:
     from pathlib import Path
-    from sqlalchemy import text
+    from sqlalchemy import inspect, text
 
     Path(DATA_DIR).mkdir(parents=True, exist_ok=True)
     Path(VECTORS_DIR).mkdir(parents=True, exist_ok=True)
@@ -47,6 +47,8 @@ def init_db() -> None:
 
     Base.metadata.create_all(bind=engine)
     with engine.begin() as connection:
+        inspector = inspect(connection)
+
         if engine.dialect.name == "postgresql":
             connection.execute(
                 text(
@@ -87,6 +89,38 @@ def init_db() -> None:
                     """
                 )
             )
+
+        site_columns = {column["name"] for column in inspector.get_columns("sites")}
+        if "user_id" not in site_columns:
+            connection.execute(text("ALTER TABLE sites ADD COLUMN user_id TEXT"))
+        if "guest_session_id" not in site_columns:
+            connection.execute(text("ALTER TABLE sites ADD COLUMN guest_session_id TEXT"))
+
+        page_columns = {column["name"] for column in inspector.get_columns("pages")}
+        if "html_content" not in page_columns:
+            connection.execute(text("ALTER TABLE pages ADD COLUMN html_content TEXT"))
+
+        user_columns = {column["name"] for column in inspector.get_columns("users")}
+        if "subscription_id" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN subscription_id TEXT"))
+        if "current_period_end" not in user_columns:
+            if engine.dialect.name == "postgresql":
+                connection.execute(text("ALTER TABLE users ADD COLUMN current_period_end TIMESTAMPTZ"))
+            else:
+                connection.execute(text("ALTER TABLE users ADD COLUMN current_period_end TIMESTAMP"))
+
+        if engine.dialect.name == "postgresql":
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_user_id ON sites (user_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_guest_session_id ON sites (guest_session_id)"))
+            connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
+            connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_subscription_id ON users (subscription_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_billing_webhook_events_processed_at ON billing_webhook_events (processed_at)"))
+        else:
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_user_id ON sites (user_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_guest_session_id ON sites (guest_session_id)"))
+            connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
+            connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_subscription_id ON users (subscription_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_billing_webhook_events_processed_at ON billing_webhook_events (processed_at)"))
 
 
 def get_db():

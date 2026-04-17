@@ -11,6 +11,7 @@
 
   var baseUrl = new URL(currentScript.src, window.location.href).origin;
   var FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
+  var TRIAL_ENDED_MESSAGE = "This chatbot is inactive. Please upgrade.";
   var state = {
     open: false,
     siteName: "this site",
@@ -258,7 +259,7 @@
 
   async function loadSiteName() {
     try {
-      var response = await fetch(baseUrl + "/api/sites/" + encodeURIComponent(siteId) + "/status");
+      var response = await fetch(baseUrl + "/api/public/sites/" + encodeURIComponent(siteId) + "/status");
       if (!response.ok) return;
       var data = await response.json();
       state.siteName = data.name || "this site";
@@ -391,6 +392,12 @@
           hadNoAnswer = true;
           answerText = FALLBACK_MESSAGE;
           renderAssistantContent(assistantBubble, FALLBACK_MESSAGE);
+          scrollToBottom();
+        } else if (data.type === "trial_ended") {
+          removeTyping();
+          hadNoAnswer = true;
+          answerText = data.message || TRIAL_ENDED_MESSAGE;
+          renderAssistantContent(assistantBubble, answerText);
           scrollToBottom();
         } else if (data.type === "done") {
           removeTyping();

@@ -3,7 +3,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
+from urllib.parse import urlencode
 from pathlib import Path
 from time import time
 from typing import Any, AsyncGenerator
@@ -11,7 +13,7 @@ from uuid import uuid4
 
 import httpx
 import numpy as np
-from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,11 +21,20 @@ from sqlalchemy import delete, select, text
 from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 
+from backend.billing import (
+    BillingConfigError,
+    BillingVerificationError,
+    create_checkout_session,
+    list_plan_definitions,
+    process_webhook_event,
+    verify_webhook_payload,
+)
 from backend.chunker import build_site_overview_chunk, chunk_page, chunk_ui_structure
 from backend.config import (
     BASE_URL,
     DB_PATH,
     DATABASE_URL,
+    DEFAULT_SITES_LIMIT,
     MAX_CRAWL_DEPTH,
     MAX_CRAWL_PAGES,
     OPENROUTER_API_KEY,
@@ -34,16 +45,36 @@ from backend.config import (
     PROCESS_RETRY_ATTEMPTS,
     PROCESS_RETRY_DELAY_SECONDS,
     QUESTION_SUGGESTION_CACHE_TTL_SECONDS,
+    TRIAL_DURATION_DAYS,
     UI_CHUNK_SECTION_LABEL,
 )
+from backend.auth import build_viewer_context, clear_auth_cookie, get_current_user, hash_password, set_auth_cookie, verify_password
 from backend.crawler import crawl_site, normalize_url
 from backend.database import engine, get_db, init_db, session_scope
 from backend.embedder import get_embedder
+from backend.entitlements import TRIAL_ENDED_MESSAGE, evaluate_site_entitlement, sync_user_subscription_status, trial_days_remaining
 from backend.extractor import extract_content
 from backend.llm import generate_answer
-from backend.models import Chunk, Page, Site
+from backend.models import Chunk, Page, Site, User
 from backend.retriever import classify_query_intent, retrieve
-from backend.schemas import CreateSiteRequest, CreateSiteResponse, EmbedScriptResponse, SiteListResponse, SiteStatusResponse, SiteSummary
+from backend.schemas import (
+    AuthResponse,
+    BillingCheckoutRequest,
+    BillingCheckoutResponse,
+    BillingPlansResponse,
+    BillingPlanSummary,
+    BillingStatusResponse,
+    CreateSiteRequest,
+    CreateSiteResponse,
+    EmbedScriptResponse,
+    LoginRequest,
+    LogoutResponse,
+    SignupRequest,
+    SiteListResponse,
+    SiteStatusResponse,
+    SiteSummary,
+    UserSummary,
+)
 from backend.session_store import append_turn, build_contextual_query, get_history
 from backend.vector_store import write_vector_store
 
@@ -62,11 +93,116 @@ STARTER_QUESTION_FALLBACK = [
     "What are the main features?",
 ]
 _suggested_question_cache: dict[str, dict[str, Any]] = {}
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 WIDGET_PATH = BASE_DIR / "widget" / "agent.js"
 DASHBOARD_PATH = BASE_DIR / "dashboard" / "index.html"
 WEBSITE_DIR = BASE_DIR / "website"
+
+
+def _utc_iso(value: datetime | None) -> str | None:
+    if value is None:
+        return None
+    return value.isoformat()
+
+
+def _serialize_user(user: User | None, db: Session | None = None) -> UserSummary | None:
+    if user is None:
+        return None
+    if db is not None:
+        sync_user_subscription_status(db, user)
+    return UserSummary(
+        id=user.id,
+        email=user.email,
+        subscription_id=user.subscription_id,
+        subscription_status=user.subscription_status or "trial",
+        subscription_plan=user.subscription_plan,
+        trial_start_at=_utc_iso(user.trial_start_at),
+        trial_ends_at=_utc_iso(user.trial_ends_at),
+        current_period_end=_utc_iso(user.current_period_end),
+        days_remaining=trial_days_remaining(user),
+        sites_limit=user.sites_limit,
+    )
+
+
+def _serialize_billing_plans(user: User | None = None) -> list[BillingPlanSummary]:
+    current_plan = (user.subscription_plan or "").strip().lower() if user is not None else ""
+    plans: list[BillingPlanSummary] = []
+    for plan in list_plan_definitions():
+        plans.append(
+            BillingPlanSummary(
+                key=plan.key,
+                label=plan.label,
+                sites_limit=plan.sites_limit,
+                usage_limit=plan.usage_limit,
+                checkout_enabled=bool(plan.dodo_price_id),
+                current=current_plan == plan.key,
+            )
+        )
+    return plans
+
+
+def _validate_credentials(email: str, password: str) -> tuple[str, str]:
+    normalized_email = email.strip().lower()
+    if not EMAIL_PATTERN.match(normalized_email):
+        raise HTTPException(status_code=422, detail="Please enter a valid email address.")
+    if len(password) < 8:
+        raise HTTPException(status_code=422, detail="Password must be at least 8 characters long.")
+    return normalized_email, password
+
+
+def _transfer_guest_sites(db: Session, guest_session_id: str | None, user_id: str) -> int:
+    if not guest_session_id:
+        return 0
+    guest_sites = db.execute(
+        select(Site).where(Site.user_id.is_(None), Site.guest_session_id == guest_session_id)
+    ).scalars().all()
+    for site in guest_sites:
+        site.user_id = user_id
+        site.guest_session_id = None
+    return len(guest_sites)
+
+
+def _auth_response(db: Session, user: User | None, guest_session_id: str | None = None) -> AuthResponse:
+    return AuthResponse(authenticated=user is not None, user=_serialize_user(user, db=db), guest_session_id=guest_session_id)
+
+
+def _require_authenticated_viewer(request: Request, db: Session, response: Response | None = None) -> User:
+    viewer = build_viewer_context(request, db, response=response)
+    if viewer.user is None:
+        raise HTTPException(status_code=401, detail="Please sign up or log in to continue.")
+    return viewer.user
+
+
+def _require_manageable_site(
+    db: Session,
+    site_id: str,
+    request: Request,
+    response: Response | None = None,
+    require_user: bool = False,
+) -> Site:
+    site = db.get(Site, site_id)
+    if site is None:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    viewer = build_viewer_context(request, db, response=response)
+    if site.user_id:
+        if viewer.user is None:
+            if require_user:
+                raise HTTPException(status_code=401, detail="Please sign up or log in to continue.")
+            raise HTTPException(status_code=404, detail="Site not found")
+        if site.user_id != viewer.user.id:
+            raise HTTPException(status_code=404, detail="Site not found")
+        return site
+
+    if require_user:
+        raise HTTPException(status_code=401, detail="Please sign up or log in to continue.")
+
+    if site.guest_session_id and site.guest_session_id != viewer.guest_session_id:
+        raise HTTPException(status_code=404, detail="Site not found")
+
+    return site
 
 
 def _schedule_process_site(site_id: str, site_url: str) -> None:
@@ -416,17 +552,142 @@ async def process_site(site_id: str, root_url: str):
                 site.updated_at = datetime.utcnow()
 
 
+@app.get("/api/auth/me", response_model=AuthResponse)
+async def auth_me(request: Request, response: Response, db: Session = Depends(get_db)):
+    viewer = build_viewer_context(request, db, response=response)
+    return _auth_response(db, viewer.user, guest_session_id=viewer.guest_session_id)
+
+
+@app.post("/api/auth/signup", response_model=AuthResponse)
+async def signup(payload: SignupRequest, request: Request, response: Response, db: Session = Depends(get_db)):
+    email, password = _validate_credentials(payload.email, payload.password)
+    existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="An account with this email already exists.")
+
+    viewer = build_viewer_context(request, db, response=response)
+    now = datetime.utcnow()
+    user = User(
+        id=str(uuid4()),
+        email=email,
+        password_hash=hash_password(password),
+        created_at=now,
+        trial_start_at=now,
+        trial_ends_at=now + timedelta(days=TRIAL_DURATION_DAYS),
+        subscription_status="trial",
+        subscription_plan="trial",
+        sites_limit=DEFAULT_SITES_LIMIT,
+    )
+    db.add(user)
+    db.flush()
+    _transfer_guest_sites(db, viewer.guest_session_id, user.id)
+    db.commit()
+    db.refresh(user)
+    set_auth_cookie(response, user)
+    return _auth_response(db, user, guest_session_id=viewer.guest_session_id)
+
+
+@app.post("/api/auth/login", response_model=AuthResponse)
+async def login(payload: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
+    email, password = _validate_credentials(payload.email, payload.password)
+    user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if user is None or not verify_password(password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+    viewer = build_viewer_context(request, db, response=response)
+    _transfer_guest_sites(db, viewer.guest_session_id, user.id)
+    sync_user_subscription_status(db, user)
+    db.commit()
+    db.refresh(user)
+    set_auth_cookie(response, user)
+    return _auth_response(db, user, guest_session_id=viewer.guest_session_id)
+
+
+@app.post("/api/auth/logout", response_model=LogoutResponse)
+async def logout(response: Response):
+    clear_auth_cookie(response)
+    return LogoutResponse(ok=True)
+
+
+@app.get("/api/billing/plans", response_model=BillingPlansResponse)
+async def billing_plans(request: Request, db: Session = Depends(get_db)):
+    viewer = build_viewer_context(request, db)
+    return BillingPlansResponse(plans=_serialize_billing_plans(viewer.user))
+
+
+@app.get("/api/billing/status", response_model=BillingStatusResponse)
+async def billing_status(request: Request, response: Response, db: Session = Depends(get_db)):
+    viewer = build_viewer_context(request, db, response=response)
+    return BillingStatusResponse(
+        authenticated=viewer.user is not None,
+        user=_serialize_user(viewer.user, db=db),
+        plans=_serialize_billing_plans(viewer.user),
+        guest_session_id=viewer.guest_session_id,
+    )
+
+
+@app.post("/api/billing/checkout", response_model=BillingCheckoutResponse)
+async def billing_checkout(payload: BillingCheckoutRequest, request: Request, db: Session = Depends(get_db)):
+    user = _require_authenticated_viewer(request, db)
+    try:
+        checkout = await create_checkout_session(user, payload.plan.strip().lower())
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except BillingConfigError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except httpx.HTTPStatusError as exc:
+        logger.warning("Dodo checkout creation failed with status %s", exc.response.status_code)
+        detail = "Unable to start checkout right now."
+        try:
+            error_payload = exc.response.json()
+            detail = error_payload.get("message") or error_payload.get("detail") or detail
+        except Exception:
+            pass
+        raise HTTPException(status_code=502, detail=detail) from exc
+    except Exception as exc:
+        logger.exception("Unexpected Dodo checkout error")
+        raise HTTPException(status_code=500, detail="Unable to start checkout right now.") from exc
+
+    return BillingCheckoutResponse(checkout_url=checkout["checkout_url"])
+
+
+@app.post("/api/webhooks/dodo")
+async def dodo_webhook(request: Request, db: Session = Depends(get_db)):
+    raw_body = (await request.body()).decode("utf-8")
+    headers = {
+        "webhook-id": request.headers.get("webhook-id", ""),
+        "webhook-signature": request.headers.get("webhook-signature", ""),
+        "webhook-timestamp": request.headers.get("webhook-timestamp", ""),
+    }
+    try:
+        payload = verify_webhook_payload(raw_body, headers)
+    except BillingVerificationError as exc:
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+
+    webhook_id = headers["webhook-id"]
+    try:
+        result = process_webhook_event(db, webhook_id, payload)
+    except Exception as exc:
+        logger.exception("Failed to process Dodo webhook %s", webhook_id)
+        raise HTTPException(status_code=500, detail="Webhook processing failed.") from exc
+
+    return {"received": True, **result}
+
+
 @app.post("/api/sites", response_model=CreateSiteResponse)
-async def create_site(payload: CreateSiteRequest, db: Session = Depends(get_db)):
+async def create_site(payload: CreateSiteRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     try:
         normalized_url = normalize_url(str(payload.url))
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Invalid URL: {exc}") from exc
 
+    viewer = build_viewer_context(request, db, response=response)
     site_id = str(uuid4())
     db.add(
         Site(
             id=site_id,
+            user_id=viewer.user.id if viewer.user is not None else None,
+            guest_session_id=None if viewer.user is not None else viewer.guest_session_id,
             url=normalized_url,
             name=None,
             status="pending",
@@ -443,8 +704,14 @@ async def create_site(payload: CreateSiteRequest, db: Session = Depends(get_db))
 
 
 @app.get("/api/sites", response_model=SiteListResponse)
-async def list_sites(db: Session = Depends(get_db)):
-    sites = db.execute(select(Site).order_by(Site.created_at.desc())).scalars().all()
+async def list_sites(request: Request, response: Response, db: Session = Depends(get_db)):
+    viewer = build_viewer_context(request, db, response=response)
+    query = select(Site).order_by(Site.created_at.desc())
+    if viewer.user is not None:
+        query = query.where(Site.user_id == viewer.user.id)
+    else:
+        query = query.where(Site.user_id.is_(None), Site.guest_session_id == viewer.guest_session_id)
+    sites = db.execute(query).scalars().all()
     return SiteListResponse(
         sites=[
             SiteSummary(
@@ -487,19 +754,23 @@ async def _rebuild_site_vectors(site_id: str) -> None:
     await write_vector_store(site_id, vector_chunks, embeddings)
 
 
-@app.get("/api/sites/{site_id}/status", response_model=SiteStatusResponse)
-async def site_status(site_id: str, db: Session = Depends(get_db)):
+@app.get("/api/public/sites/{site_id}/status", response_model=SiteStatusResponse)
+async def public_site_status(site_id: str, db: Session = Depends(get_db)):
     site = db.get(Site, site_id)
     if site is None:
         raise HTTPException(status_code=404, detail="Site not found")
     return _serialize_status(site)
 
 
+@app.get("/api/sites/{site_id}/status", response_model=SiteStatusResponse)
+async def site_status(site_id: str, request: Request, response: Response, db: Session = Depends(get_db)):
+    site = _require_manageable_site(db, site_id, request, response=response)
+    return _serialize_status(site)
+
+
 @app.post("/api/sites/{site_id}/reprocess-ui")
-async def reprocess_ui(site_id: str, db: Session = Depends(get_db)):
-    site = db.get(Site, site_id)
-    if site is None:
-        raise HTTPException(status_code=404, detail="Site not found")
+async def reprocess_ui(site_id: str, request: Request, db: Session = Depends(get_db)):
+    site = _require_manageable_site(db, site_id, request)
 
     pages = db.execute(select(Page).where(Page.site_id == site_id).order_by(Page.crawled_at.asc())).scalars().all()
     if not pages:
@@ -582,10 +853,8 @@ async def reprocess_ui(site_id: str, db: Session = Depends(get_db)):
 
 
 @app.post("/api/sites/{site_id}/retry")
-async def retry_site(site_id: str, db: Session = Depends(get_db)):
-    site = db.get(Site, site_id)
-    if site is None:
-        raise HTTPException(status_code=404, detail="Site not found")
+async def retry_site(site_id: str, request: Request, db: Session = Depends(get_db)):
+    site = _require_manageable_site(db, site_id, request)
 
     db.execute(delete(Chunk).where(Chunk.site_id == site_id))
     db.execute(delete(Page).where(Page.site_id == site_id))
@@ -597,9 +866,7 @@ async def retry_site(site_id: str, db: Session = Depends(get_db)):
     site.updated_at = datetime.utcnow()
     db.commit()
 
-    task = asyncio.create_task(process_site(site_id, site.url))
-    _bg_tasks.add(task)
-    task.add_done_callback(_bg_tasks.discard)
+    _schedule_process_site(site_id, site.url)
     return {"status": "pending", "site_id": site_id}
 
 
@@ -745,9 +1012,7 @@ Respond ONLY with a JSON array of exactly 2 strings. No other text."""
 
 @app.get("/api/sites/{site_id}/embed-script", response_model=EmbedScriptResponse)
 async def embed_script(site_id: str, request: Request, db: Session = Depends(get_db)):
-    site = db.get(Site, site_id)
-    if site is None:
-        raise HTTPException(status_code=404, detail="Site not found")
+    site = _require_manageable_site(db, site_id, request, require_user=True)
     base = BASE_URL or str(request.base_url).rstrip("/")
     return EmbedScriptResponse(script_tag=f"<script src='{base}/widget/agent.js' data-site-id='{site_id}'></script>")
 
@@ -759,6 +1024,12 @@ async def chat(site_id: str = Query(...), q: str = Query(...), session_id: str |
         raise HTTPException(status_code=404, detail="Site not found")
 
     async def event_stream() -> AsyncGenerator[str, None]:
+        entitlement = evaluate_site_entitlement(db, site)
+        if not entitlement.allowed:
+            yield f"data: {json.dumps({'type': 'trial_ended', 'message': entitlement.message or TRIAL_ENDED_MESSAGE})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
+
         history = get_history(site_id, session_id)
         effective_query = build_contextual_query(q, history)
         chunks, intent = await asyncio.to_thread(retrieve, site_id, effective_query)
@@ -766,7 +1037,7 @@ async def chat(site_id: str = Query(...), q: str = Query(...), session_id: str |
         if not chunks:
             append_turn(site_id, session_id, "user", q)
             append_turn(site_id, session_id, "assistant", fallback_text)
-            yield f"data: {json.dumps({'type': 'token', 'content': fallback_text})}\n\n"
+            yield f"data: {json.dumps({'type': 'no_answer', 'message': fallback_text})}\n\n"
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
             return
 
@@ -867,6 +1138,22 @@ async def website_support():
 @app.get("/contact")
 async def website_contact():
     return RedirectResponse(url="/support", status_code=307)
+
+
+@app.get("/billing/success")
+async def billing_success(
+    plan: str | None = Query(default=None),
+    subscription_id: str | None = Query(default=None),
+    status: str | None = Query(default=None),
+):
+    query = {"billing": "success"}
+    if plan:
+        query["plan"] = plan
+    if subscription_id:
+        query["subscription_id"] = subscription_id
+    if status:
+        query["status"] = status
+    return RedirectResponse(url=f"/dashboard?{urlencode(query)}", status_code=302)
 
 
 @app.get("/dashboard")

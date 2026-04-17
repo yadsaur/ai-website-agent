@@ -104,6 +104,42 @@
       background: rgba(255, 255, 255, 0.04);
       color: #ffffff;
     }
+    .workspace-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .account-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #eef2ff;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .account-badge .account-status {
+      color: #c4b5fd;
+      font-weight: 700;
+    }
+    .topbar-button {
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .topbar-button.primary {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      border-color: transparent;
+    }
     .workspace-main { padding: 34px 0 72px; }
     .workspace-hero,
     .workspace-card {
@@ -203,6 +239,11 @@
     }
     .workspace-grid.secondary {
       grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    }
+    .workspace-side-stack {
+      display: grid;
+      gap: 20px;
+      align-content: start;
     }
     .workspace-card { padding: 26px; }
     .card-header {
@@ -418,6 +459,82 @@
       gap: 10px;
       margin-bottom: 16px;
     }
+    .auth-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(2, 6, 23, 0.62);
+      backdrop-filter: blur(10px);
+    }
+    .auth-modal.visible { display: flex; }
+    .auth-panel {
+      width: min(100%, 460px);
+      border-radius: 24px;
+      background: #0f1722;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 70px rgba(2, 6, 23, 0.38);
+      padding: 24px;
+      color: #f8fafc;
+    }
+    .auth-panel h3 {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      color: #ffffff;
+    }
+    .auth-panel p {
+      margin: 0 0 18px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    .auth-toggle {
+      display: inline-flex;
+      gap: 8px;
+      padding: 6px;
+      margin-bottom: 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .auth-toggle button {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 0;
+      background: transparent;
+      color: #cbd5e1;
+      font-weight: 700;
+    }
+    .auth-toggle button.active {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #ffffff;
+    }
+    .auth-form {
+      display: grid;
+      gap: 12px;
+    }
+    .auth-form input {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+    .auth-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .auth-note {
+      margin-top: 12px;
+      color: #cbd5e1;
+      font-size: 13px;
+    }
     .summary-chip {
       padding: 9px 12px;
       border-radius: 999px;
@@ -425,6 +542,84 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       color: #e8eafe;
       font-size: 13px;
+    }
+    .billing-summary {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .billing-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.14);
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      color: #ede9fe;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .billing-status-pill.active {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.24);
+      color: #dcfce7;
+    }
+    .billing-status-pill.issue {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.24);
+      color: #fef3c7;
+    }
+    .billing-copy {
+      color: #e6e9f7;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+    .billing-copy strong {
+      color: #ffffff;
+    }
+    .billing-meta-list {
+      display: grid;
+      gap: 8px;
+      color: var(--app-muted);
+      font-size: 13px;
+    }
+    .billing-plans {
+      display: grid;
+      gap: 12px;
+    }
+    .billing-plan {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .billing-plan.current {
+      border-color: rgba(124, 58, 237, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.12);
+    }
+    .billing-plan h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      color: #ffffff;
+    }
+    .billing-plan p {
+      margin: 0;
+      color: var(--app-muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .billing-plan-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .billing-plan-actions button {
+      min-width: 128px;
     }
     .table-wrap {
       overflow: hidden;
@@ -1001,6 +1196,44 @@
       font-size: 13px;
       font-weight: 600;
     }
+    .billing-status-pill {
+      background: #f3e8ff;
+      border-color: #ddd6fe;
+      color: #6d28d9;
+    }
+    .billing-status-pill.active {
+      background: #dcfce7;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+    .billing-status-pill.issue {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      color: #c2410c;
+    }
+    .billing-copy {
+      color: #0f172a;
+    }
+    .billing-copy strong {
+      color: #0f172a;
+    }
+    .billing-meta-list {
+      color: #64748b;
+    }
+    .billing-plan {
+      background: #f8fafc;
+      border-color: var(--app-border);
+    }
+    .billing-plan.current {
+      border-color: #c4b5fd;
+      box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.12);
+    }
+    .billing-plan h3 {
+      color: #0f172a;
+    }
+    .billing-plan p {
+      color: #64748b;
+    }
 
     .empty-state {
       display: none;
@@ -1245,6 +1478,10 @@
       .workspace-links {
         display: none;
       }
+      .workspace-topbar-right {
+        width: 100%;
+        justify-content: space-between;
+      }
 
       .summary-grid,
       .workspace-state-grid {
@@ -1260,12 +1497,22 @@
       .site-card-actions {
         flex-direction: column;
       }
+      .billing-plan {
+        grid-template-columns: 1fr;
+      }
+      .billing-plan-actions {
+        width: 100%;
+      }
 
       .row-button,
       .primary-button,
       .secondary-button,
-      .ghost-button {
+      .ghost-button,
+      .topbar-button {
         width: 100%;
+      }
+      .auth-actions {
+        flex-direction: column;
       }
     }
   </style>
@@ -1287,6 +1534,12 @@
           <a href="/pricing">Pricing</a>
           <a href="/support">Support</a>
         </nav>
+        <div class="workspace-topbar-right">
+          <div id="account-badge" class="account-badge">Guest mode</div>
+          <button id="account-upgrade" class="topbar-button" type="button">Upgrade</button>
+          <button id="account-auth" class="topbar-button primary" type="button">Sign up</button>
+          <button id="account-logout" class="topbar-button" type="button" style="display:none;">Logout</button>
+        </div>
       </div>
     </header>
 
@@ -1391,26 +1644,60 @@
             </div>
           </section>
 
-          <section class="workspace-card">
-            <div class="card-header">
-              <div>
-                <h2>Processed sites</h2>
-                <p>Every processed site stays here so you can test it, copy the script, or rerun it if something fails.</p>
+          <div class="workspace-side-stack">
+            <section id="billing-card" class="workspace-card billing-card">
+              <div class="card-header">
+                <div>
+                  <h2>Billing</h2>
+                  <p>Stay on trial while you validate the bot, then upgrade when you are ready to keep it live.</p>
+                </div>
               </div>
-            </div>
-            <div id="site-summary-row" class="site-summary-row"></div>
-            <div id="empty-sites-state" class="empty-state">
-              <h3>No sites yet</h3>
-              <p>Add your first website above and it will appear here as soon as training begins.</p>
-            </div>
-            <div id="site-list" class="site-list"></div>
-          </section>
+              <div id="billing-summary" class="billing-summary"></div>
+              <div id="billing-plans" class="billing-plans"></div>
+              <div id="billing-note" class="status-note">Paid plans activate after Dodo confirms the checkout webhook.</div>
+            </section>
+
+            <section class="workspace-card">
+              <div class="card-header">
+                <div>
+                  <h2>Processed sites</h2>
+                  <p>Every processed site stays here so you can test it, copy the script, or rerun it if something fails.</p>
+                </div>
+              </div>
+              <div id="site-summary-row" class="site-summary-row"></div>
+              <div id="empty-sites-state" class="empty-state">
+                <h3>No sites yet</h3>
+                <p>Add your first website above and it will appear here as soon as training begins.</p>
+              </div>
+              <div id="site-list" class="site-list"></div>
+            </section>
+          </div>
         </section>
       </div>
     </main>
   </div>
+  <div id="auth-modal" class="auth-modal" aria-hidden="true">
+    <div class="auth-panel">
+      <h3 id="auth-title">Create your account</h3>
+      <p id="auth-subtitle">Save the sites you already trained and unlock the embed script.</p>
+      <div class="auth-toggle">
+        <button id="auth-tab-signup" type="button" class="active">Sign up</button>
+        <button id="auth-tab-login" type="button">Log in</button>
+      </div>
+      <form id="auth-form" class="auth-form">
+        <input id="auth-email" type="email" placeholder="you@company.com" autocomplete="email" required />
+        <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required />
+        <div class="auth-actions">
+          <button id="auth-submit" class="primary-button" type="submit">Continue</button>
+          <button id="auth-cancel" class="ghost-button" type="button">Cancel</button>
+        </div>
+      </form>
+      <div id="auth-note" class="auth-note">You can train and test as a guest. Signup is only required when you want the live embed script.</div>
+    </div>
+  </div>
   <script>
     const FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
+    const TRIAL_ENDED_MESSAGE = "This chatbot is inactive. Please upgrade.";
     let markedLoader = null;
     const state = {
       pollTimer: null,
@@ -1423,7 +1710,13 @@
       currentStatusSiteId: null,
       submitting: false,
       pendingSiteUrl: "",
-      trainingStartedAt: 0
+      trainingStartedAt: 0,
+      authMode: "signup",
+      authUser: null,
+      billingPlans: [],
+      guestSessionId: null,
+      pendingEmbedSiteId: null,
+      billingPollTimer: null
     };
 
     const form = document.getElementById("site-form");
@@ -1433,6 +1726,21 @@
     const progressFill = document.getElementById("progress-fill");
     const progressMeta = document.getElementById("progress-meta");
     const feedbackBanner = document.getElementById("feedback-banner");
+    const accountBadge = document.getElementById("account-badge");
+    const accountAuth = document.getElementById("account-auth");
+    const accountLogout = document.getElementById("account-logout");
+    const accountUpgrade = document.getElementById("account-upgrade");
+    const authModal = document.getElementById("auth-modal");
+    const authTitle = document.getElementById("auth-title");
+    const authSubtitle = document.getElementById("auth-subtitle");
+    const authForm = document.getElementById("auth-form");
+    const authEmail = document.getElementById("auth-email");
+    const authPassword = document.getElementById("auth-password");
+    const authSubmit = document.getElementById("auth-submit");
+    const authCancel = document.getElementById("auth-cancel");
+    const authNote = document.getElementById("auth-note");
+    const authTabSignup = document.getElementById("auth-tab-signup");
+    const authTabLogin = document.getElementById("auth-tab-login");
     const launchTitle = document.getElementById("launch-title");
     const launchCopy = document.getElementById("launch-copy");
     const nextStepCopy = document.getElementById("next-step-copy");
@@ -1448,6 +1756,10 @@
     const metricSites = document.getElementById("metric-sites");
     const metricReady = document.getElementById("metric-ready");
     const metricActive = document.getElementById("metric-active");
+    const billingCard = document.getElementById("billing-card");
+    const billingSummary = document.getElementById("billing-summary");
+    const billingPlans = document.getElementById("billing-plans");
+    const billingNote = document.getElementById("billing-note");
     const testSiteSelect = document.getElementById("test-site-select");
     const openSelectedEmbed = document.getElementById("open-selected-embed");
     const chatTitle = document.getElementById("chat-title");
@@ -1513,6 +1825,292 @@
       }
       if (payload.message) return payload.message;
       return fallback;
+    }
+
+    function daysLabel(daysRemaining) {
+      if (daysRemaining == null) return "";
+      if (daysRemaining <= 0) return "trial ended";
+      if (daysRemaining === 1) return "1 day left";
+      return daysRemaining + " days left";
+    }
+
+    function formatDateLabel(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function billingStatusTone(status) {
+      if (status === "active") return "active";
+      if (status === "past_due" || status === "cancelled" || status === "expired") return "issue";
+      return "";
+    }
+
+    function billingStatusLabel(status, user) {
+      if (!status) return "Guest mode";
+      if (status === "trial") {
+        const remaining = daysLabel(user && user.days_remaining);
+        return remaining ? "Trial · " + remaining : "Trial";
+      }
+      if (status === "active") return "Active subscription";
+      if (status === "past_due") return "Payment issue";
+      if (status === "cancelled") return "Cancelled";
+      if (status === "expired") return "Expired";
+      return status.replace(/_/g, " ");
+    }
+
+    function renderBillingPanel() {
+      const user = state.authUser;
+      const plans = Array.isArray(state.billingPlans) && state.billingPlans.length ? state.billingPlans : [];
+      if (!billingSummary || !billingPlans) return;
+      if (billingNote) {
+        billingNote.textContent = user && user.subscription_status === "active"
+          ? "Webhook renewals keep your paid access in sync automatically."
+          : "Paid plans activate after Dodo confirms the checkout webhook.";
+      }
+
+      if (!user) {
+        billingSummary.innerHTML = [
+          '<div class="billing-status-pill">Guest trial flow</div>',
+          '<div class="billing-copy"><strong>Train and test without signing up.</strong> Create an account only when you want the live embed script or a paid plan.</div>',
+          '<div class="billing-meta-list"><span>Signup starts your trial automatically.</span><span>Webhook confirmation activates paid plans after checkout.</span></div>'
+        ].join("");
+      } else {
+        const renewalDate = formatDateLabel(user.current_period_end || user.trial_ends_at);
+        const status = user.subscription_status || "trial";
+        const metaLines = [];
+        if (user.subscription_plan) {
+          metaLines.push("Current plan: " + user.subscription_plan.charAt(0).toUpperCase() + user.subscription_plan.slice(1));
+        }
+        if (renewalDate) {
+          metaLines.push((status === "trial" ? "Trial ends" : "Next billing date") + ": " + renewalDate);
+        }
+        if (user.sites_limit != null) {
+          metaLines.push(user.sites_limit > 9999 ? "Site limit: unlimited" : "Site limit: " + user.sites_limit);
+        }
+
+        const leadCopy = status === "active"
+          ? "<strong>Your subscription is active.</strong> Paid access stays live while webhook renewals keep the account current."
+          : status === "trial"
+            ? "<strong>Your trial is running.</strong> Upgrade before it ends if you want the chatbot to keep answering live."
+            : "<strong>This workspace needs an active plan.</strong> Choose a plan below and we will reactivate it as soon as Dodo confirms payment.";
+
+        billingSummary.innerHTML = [
+          '<div class="billing-status-pill ' + billingStatusTone(status) + '">' + billingStatusLabel(status, user) + '</div>',
+          '<div class="billing-copy">' + leadCopy + '</div>',
+          '<div class="billing-meta-list">' + metaLines.map(function (item) { return "<span>" + item + "</span>"; }).join("") + '</div>'
+        ].join("");
+      }
+
+      billingPlans.innerHTML = "";
+      plans.forEach(function (plan) {
+        const planCard = document.createElement("div");
+        planCard.className = "billing-plan" + (plan.current ? " current" : "");
+        const usageText = plan.usage_limit == null ? "Unlimited chats" : plan.usage_limit.toLocaleString() + " chats";
+        const sitesText = plan.sites_limit > 9999 ? "Unlimited sites" : plan.sites_limit + " site" + (plan.sites_limit === 1 ? "" : "s");
+        let buttonLabel = "Upgrade";
+        let disabled = false;
+        if (!state.authUser) {
+          buttonLabel = "Sign up";
+        } else if (plan.current && state.authUser.subscription_status === "active") {
+          buttonLabel = "Current plan";
+          disabled = true;
+        } else if (!plan.checkout_enabled) {
+          buttonLabel = "Not configured";
+          disabled = true;
+        } else if (plan.current && state.authUser.subscription_status === "trial") {
+          buttonLabel = "Choose plan";
+        }
+        planCard.innerHTML = [
+          '<div><h3>' + plan.label + '</h3><p>' + sitesText + " · " + usageText + '</p></div>',
+          '<div class="billing-plan-actions"><button class="' + (plan.current ? "secondary-button" : "primary-button") + '" type="button" data-plan="' + plan.key + '"' + (disabled ? " disabled" : "") + ">" + buttonLabel + "</button></div>"
+        ].join("");
+        billingPlans.appendChild(planCard);
+      });
+    }
+
+    function setAuthMode(mode) {
+      state.authMode = mode === "login" ? "login" : "signup";
+      const signupMode = state.authMode === "signup";
+      authTabSignup.classList.toggle("active", signupMode);
+      authTabLogin.classList.toggle("active", !signupMode);
+      authTitle.textContent = signupMode ? "Create your account" : "Log back in";
+      authSubtitle.textContent = signupMode
+        ? "Save the sites you already trained and unlock the embed script."
+        : "Log in to access your saved sites, trial status, and embed script.";
+      authSubmit.textContent = signupMode ? "Create account" : "Log in";
+      authNote.textContent = signupMode
+        ? "You can train and test as a guest. Signup is only required when you want the live embed script."
+        : "Logging in on this browser will also attach any guest-created sites from this session to your account.";
+      authPassword.setAttribute("autocomplete", signupMode ? "new-password" : "current-password");
+    }
+
+    function openAuthModal(mode, siteId) {
+      if (siteId) {
+        state.pendingEmbedSiteId = siteId;
+      }
+      setAuthMode(mode || state.authMode);
+      authModal.classList.add("visible");
+      authModal.setAttribute("aria-hidden", "false");
+      window.setTimeout(function () { authEmail.focus(); }, 40);
+    }
+
+    function closeAuthModal() {
+      authModal.classList.remove("visible");
+      authModal.setAttribute("aria-hidden", "true");
+      authPassword.value = "";
+    }
+
+    function renderAccountState() {
+      if (state.authUser) {
+        const status = state.authUser.subscription_status || "trial";
+        const remaining = daysLabel(state.authUser.days_remaining);
+        accountBadge.innerHTML = '<span>' + state.authUser.email + '</span><span class="account-status">' + (status === "trial" && remaining ? remaining : status) + '</span>';
+        accountAuth.style.display = "none";
+        accountLogout.style.display = "inline-flex";
+        accountUpgrade.textContent = status === "active" ? "Billing" : "Upgrade";
+      } else {
+        accountBadge.textContent = "Guest mode";
+        accountAuth.style.display = "inline-flex";
+        accountLogout.style.display = "none";
+        accountUpgrade.textContent = "Upgrade";
+      }
+      renderBillingPanel();
+    }
+
+    async function fetchAuthState() {
+      try {
+        const response = await fetch("/api/billing/status");
+        const data = await response.json();
+        if (!response.ok) return;
+        state.authUser = data.user || null;
+        state.billingPlans = data.plans || [];
+        state.guestSessionId = data.guest_session_id || null;
+        renderAccountState();
+      } catch (err) {
+      }
+    }
+
+    async function submitAuth(event) {
+      event.preventDefault();
+      const endpoint = state.authMode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+      authSubmit.disabled = true;
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: authEmail.value.trim(),
+            password: authPassword.value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setFeedback(formatApiError(data, "Unable to authenticate right now."), "error");
+          return;
+        }
+        state.authUser = data.user || null;
+        state.guestSessionId = data.guest_session_id || null;
+        await fetchAuthState();
+        closeAuthModal();
+        await fetchSites();
+        setFeedback(state.authMode === "signup" ? "Account created. Your guest sites were saved to your account." : "Welcome back. Your workspace is ready.", "success");
+        if (state.pendingEmbedSiteId) {
+          const pendingSiteId = state.pendingEmbedSiteId;
+          state.pendingEmbedSiteId = null;
+          await showEmbedCode(pendingSiteId);
+        }
+      } catch (err) {
+        setFeedback("Unable to reach the backend while signing in.", "error");
+      } finally {
+        authSubmit.disabled = false;
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+      } catch (err) {
+      }
+      state.authUser = null;
+      state.billingPlans = [];
+      state.pendingEmbedSiteId = null;
+      renderAccountState();
+      await fetchAuthState();
+      await fetchSites();
+      setFeedback("Logged out. Guest mode is still available for training and testing.", "info");
+    }
+
+    async function startCheckout(planKey, triggerButton) {
+      if (!planKey) return;
+      if (!state.authUser) {
+        openAuthModal("signup");
+        setFeedback("Create an account first, then choose a paid plan.", "info");
+        return;
+      }
+      const originalLabel = triggerButton ? triggerButton.textContent : "";
+      if (triggerButton) {
+        triggerButton.disabled = true;
+        triggerButton.textContent = "Redirecting...";
+      }
+      try {
+        const response = await fetch("/api/billing/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: planKey })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setFeedback(formatApiError(data, "Unable to start checkout right now."), "error");
+          return;
+        }
+        setFeedback("Redirecting to secure checkout...", "info");
+        window.location.href = data.checkout_url;
+      } catch (err) {
+        setFeedback("Unable to reach billing right now.", "error");
+      } finally {
+        if (triggerButton) {
+          triggerButton.disabled = false;
+          triggerButton.textContent = originalLabel;
+        }
+      }
+    }
+
+    function clearBillingPoll() {
+      if (state.billingPollTimer) {
+        window.clearInterval(state.billingPollTimer);
+        state.billingPollTimer = null;
+      }
+    }
+
+    async function handleBillingReturn() {
+      const params = new URLSearchParams(window.location.search);
+      const billingState = params.get("billing");
+      if (billingState === "cancelled") {
+        setFeedback("Checkout was cancelled. Your workspace is unchanged.", "info");
+        window.history.replaceState({}, "", window.location.pathname);
+        return;
+      }
+      if (billingState !== "success") return;
+
+      setFeedback("Payment received. We are waiting for Dodo to confirm the subscription...", "info");
+      clearBillingPoll();
+      let attempts = 0;
+      state.billingPollTimer = window.setInterval(async function () {
+        attempts += 1;
+        await fetchAuthState();
+        const status = state.authUser && state.authUser.subscription_status;
+        if (status === "active") {
+          clearBillingPoll();
+          setFeedback("Payment confirmed. Your subscription is active.", "success");
+          window.history.replaceState({}, "", window.location.pathname);
+        } else if (attempts >= 15) {
+          clearBillingPoll();
+          setFeedback("Payment is still processing. Refresh in a minute if the plan has not updated yet.", "info");
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+      }, 2000);
     }
 
     function progressValue(site) {
@@ -1745,7 +2343,6 @@
         const response = await fetch("/api/sites");
         const data = await response.json();
         state.sites = data.sites || [];
-        localStorage.setItem("sitecloser-sites", JSON.stringify(state.sites));
         renderSites();
       } catch (err) {
         setFeedback("Unable to reach the backend. Make sure the FastAPI server is running.", "error");
@@ -1753,13 +2350,7 @@
     }
 
     function loadCachedSites() {
-      try {
-        const cached = JSON.parse(localStorage.getItem("sitecloser-sites") || "[]");
-        if (Array.isArray(cached)) {
-          state.sites = cached;
-          renderSites();
-        }
-      } catch (err) {}
+      state.sites = [];
     }
 
     async function pollStatus(siteId) {
@@ -1838,6 +2429,11 @@
       try {
         const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/embed-script");
         const data = await response.json();
+        if (response.status === 401) {
+          openAuthModal("signup", siteId);
+          setFeedback(formatApiError(data, "Create an account to get the embed script."), "info");
+          return;
+        }
         if (!response.ok) {
           setFeedback(formatApiError(data, "Unable to generate embed code."), "error");
           return;
@@ -2100,6 +2696,10 @@
             hadNoAnswer = true;
             answerText = FALLBACK_MESSAGE;
             renderAssistantContent(assistantBubble, FALLBACK_MESSAGE);
+          } else if (data.type === "trial_ended") {
+            hadNoAnswer = true;
+            answerText = data.message || TRIAL_ENDED_MESSAGE;
+            renderAssistantContent(assistantBubble, answerText);
           } else if (data.type === "done") {
             source.close();
             state.activeEventSource = null;
@@ -2122,6 +2722,18 @@
     }
 
     form.addEventListener("submit", handleCreateSite);
+    accountAuth.addEventListener("click", function () { openAuthModal("signup"); });
+    accountLogout.addEventListener("click", function () { handleLogout(); });
+    accountUpgrade.addEventListener("click", function () {
+      scrollAndHighlight(billingCard);
+    });
+    authTabSignup.addEventListener("click", function () { setAuthMode("signup"); });
+    authTabLogin.addEventListener("click", function () { setAuthMode("login"); });
+    authCancel.addEventListener("click", function () { closeAuthModal(); });
+    authModal.addEventListener("click", function (event) {
+      if (event.target === authModal) closeAuthModal();
+    });
+    authForm.addEventListener("submit", submitAuth);
     siteList.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-site-id]");
       if (!button) return;
@@ -2149,6 +2761,11 @@
     openSelectedEmbed.addEventListener("click", function () {
       if (testSiteSelect.value) showEmbedCode(testSiteSelect.value);
     });
+    billingPlans.addEventListener("click", function (event) {
+      const button = event.target.closest("button[data-plan]");
+      if (!button) return;
+      startCheckout(button.getAttribute("data-plan"), button);
+    });
     chatSend.addEventListener("click", function () { sendChat(); });
     chatInput.addEventListener("keydown", function (event) {
       if (event.key === "Enter") {
@@ -2158,8 +2775,11 @@
     });
 
     loadCachedSites();
+    fetchAuthState();
     fetchSites();
     loadMarked().catch(function () {});
+    setAuthMode("signup");
+    handleBillingReturn();
     if (new URLSearchParams(window.location.search).get("onboarding")) {
       window.setTimeout(function () { siteUrl.focus(); }, 200);
     }

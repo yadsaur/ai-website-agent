@@ -23,6 +23,12 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 VECTOR_CACHE_TTL_SECONDS = 1800
 SESSION_TTL_SECONDS = 3600
 SESSION_MAX_TURNS = 6
+TRIAL_DURATION_DAYS = int(os.getenv("TRIAL_DURATION_DAYS", "14"))
+DEFAULT_SITES_LIMIT = int(os.getenv("DEFAULT_SITES_LIMIT", "3"))
+SUBSCRIPTION_INACTIVE_MESSAGE = os.getenv(
+    "SUBSCRIPTION_INACTIVE_MESSAGE",
+    "This chatbot is inactive. Please upgrade.",
+)
 DATA_DIR = os.environ.get("DATA_DIR", "data")
 VECTORS_DIR = os.environ.get("VECTORS_DIR", os.path.join(DATA_DIR, "vectors"))
 DB_PATH = os.environ.get("DB_PATH", os.path.join(DATA_DIR, "sites.db"))
@@ -34,6 +40,43 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 OPENROUTER_APP_NAME = os.getenv("OPENROUTER_APP_NAME", "AI Website Agent")
 OPENROUTER_SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:8000")
 HF_API_KEY = os.getenv("HF_API_KEY", "")
+DODO_PAYMENTS_API_KEY = os.getenv("DODO_PAYMENTS_API_KEY", "")
+DODO_PAYMENTS_WEBHOOK_KEY = os.getenv("DODO_PAYMENTS_WEBHOOK_KEY", "")
+DODO_PAYMENTS_BASE_URL = os.getenv("DODO_PAYMENTS_BASE_URL", "https://test.dodopayments.com").rstrip("/")
+DODO_SUCCESS_URL = os.getenv("DODO_SUCCESS_URL", f"{BASE_URL}/billing/success")
+DODO_CANCEL_URL = os.getenv("DODO_CANCEL_URL", f"{BASE_URL}/dashboard?billing=cancelled")
+DODO_STARTER_PRICE_ID = os.getenv("DODO_STARTER_PRICE_ID", "")
+DODO_GROWTH_PRICE_ID = os.getenv("DODO_GROWTH_PRICE_ID", "")
+DODO_PRO_PRICE_ID = os.getenv("DODO_PRO_PRICE_ID", "")
+AUTH_SECRET_KEY = os.getenv("AUTH_SECRET_KEY", "dev-only-change-me")
+AUTH_COOKIE_NAME = os.getenv("AUTH_COOKIE_NAME", "fivebot_auth")
+GUEST_COOKIE_NAME = os.getenv("GUEST_COOKIE_NAME", "fivebot_guest")
+AUTH_COOKIE_MAX_AGE_SECONDS = int(os.getenv("AUTH_COOKIE_MAX_AGE_SECONDS", str(60 * 60 * 24 * 30)))
+GUEST_COOKIE_MAX_AGE_SECONDS = int(os.getenv("GUEST_COOKIE_MAX_AGE_SECONDS", str(60 * 60 * 24 * 30)))
+AUTH_COOKIE_SAMESITE = os.getenv("AUTH_COOKIE_SAMESITE", "lax")
+AUTH_COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "1" if BASE_URL.startswith("https://") else "0").lower() in {"1", "true", "yes"}
+
+BILLING_PLAN_ORDER = ("starter", "growth", "pro")
+BILLING_PLAN_CONFIG = {
+    "starter": {
+        "label": "Starter",
+        "dodo_price_id": DODO_STARTER_PRICE_ID,
+        "sites_limit": 1,
+        "usage_limit": 500,
+    },
+    "growth": {
+        "label": "Growth",
+        "dodo_price_id": DODO_GROWTH_PRICE_ID,
+        "sites_limit": 5,
+        "usage_limit": 5000,
+    },
+    "pro": {
+        "label": "Pro",
+        "dodo_price_id": DODO_PRO_PRICE_ID,
+        "sites_limit": 999999,
+        "usage_limit": None,
+    },
+}
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(VECTORS_DIR, exist_ok=True)
