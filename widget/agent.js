@@ -26,7 +26,7 @@
   var root = document.createElement("div");
   root.id = "aiwa-widget";
   root.innerHTML = [
-    '<button id="aiwa-toggle" type="button" aria-label="Open 5minbot chat">5M</button>',
+    '<button id="aiwa-toggle" type="button" aria-label="Open 5minBot chat">5M</button>',
     '<div id="aiwa-panel" aria-hidden="true">',
     '  <div id="aiwa-header">',
     '    <div id="aiwa-title">Chat with this site</div>',
@@ -37,7 +37,7 @@
     '    <input id="aiwa-input" type="text" placeholder="Ask a question..." />',
     '    <button id="aiwa-send" type="button">Send</button>',
     "  </div>",
-    '  <div id="aiwa-footer">Powered by 5minbot</div>',
+    '  <div id="aiwa-footer">Powered by 5minBot</div>',
     "</div>"
   ].join("");
 

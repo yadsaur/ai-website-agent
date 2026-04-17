@@ -1,7 +1,7 @@
 (function () {
   const siteConfig = {
-    brand: "5minbot",
-    tagline: "Launch your website chatbot in 5 minutes",
+    brand: "5minBot",
+    tagline: "Website chatbot in 5 minutes",
     dashboardUrl: "/dashboard?onboarding=1",
     workspaceUrl: "/dashboard",
     fallbackDemoSiteId: "d94c64af-65d2-410f-a6d4-c9f05f9919c0",
@@ -15,7 +15,6 @@
     { href: "/pricing", label: "Pricing", page: "pricing" },
     { href: "/how-it-works", label: "How it works", page: "how-it-works" },
     { href: "/demo", label: "Demo", page: "demo" },
-    { href: "/blog", label: "Insights", page: "blog" },
   ];
 
   const footerColumns = [
@@ -31,10 +30,10 @@
     {
       title: "Resources",
       links: [
-        { href: "/blog", label: "Insights" },
+        { href: "/blog", label: "Blog" },
         { href: "/support", label: "Support" },
         { href: "/security", label: "Security" },
-        { href: "/dashboard", label: "Workspace" },
+        { href: "/dashboard", label: "Dashboard" },
       ],
     },
     {
@@ -48,7 +47,7 @@
       title: "Get started",
       links: [
         { href: "/dashboard?onboarding=1", label: "Start onboarding" },
-        { href: "/demo", label: "Try the live chatbot" },
+        { href: "/demo", label: "See live demo" },
         { href: "/support", label: "Talk to support" },
       ],
     },
@@ -65,10 +64,7 @@
         <div class="nav-inner">
           <a class="brand" href="/" aria-label="${siteConfig.brand} home">
             <span class="brand-mark"></span>
-            <span class="brand-text">
-              <span>${siteConfig.brand}</span>
-              <small>${siteConfig.tagline}</small>
-            </span>
+            <span class="brand-text">${siteConfig.brand}</span>
           </a>
           <nav class="nav-links" aria-label="Primary navigation">
             ${navLinks
@@ -79,8 +75,8 @@
               .join("")}
           </nav>
           <div class="nav-cta">
-            <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Workspace</a>
-            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free &rarr;</a>
+            <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Dashboard</a>
+            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Add your site &rarr;</a>
             <button class="nav-mobile-toggle" type="button" aria-label="Open menu">&#9776;</button>
           </div>
         </div>
@@ -91,8 +87,9 @@
                 `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`
             )
             .join("")}
-          <a href="${siteConfig.workspaceUrl}" class="button button-ghost">Workspace</a>
-          <a href="${siteConfig.dashboardUrl}" class="button button-primary">Start free &rarr;</a>
+          <a href="/blog">Blog</a>
+          <a href="${siteConfig.workspaceUrl}" class="button button-ghost">Dashboard</a>
+          <a href="${siteConfig.dashboardUrl}" class="button button-primary">Add your site &rarr;</a>
         </div>
       </div>
     `;
@@ -106,9 +103,9 @@
             <span class="brand-mark"></span>
             <span>${siteConfig.brand}</span>
           </a>
-          <p>${siteConfig.brand} turns your website into a grounded chatbot your team can set up fast, so visitors get clear answers and you can launch with less friction.</p>
+          <p>${siteConfig.brand} helps founders and website owners launch a chatbot trained on their own site in about five minutes, with one script tag and minimal setup.</p>
           <div class="footer-actions">
-            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free &rarr;</a>
+            <a class="button button-primary" href="${siteConfig.dashboardUrl}">Add your site &rarr;</a>
             <a class="button button-ghost" href="/support">Get help</a>
           </div>
         </div>
@@ -126,7 +123,7 @@
           .join("")}
       </div>
       <div class="container footer-bottom">
-        <p>&copy; ${year} ${siteConfig.brand}. Clear answers. Fast launch. Better first conversations.</p>
+        <p>&copy; ${year} ${siteConfig.brand}. Trained on your website. Live in minutes.</p>
       </div>
     `;
   }
@@ -304,7 +301,7 @@
     const iframe = document.createElement("iframe");
     iframe.className = "hero-preview-frame";
     iframe.loading = "lazy";
-    iframe.title = "Interactive 5minbot preview";
+    iframe.title = "Interactive 5minBot preview";
     iframe.setAttribute("allow", "clipboard-read; clipboard-write");
     iframe.src =
       `${siteConfig.heroPreviewPath}?mode=hero&site_id=${encodeURIComponent(demoConfig.siteId)}` +

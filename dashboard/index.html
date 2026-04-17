@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>5minbot Workspace</title>
-  <meta name="description" content="Train, test, and launch your 5minbot chatbot from one guided workspace." />
-  <meta name="theme-color" content="#0a0a0f" />
+  <title>5minBot Workspace</title>
+  <meta name="description" content="Deploy your 5minBot AI sales chatbot in under 5 minutes, test it, and launch it with one script tag." />
+  <meta property="og:title" content="5minBot Workspace" />
+  <meta property="og:description" content="Deploy your 5minBot AI sales chatbot in under 5 minutes, test it, and launch it with one script tag." />
+  <meta property="og:site_name" content="5minBot" />
+  <meta name="theme-color" content="#f7f8fc" />
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -721,6 +724,526 @@
       }
     }
   </style>
+  <style>
+    :root {
+      --app-bg: #f6f8fc;
+      --app-panel: #ffffff;
+      --app-panel-strong: #f8fafc;
+      --app-border: rgba(15, 23, 42, 0.08);
+      --app-muted: #64748b;
+      --app-text: #0f172a;
+      --app-blue: #2563eb;
+      --app-success: #15803d;
+      --app-warning: #d97706;
+      --app-danger: #dc2626;
+      --app-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 18%),
+        #f6f8fc;
+      color: var(--app-text);
+    }
+
+    .workspace-shell::before {
+      opacity: 0.03;
+      background-image:
+        linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+      mask-image: none;
+    }
+
+    .workspace-topbar {
+      background: rgba(255, 255, 255, 0.86);
+      border-bottom: 1px solid var(--app-border);
+    }
+
+    .workspace-topbar-inner {
+      min-height: 72px;
+    }
+
+    .workspace-brand,
+    .workspace-links a {
+      color: var(--app-text);
+    }
+
+    .workspace-brand small,
+    .workspace-links a {
+      font-size: 13px;
+    }
+
+    .workspace-brand small,
+    .card-subtitle,
+    .support-copy,
+    .summary-tile span,
+    .state-card p,
+    .launch-card p,
+    .tip-card p,
+    .empty-state p,
+    .status-note,
+    .tip-card li,
+    .launch-card li {
+      color: var(--app-muted);
+    }
+
+    .workspace-links a:hover {
+      background: rgba(37, 99, 235, 0.07);
+      color: var(--app-blue);
+    }
+
+    .workspace-main {
+      padding: 28px 0 56px;
+    }
+
+    .workspace-hero,
+    .workspace-card {
+      background: var(--app-panel);
+      border: 1px solid var(--app-border);
+      box-shadow: var(--app-shadow);
+      backdrop-filter: none;
+    }
+
+    .workspace-hero {
+      grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+      gap: 18px;
+      padding: 28px;
+      border-radius: 24px;
+    }
+
+    .workspace-hero h1 {
+      margin: 14px 0 12px;
+      font-size: clamp(2.3rem, 4.8vw, 3.8rem);
+      color: var(--app-text);
+    }
+
+    .workspace-hero p,
+    .card-header p {
+      color: var(--app-muted);
+      font-size: 15px;
+    }
+
+    .summary-grid {
+      gap: 12px;
+    }
+
+    .summary-tile,
+    .state-card,
+    .tip-card,
+    .launch-card {
+      background: #f8fafc;
+      border: 1px solid var(--app-border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .summary-tile strong {
+      font-size: 1.65rem;
+      color: var(--app-text);
+    }
+
+    .feedback-banner {
+      background: #eff6ff;
+    }
+
+    .feedback-banner.info {
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .feedback-banner.success {
+      border-color: #bbf7d0;
+      color: #166534;
+      background: #f0fdf4;
+    }
+
+    .feedback-banner.error {
+      border-color: #fecaca;
+      color: #b91c1c;
+      background: #fef2f2;
+    }
+
+    .workspace-grid,
+    .workspace-grid.secondary {
+      gap: 18px;
+    }
+
+    .workspace-grid.secondary {
+      grid-template-columns: 1fr;
+    }
+
+    .workspace-card {
+      padding: 24px;
+      border-radius: 24px;
+    }
+
+    .card-header {
+      margin-bottom: 18px;
+    }
+
+    .card-header h2 {
+      font-size: clamp(1.45rem, 2.5vw, 2rem);
+      color: var(--app-text);
+    }
+
+    .overline {
+      color: #2563eb;
+    }
+
+    .setup-form input,
+    .chat-toolbar select,
+    .chat-controls input {
+      background: #ffffff;
+      color: var(--app-text);
+      border: 1px solid var(--app-border);
+    }
+
+    .chat-toolbar select option,
+    .setup-form input,
+    .chat-controls input,
+    select option {
+      color: var(--app-text);
+      background: #ffffff;
+    }
+
+    .setup-form input::placeholder,
+    .chat-controls input::placeholder {
+      color: #94a3b8;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .ghost-button {
+      min-height: 48px;
+      border-radius: 14px;
+    }
+
+    .primary-button {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      box-shadow: 0 14px 26px rgba(37, 99, 235, 0.16);
+    }
+
+    .secondary-button,
+    .ghost-button {
+      background: #ffffff;
+      color: var(--app-text);
+      border: 1px solid var(--app-border);
+    }
+
+    .secondary-button:hover,
+    .ghost-button:hover {
+      background: #f8fafc;
+    }
+
+    .status-line {
+      color: var(--app-text);
+    }
+
+    .status-dot {
+      background: var(--app-blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .progress-track {
+      background: #e5ebf5;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #2563eb, #60a5fa);
+    }
+
+    .progress-meta {
+      color: var(--app-muted);
+    }
+
+    .progress-meta strong {
+      color: var(--app-text);
+    }
+
+    .embed-box {
+      background: #f8fafc;
+      border: 1px solid var(--app-border);
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .site-summary-row {
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .summary-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #eef4ff;
+      border: 1px solid #dbeafe;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px dashed #cbd5e1;
+      background: #f8fafc;
+      margin-bottom: 12px;
+    }
+
+    .empty-state.visible {
+      display: block;
+    }
+
+    .site-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .site-card {
+      display: grid;
+      gap: 14px;
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid var(--app-border);
+      background: #ffffff;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+    }
+
+    .site-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .site-card-main strong {
+      display: block;
+      color: var(--app-text);
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+
+    .site-card-link {
+      display: block;
+      margin-top: 6px;
+      color: #2563eb;
+      font-size: 13px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .site-card-note {
+      margin: 0;
+      color: var(--app-muted);
+      font-size: 14px;
+    }
+
+    .site-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .site-meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #f8fafc;
+      border: 1px solid var(--app-border);
+      color: var(--app-muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .site-meta-chip strong {
+      color: var(--app-text);
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: capitalize;
+      white-space: nowrap;
+    }
+
+    .badge.ready {
+      background: #ecfdf3;
+      color: #166534;
+    }
+
+    .badge.crawling,
+    .badge.embedding,
+    .badge.pending {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .badge.error {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .site-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .row-button {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid var(--app-border);
+      background: #ffffff;
+      color: var(--app-text);
+      font-weight: 700;
+    }
+
+    .row-button.primary {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #ffffff;
+    }
+
+    .chat-shell {
+      background: #ffffff;
+      border: 1px solid var(--app-border);
+      box-shadow: none;
+    }
+
+    .chat-header {
+      background: #f8fafc;
+      border-bottom: 1px solid var(--app-border);
+      color: var(--app-text);
+    }
+
+    .chat-messages {
+      background: #ffffff;
+    }
+
+    .chat-row.user .bubble {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+    }
+
+    .chat-row.assistant .bubble {
+      background: #f8fafc;
+      color: var(--app-text);
+      border: 1px solid var(--app-border);
+      box-shadow: none;
+    }
+
+    .assistant-markdown-bubble,
+    .assistant-markdown-bubble * {
+      color: inherit;
+    }
+
+    .chat-footer {
+      background: #ffffff;
+      color: var(--app-muted);
+      border-top: 1px solid var(--app-border);
+    }
+
+    .chat-empty-hint {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      color: var(--app-muted);
+      margin-bottom: 14px;
+    }
+
+    .chat-chip {
+      background: #ffffff;
+      border: 1px solid var(--app-border);
+      color: var(--app-text);
+    }
+
+    .chat-chip:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .source-chip {
+      background: #eef4ff;
+      border: 1px solid #c7d2fe;
+      color: #1d4ed8;
+    }
+
+    .attention-glow {
+      animation: workspaceGlow 1.8s ease;
+    }
+
+    @keyframes workspaceGlow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.18);
+      }
+      40% {
+        box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.12);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .workspace-hero,
+      .workspace-grid,
+      .workspace-grid.secondary {
+        grid-template-columns: 1fr;
+      }
+
+      .site-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .workspace-links {
+        display: none;
+      }
+
+      .summary-grid,
+      .workspace-state-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .setup-form,
+      .chat-toolbar,
+      .chat-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .site-card-actions {
+        flex-direction: column;
+      }
+
+      .row-button,
+      .primary-button,
+      .secondary-button,
+      .ghost-button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="workspace-shell">
@@ -729,15 +1252,14 @@
         <a class="workspace-brand" href="/">
           <span class="brand-mark"></span>
           <span>
-            <span>5minbot</span>
-            <small>Workspace</small>
+            <span>5minBot</span>
+            <small>Dashboard</small>
           </span>
         </a>
         <nav class="workspace-links" aria-label="Workspace navigation">
-          <a href="/">Marketing site</a>
+          <a href="/">Home</a>
           <a href="/demo">Live demo</a>
           <a href="/pricing">Pricing</a>
-          <a href="/security">Security</a>
           <a href="/support">Support</a>
         </nav>
       </div>
@@ -747,34 +1269,33 @@
       <div class="workspace-container">
         <section class="workspace-hero">
           <div>
-            <span class="eyebrow">Guided onboarding</span>
-            <h1>Launch your first 5minbot chatbot</h1>
-            <p>Process a site, review training, copy the embed code, and test answers before you go live. The workspace is designed to make the first chatbot launch obvious and low-friction.</p>
+            <span class="eyebrow">For founders and website owners</span>
+            <h1>Add a chatbot trained on your website in 5 minutes</h1>
+            <p>Paste your URL, let 5minBot learn your pages, then copy one script tag to put the chatbot live on your site.</p>
             <div class="step-pills">
               <span class="step-pill">1. Add website</span>
               <span class="step-pill">2. Train chatbot</span>
-              <span class="step-pill">3. Install widget</span>
-              <span class="step-pill">4. Test live</span>
+              <span class="step-pill">3. Copy code and test</span>
             </div>
           </div>
           <div class="hero-summary">
             <div class="summary-grid">
               <div class="summary-tile">
                 <strong id="metric-sites">0</strong>
-                <span>Processed sites</span>
+                <span>Sites</span>
               </div>
               <div class="summary-tile">
                 <strong id="metric-ready">0</strong>
-                <span>Ready to launch</span>
+                <span>Ready</span>
               </div>
               <div class="summary-tile">
                 <strong id="metric-active">0</strong>
-                <span>In progress</span>
+                <span>Training</span>
               </div>
             </div>
             <div class="launch-card">
-              <h3 id="launch-title">Start by connecting a website</h3>
-              <p id="launch-copy">Once 5minbot sees your pages, it can build the chatbot, generate embed code, and let you pressure-test the chat before launch.</p>
+              <h3 id="launch-title">Start with your main product website</h3>
+              <p id="launch-copy">The best first launch uses pages that already explain your product, pricing, and primary call to action.</p>
             </div>
           </div>
         </section>
@@ -787,12 +1308,12 @@
               <div>
                 <p class="overline">Step 1</p>
                 <h2>Add website</h2>
-                <p>Paste a public website URL and 5minbot will crawl, structure, embed, and prepare a chatbot around it.</p>
+                <p>Paste the public URL you want the chatbot to learn from. 5minBot will read the pages and prepare the live widget.</p>
               </div>
             </div>
             <form id="site-form" class="setup-form">
               <input id="site-url" type="url" placeholder="https://example.com" required />
-              <button id="site-submit" class="primary-button" type="submit">Start training</button>
+              <button id="site-submit" class="primary-button" type="submit">Add your site</button>
             </form>
             <div class="status-line"><span class="status-dot"></span><span id="status-line">Ready when you are. Add a site to begin onboarding.</span></div>
             <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
@@ -800,20 +1321,20 @@
             <div class="workspace-state-grid">
               <div class="state-card">
                 <h3>What happens next</h3>
-                <p>Training runs in the background while the workspace stays interactive. When the site is ready, you can copy the widget and test the chatbot immediately.</p>
+                <p>Training runs in the background. When the site is ready, copy the script and test the bot before you publish it.</p>
                 <div class="state-list" id="onboarding-steps"></div>
               </div>
               <div class="state-card">
-                <h3>Launch guidance</h3>
-                <p id="next-step-copy">No sites yet. Your first goal is simple: connect one public site and let the chatbot build itself.</p>
+                <h3>Best next step</h3>
+                <p id="next-step-copy">Add one public site first, then use the chat lab to test the questions real visitors ask.</p>
                 <div class="state-list">
                   <div class="state-step">
                     <span class="state-step-badge">A</span>
-                    <div><h4>Train on the site</h4><p>Use the input above to kick off the first crawl.</p></div>
+                    <div><h4>Train on the site</h4><p>Start with the URL above.</p></div>
                   </div>
                   <div class="state-step">
                     <span class="state-step-badge">B</span>
-                    <div><h4>Validate the experience</h4><p>Use the chat lab to ask real visitor questions before launch.</p></div>
+                    <div><h4>Validate the experience</h4><p>Ask pricing, setup, and CTA questions before launch.</p></div>
                   </div>
                 </div>
               </div>
@@ -823,7 +1344,7 @@
                 <div>
                   <p class="overline">Step 3</p>
                   <h3 style="margin: 0 0 6px;">Embed code</h3>
-                  <p class="card-subtitle" id="embed-copy">Copy this script into your site where you want the chatbot available.</p>
+                  <p class="card-subtitle" id="embed-copy">Copy this script tag into your site where you want the chatbot available.</p>
                 </div>
                 <button id="copy-embed" class="secondary-button" type="button">Copy script</button>
               </div>
@@ -835,15 +1356,15 @@
           <aside class="workspace-card">
             <div class="card-header">
               <div>
-                <p class="overline">Workspace guide</p>
-                <h2>First-run checklist</h2>
-                <p>Everything a first-time user needs is here: onboarding, validation, and launch.</p>
+                <p class="overline">Best results</p>
+                <h2>What to use first</h2>
+                <p>Start simple. The best first launch uses pages that already explain the product clearly.</p>
               </div>
             </div>
             <div class="tip-stack">
               <div class="tip-card">
-                <h3>Best first site</h3>
-                <p>Start with a product or landing site that already has your core positioning, pricing, and CTA paths in place.</p>
+                <h3>Best first website</h3>
+                <p>Use your main marketing or product site, especially if it already has pricing and signup pages live.</p>
               </div>
               <div class="tip-card">
                 <h3>Best questions to test</h3>
@@ -855,8 +1376,8 @@
                 </ul>
               </div>
               <div class="tip-card">
-                <h3>Need rollout help?</h3>
-                <p class="support-copy">Use the support page for onboarding guidance, product questions, and deployment details.</p>
+                <h3>Need help?</h3>
+                <p class="support-copy">If you want rollout help or need support, use the support page and we will point you in the right direction.</p>
                 <div class="button-row">
                   <a class="button button-secondary" href="/support">Open support</a>
                 </div>
@@ -869,31 +1390,17 @@
           <section class="workspace-card">
             <div class="card-header">
               <div>
-                <p class="overline">Processed sites</p>
-                <h2>Your portfolio</h2>
-                <p>Track training state, open embed code, retry failures, and keep every site launch-ready.</p>
+                <p class="overline">Your sites</p>
+                <h2>Pick a site and launch faster</h2>
+                <p>Copy code or test a ready bot from here.</p>
               </div>
             </div>
             <div id="site-summary-row" class="site-summary-row"></div>
             <div id="empty-sites-state" class="empty-state">
               <h3>No sites yet</h3>
-              <p>Your processed sites will appear here once you add the first URL. This table becomes your launch control center for retries, embed code, and testing.</p>
+              <p>Add your first website above and it will appear here as soon as training starts.</p>
             </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>URL</th>
-                    <th>Pages</th>
-                    <th>Chunks</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="site-table-body"></tbody>
-              </table>
-            </div>
+            <div id="site-list" class="site-list"></div>
           </section>
 
           <section class="workspace-card">
@@ -901,16 +1408,16 @@
               <div>
                 <p class="overline">Step 4</p>
                 <h2>Test chat</h2>
-                <p>Use the built-in chat lab before you ship the widget. It mirrors the live chatbot flow and shows source chips when a real page supports the answer.</p>
+                <p>Test the same chatbot experience your visitors will see before you put it live on your site.</p>
               </div>
             </div>
             <div class="chat-toolbar">
               <select id="test-site-select" aria-label="Select a site to test">
                 <option value="">Select a ready site</option>
               </select>
-              <button id="open-selected-embed" class="ghost-button" type="button">Get embed code</button>
+              <button id="open-selected-embed" class="ghost-button" type="button">Show code</button>
             </div>
-            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Good first prompts: pricing, setup, support, and where-to-click questions.</div>
+            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Good first prompts: pricing, setup, and where-to-click questions.</div>
             <div id="chat-shell" class="chat-shell">
               <div class="chat-header" id="chat-title">Chat with your site</div>
               <div class="chat-messages" id="chat-messages"></div>
@@ -918,7 +1425,7 @@
                 <input id="chat-input" type="text" placeholder="Ask a question..." />
                 <button id="chat-send" class="primary-button" type="button">Send</button>
               </div>
-              <div class="chat-footer">Powered by 5minbot</div>
+              <div class="chat-footer">Powered by 5minBot</div>
             </div>
           </section>
         </section>
@@ -955,7 +1462,7 @@
     const onboardingSteps = document.getElementById("onboarding-steps");
     const siteSummaryRow = document.getElementById("site-summary-row");
     const emptySitesState = document.getElementById("empty-sites-state");
-    const siteTableBody = document.getElementById("site-table-body");
+    const siteList = document.getElementById("site-list");
     const embedBox = document.getElementById("embed-box");
     const embedCode = document.getElementById("embed-code");
     const embedCopy = document.getElementById("embed-copy");
@@ -988,7 +1495,7 @@
       siteSubmit.disabled = isSubmitting;
       siteUrl.readOnly = isSubmitting;
       siteUrl.setAttribute("aria-busy", isSubmitting ? "true" : "false");
-      siteSubmit.textContent = isSubmitting ? "Training..." : "Start training";
+      siteSubmit.textContent = isSubmitting ? "Training..." : "Add your site";
     }
 
     function loadMarked() {
@@ -1117,9 +1624,9 @@
     function renderLaunchSummary() {
       const site = latestImportantSite();
       if (!site) {
-        launchTitle.textContent = "Start by connecting a website";
-      launchCopy.textContent = "Once 5minbot sees your pages, it can build the chatbot, generate embed code, and let you pressure-test the chat before launch.";
-      nextStepCopy.textContent = "No sites yet. Your first goal is simple: connect one public site and let the chatbot build itself.";
+        launchTitle.textContent = "Start with one main website";
+        launchCopy.textContent = "Use the website that already explains your product, pricing, and main call to action clearly.";
+        nextStepCopy.textContent = "Add one public site first, then test the questions real visitors ask before you install the script.";
         if (!state.submitting) {
           setProgressState(null);
         }
@@ -1129,27 +1636,26 @@
         setProgressState(site);
       }
       if (site.status === "ready") {
-        launchTitle.textContent = "A site is ready to launch";
-        launchCopy.textContent = "Copy the embed code, run a few final questions in the chat lab, and place the widget anywhere you want buyer help to appear.";
-        nextStepCopy.textContent = "Your next best move is to copy the script and pressure-test a few real buyer questions.";
+        launchTitle.textContent = "This site is ready";
+        launchCopy.textContent = "Copy the script, test a few buyer questions, and put the chatbot live where visitors need help.";
+        nextStepCopy.textContent = "Copy the code next, then ask pricing, setup, and call-to-action questions in the chat lab.";
       } else if (site.status === "error") {
         launchTitle.textContent = "One site needs attention";
-        launchCopy.textContent = "A previous run failed. Use retry to process it again, or refresh UI structure if you only need better layout guidance.";
-      nextStepCopy.textContent = "Retry the failed site, then test the chatbot once the status returns to ready.";
+        launchCopy.textContent = "Training failed on the last run. Retry it, then come back to testing once the status turns ready again.";
+        nextStepCopy.textContent = "Retry the failed site, then copy the script and test it once training finishes.";
       } else {
         launchTitle.textContent = "Training is underway";
-      launchCopy.textContent = "5minbot is processing the website now. Stay here while the status updates, then move straight to embed code and chat testing.";
-        nextStepCopy.textContent = "Wait for the ready state, then select the site in the chat lab and validate real questions.";
+        launchCopy.textContent = "5minBot is reading the site now. When training completes, you can copy the code and test the bot immediately.";
+        nextStepCopy.textContent = "Stay on this page until the site turns ready, then move straight to code and testing.";
       }
     }
 
     function renderOnboardingSteps() {
       const site = latestImportantSite();
       const steps = [
-      { title: "Add a website", body: "Connect a public URL to create the first chatbot.", state: site ? "completed" : "active" },
-      { title: "Train the chatbot", body: "Let 5minbot crawl, chunk, and embed the site.", state: site && site.status === "ready" ? "completed" : site ? "active" : "pending" },
-        { title: "Copy the widget", body: "Generate a production-ready embed script.", state: embedBox.classList.contains("visible") ? "completed" : site && site.status === "ready" ? "active" : "pending" },
-        { title: "Test before launch", body: "Use the chat lab to validate buyer questions.", state: testSiteSelect.value ? "active" : site && site.status === "ready" ? "pending" : "pending" }
+        { title: "Add website", body: "Paste one public URL.", state: site ? "completed" : "active" },
+        { title: "Train chatbot", body: "Let 5minBot read and structure the site.", state: site && site.status === "ready" ? "completed" : site ? "active" : "pending" },
+        { title: "Copy and test", body: "Grab the script and validate buyer questions.", state: testSiteSelect.value || embedBox.classList.contains("visible") ? "active" : site && site.status === "ready" ? "pending" : "pending" }
       ];
       onboardingSteps.innerHTML = steps.map(function (step, index) {
         return '<div class="state-step ' + step.state + '"><span class="state-step-badge">' + (index + 1) + '</span><div><h4>' + step.title + '</h4><p>' + step.body + '</p></div></div>';
@@ -1175,7 +1681,14 @@
     }
 
     function renderStatusBadge(status) {
-      return '<span class="badge ' + status + '">' + status + "</span>";
+      const labels = {
+        pending: "Queued",
+        crawling: "Training",
+        embedding: "Finishing",
+        ready: "Ready",
+        error: "Needs attention"
+      };
+      return '<span class="badge ' + status + '">' + (labels[status] || status) + "</span>";
     }
 
     function escapeHtml(value) {
@@ -1192,10 +1705,10 @@
         const message = String(site.error_msg).trim();
         return message.length > 120 ? message.slice(0, 117) + "..." : message;
       }
-      if (site.status === "ready") return "Ready for onboarding, testing, and launch.";
-      if (site.status === "embedding") return "Building embeddings and preparing the live chatbot.";
-      if (site.status === "crawling") return "Crawling pages and structuring site knowledge.";
-      return "Waiting for the next launch step.";
+      if (site.status === "ready") return "Ready to copy and test.";
+      if (site.status === "embedding") return "Finishing the bot setup.";
+      if (site.status === "crawling") return "Reading pages and structuring content.";
+      return "Queued to start.";
     }
 
     function ensureSelectedReadySite() {
@@ -1204,7 +1717,7 @@
       readySites.forEach(function (site) {
         const option = document.createElement("option");
         option.value = site.site_id;
-        option.textContent = (site.name || site.url) + " (" + site.url + ")";
+        option.textContent = site.name || site.url;
         testSiteSelect.appendChild(option);
       });
       if (!readySites.length) testSiteSelect.value = "";
@@ -1213,27 +1726,35 @@
     }
 
     function renderSites() {
-      siteTableBody.innerHTML = "";
+      siteList.innerHTML = "";
       state.sites.forEach(function (site) {
-        const tr = document.createElement("tr");
+        const card = document.createElement("article");
         const siteName = escapeHtml(site.name || "Untitled site");
         const siteUrl = escapeHtml(site.url || "");
-        const siteNote = escapeHtml(summarizeSiteNote(site));
-        const siteNoteTitle = escapeHtml(site.status === "error" && site.error_msg ? site.error_msg : summarizeSiteNote(site));
-        tr.innerHTML = [
-          '<td data-label="Name"><div class="site-name"><strong>' + siteName + '</strong><span class="site-note" title="' + siteNoteTitle + '">' + siteNote + '</span></div></td>',
-          '<td data-label="URL"><span class="site-url">' + siteUrl + "</span></td>",
-          '<td data-label="Pages">' + site.page_count + "</td>",
-          '<td data-label="Chunks">' + site.chunk_count + "</td>",
-          '<td data-label="Status">' + renderStatusBadge(site.status) + "</td>",
-          '<td data-label="Actions"><div class="row-actions">' +
+        const siteNoteText = summarizeSiteNote(site);
+        const siteNote = escapeHtml(siteNoteText);
+        const siteNoteTitle = escapeHtml(site.status === "error" && site.error_msg ? site.error_msg : siteNoteText);
+        card.className = "site-card";
+        card.innerHTML = [
+          '<div class="site-card-top">',
+            '<div class="site-card-main">',
+              '<strong>' + siteName + '</strong>',
+              '<a class="site-card-link" href="' + siteUrl + '" target="_blank" rel="noopener noreferrer">' + siteUrl + '</a>',
+            '</div>',
+            renderStatusBadge(site.status),
+          '</div>',
+          '<div class="site-card-meta">',
+            '<span class="site-meta-chip"><strong>' + site.page_count + '</strong> pages</span>',
+            '<span class="site-meta-chip"><strong>' + site.chunk_count + '</strong> chunks</span>',
+          '</div>',
+          '<p class="site-card-note" title="' + siteNoteTitle + '">' + siteNote + '</p>',
+          '<div class="site-card-actions">' +
             (site.status === "ready" ? '<button class="row-button primary" type="button" data-action="select" data-site-id="' + site.site_id + '">Test chat</button>' : "") +
             '<button class="row-button" type="button" data-action="embed" data-site-id="' + site.site_id + '">Embed code</button>' +
-            (site.status === "ready" ? '<button class="row-button" type="button" data-action="reprocess-ui" data-site-id="' + site.site_id + '">Refresh UI</button>' : "") +
             (site.status === "error" ? '<button class="row-button" type="button" data-action="retry" data-site-id="' + site.site_id + '">Retry</button>' : "") +
-          "</div></td>"
+          "</div>"
         ].join("");
-        siteTableBody.appendChild(tr);
+        siteList.appendChild(card);
       });
       ensureSelectedReadySite();
       renderMetrics();
@@ -1314,7 +1835,7 @@
       state.pendingSiteUrl = submittedUrl;
       state.trainingStartedAt = Date.now();
       setSubmitting(true);
-      setFeedback("Training has started. 5minbot is now processing your website.", "info");
+        setFeedback("Training started. We are reading your site now.", "info");
       setProgressState({ status: "pending", page_count: 0, chunk_count: 0 }, "Starting crawl and reserving your processing slot.");
       try {
         const response = await fetch("/api/sites", {
@@ -1624,13 +2145,12 @@
     }
 
     form.addEventListener("submit", handleCreateSite);
-    siteTableBody.addEventListener("click", function (event) {
+    siteList.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-site-id]");
       if (!button) return;
       const siteId = button.getAttribute("data-site-id");
       const action = button.getAttribute("data-action");
-      if (action === "reprocess-ui") reprocessUi(siteId);
-      else if (action === "retry") retrySite(siteId);
+      if (action === "retry") retrySite(siteId);
       else if (action === "select") {
         testSiteSelect.value = siteId;
         resetChatPanel();
