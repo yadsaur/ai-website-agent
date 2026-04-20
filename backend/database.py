@@ -101,6 +101,8 @@ def init_db() -> None:
             connection.execute(text("ALTER TABLE pages ADD COLUMN html_content TEXT"))
 
         user_columns = {column["name"] for column in inspector.get_columns("users")}
+        if "google_sub" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN google_sub TEXT"))
         if "subscription_id" not in user_columns:
             connection.execute(text("ALTER TABLE users ADD COLUMN subscription_id TEXT"))
         if "current_period_end" not in user_columns:
@@ -113,12 +115,14 @@ def init_db() -> None:
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_user_id ON sites (user_id)"))
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_guest_session_id ON sites (guest_session_id)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
+            connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_google_sub ON users (google_sub) WHERE google_sub IS NOT NULL"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_subscription_id ON users (subscription_id)"))
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_billing_webhook_events_processed_at ON billing_webhook_events (processed_at)"))
         else:
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_user_id ON sites (user_id)"))
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_guest_session_id ON sites (guest_session_id)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
+            connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_google_sub ON users (google_sub)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_subscription_id ON users (subscription_id)"))
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_billing_webhook_events_processed_at ON billing_webhook_events (processed_at)"))
 

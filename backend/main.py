@@ -13,6 +13,8 @@ from uuid import uuid4
 
 import httpx
 import numpy as np
+from google.auth.transport import requests as google_auth_requests
+from google.oauth2 import id_token as google_id_token
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
@@ -35,6 +37,7 @@ from backend.config import (
     DB_PATH,
     DATABASE_URL,
     DEFAULT_SITES_LIMIT,
+    GOOGLE_CLIENT_ID,
     MAX_CRAWL_DEPTH,
     MAX_CRAWL_PAGES,
     OPENROUTER_API_KEY,
@@ -48,7 +51,16 @@ from backend.config import (
     TRIAL_DURATION_DAYS,
     UI_CHUNK_SECTION_LABEL,
 )
-from backend.auth import build_viewer_context, clear_auth_cookie, get_current_user, hash_password, set_auth_cookie, verify_password
+from backend.auth import (
+    GOOGLE_ONLY_PASSWORD_HASH,
+    build_viewer_context,
+    clear_auth_cookie,
+    get_current_user,
+    hash_password,
+    is_google_only_user,
+    set_auth_cookie,
+    verify_password,
+)
 from backend.crawler import crawl_site, normalize_url
 from backend.database import engine, get_db, init_db, session_scope
 from backend.embedder import get_embedder
@@ -58,6 +70,7 @@ from backend.llm import generate_answer
 from backend.models import Chunk, Page, Site, User
 from backend.retriever import classify_query_intent, retrieve
 from backend.schemas import (
+    AuthProviderConfigResponse,
     AuthResponse,
     BillingCheckoutRequest,
     BillingCheckoutResponse,
@@ -67,6 +80,7 @@ from backend.schemas import (
     CreateSiteRequest,
     CreateSiteResponse,
     EmbedScriptResponse,
+    GoogleAuthRequest,
     LoginRequest,
     LogoutResponse,
     SignupRequest,
@@ -150,6 +164,96 @@ def _validate_credentials(email: str, password: str) -> tuple[str, str]:
     if len(password) < 8:
         raise HTTPException(status_code=422, detail="Password must be at least 8 characters long.")
     return normalized_email, password
+
+
+def _google_provider_config() -> AuthProviderConfigResponse:
+    return AuthProviderConfigResponse(
+        google_enabled=bool(GOOGLE_CLIENT_ID),
+        google_client_id=GOOGLE_CLIENT_ID or None,
+    )
+
+
+def _verify_google_credential(credential: str) -> dict[str, Any]:
+    token = credential.strip()
+    if not token:
+        raise HTTPException(status_code=422, detail="Missing Google credential.")
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=503, detail="Google sign-in is not configured.")
+    try:
+        id_info = google_id_token.verify_oauth2_token(
+            token,
+            google_auth_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=401, detail="Invalid Google sign-in token.") from exc
+
+    issuer = str(id_info.get("iss") or "")
+    if issuer not in {"accounts.google.com", "https://accounts.google.com"}:
+        raise HTTPException(status_code=401, detail="Invalid Google sign-in token.")
+
+    email = str(id_info.get("email") or "").strip().lower()
+    if not EMAIL_PATTERN.match(email):
+        raise HTTPException(status_code=401, detail="Google account did not return a valid email address.")
+    if not id_info.get("email_verified"):
+        raise HTTPException(status_code=401, detail="Google account email is not verified.")
+
+    google_sub = str(id_info.get("sub") or "").strip()
+    if not google_sub:
+        raise HTTPException(status_code=401, detail="Google account ID is missing.")
+
+    return {
+        "sub": google_sub,
+        "email": email,
+        "name": str(id_info.get("name") or "").strip(),
+        "picture": str(id_info.get("picture") or "").strip(),
+    }
+
+
+def _complete_google_auth(
+    db: Session,
+    request: Request,
+    response: Response,
+    google_profile: dict[str, Any],
+) -> AuthResponse:
+    google_sub = google_profile["sub"]
+    email = google_profile["email"]
+    viewer = build_viewer_context(request, db, response=response)
+
+    user = db.execute(select(User).where(User.google_sub == google_sub)).scalar_one_or_none()
+    if user is None:
+        user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+        if user is not None:
+            conflict_user = db.execute(
+                select(User).where(User.google_sub == google_sub, User.id != user.id)
+            ).scalar_one_or_none()
+            if conflict_user is not None:
+                raise HTTPException(status_code=409, detail="This Google account is already linked to another user.")
+            user.google_sub = google_sub
+            db.add(user)
+        else:
+            now = datetime.utcnow()
+            user = User(
+                id=str(uuid4()),
+                email=email,
+                password_hash=GOOGLE_ONLY_PASSWORD_HASH,
+                google_sub=google_sub,
+                created_at=now,
+                trial_start_at=now,
+                trial_ends_at=now + timedelta(days=TRIAL_DURATION_DAYS),
+                subscription_status="trial",
+                subscription_plan="trial",
+                sites_limit=DEFAULT_SITES_LIMIT,
+            )
+            db.add(user)
+            db.flush()
+
+    _transfer_guest_sites(db, viewer.guest_session_id, user.id)
+    sync_user_subscription_status(db, user)
+    db.commit()
+    db.refresh(user)
+    set_auth_cookie(response, user)
+    return _auth_response(db, user, guest_session_id=viewer.guest_session_id)
 
 
 def _transfer_guest_sites(db: Session, guest_session_id: str | None, user_id: str) -> int:
@@ -558,6 +662,11 @@ async def auth_me(request: Request, response: Response, db: Session = Depends(ge
     return _auth_response(db, viewer.user, guest_session_id=viewer.guest_session_id)
 
 
+@app.get("/api/auth/providers", response_model=AuthProviderConfigResponse)
+async def auth_providers():
+    return _google_provider_config()
+
+
 @app.post("/api/auth/signup", response_model=AuthResponse)
 async def signup(payload: SignupRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     email, password = _validate_credentials(payload.email, payload.password)
@@ -591,7 +700,11 @@ async def signup(payload: SignupRequest, request: Request, response: Response, d
 async def login(payload: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     email, password = _validate_credentials(payload.email, payload.password)
     user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
-    if user is None or not verify_password(password, user.password_hash):
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+    if is_google_only_user(user):
+        raise HTTPException(status_code=401, detail="This account uses Google sign-in. Continue with Google instead.")
+    if not verify_password(password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
 
     viewer = build_viewer_context(request, db, response=response)
@@ -601,6 +714,12 @@ async def login(payload: LoginRequest, request: Request, response: Response, db:
     db.refresh(user)
     set_auth_cookie(response, user)
     return _auth_response(db, user, guest_session_id=viewer.guest_session_id)
+
+
+@app.post("/api/auth/google", response_model=AuthResponse)
+async def auth_google(payload: GoogleAuthRequest, request: Request, response: Response, db: Session = Depends(get_db)):
+    google_profile = _verify_google_credential(payload.credential)
+    return _complete_google_auth(db, request, response, google_profile)
 
 
 @app.post("/api/auth/logout", response_model=LogoutResponse)

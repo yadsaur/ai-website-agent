@@ -25,6 +25,7 @@ from backend.models import User
 
 PASSWORD_ALGORITHM = "pbkdf2_sha256"
 PASSWORD_ITERATIONS = 390_000
+GOOGLE_ONLY_PASSWORD_HASH = "google_oauth_only"
 
 
 @dataclass
@@ -89,6 +90,8 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, stored_value: str) -> bool:
+    if stored_value == GOOGLE_ONLY_PASSWORD_HASH:
+        return False
     try:
         algorithm, iterations_str, salt_hex, digest_hex = stored_value.split("$", 3)
         if algorithm != PASSWORD_ALGORITHM:
@@ -101,6 +104,10 @@ def verify_password(password: str, stored_value: str) -> bool:
 
     candidate = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
     return hmac.compare_digest(candidate, expected)
+
+
+def is_google_only_user(user: User | None) -> bool:
+    return bool(user and user.password_hash == GOOGLE_ONLY_PASSWORD_HASH and user.google_sub)
 
 
 def create_auth_token(user: User) -> str:
@@ -143,4 +150,3 @@ def build_viewer_context(request: Request, db: Session, response: Response | Non
     user = get_current_user(request, db)
     guest_session_id = ensure_guest_session_id(request, response=response)
     return ViewerContext(user=user, guest_session_id=guest_session_id)
-

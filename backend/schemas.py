@@ -51,6 +51,10 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
+
 class UserSummary(BaseModel):
     id: str
     email: str
@@ -72,6 +76,11 @@ class AuthResponse(BaseModel):
 
 class LogoutResponse(BaseModel):
     ok: bool
+
+
+class AuthProviderConfigResponse(BaseModel):
+    google_enabled: bool
+    google_client_id: str | None = None
 
 
 class BillingPlanSummary(BaseModel):

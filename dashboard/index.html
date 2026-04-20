@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="/website/styles/main.css" />
   <style>
     :root {
@@ -529,6 +530,47 @@
       display: flex;
       gap: 10px;
       margin-top: 6px;
+    }
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+      color: #7b8798;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 700;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: "";
+      flex: 1 1 auto;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .google-auth-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .google-auth-slot {
+      display: none;
+      justify-content: center;
+      min-height: 44px;
+    }
+    .google-auth-slot.visible {
+      display: flex;
+    }
+    .google-auth-help {
+      display: none;
+      margin: 0;
+      color: #94a3b8;
+      font-size: 13px;
+      text-align: center;
+    }
+    .google-auth-help.visible {
+      display: block;
     }
     .auth-note {
       margin-top: 12px;
@@ -1684,6 +1726,11 @@
         <button id="auth-tab-signup" type="button" class="active">Sign up</button>
         <button id="auth-tab-login" type="button">Log in</button>
       </div>
+      <div class="google-auth-stack">
+        <div id="google-auth-slot" class="google-auth-slot"></div>
+        <p id="google-auth-help" class="google-auth-help">Google sign-in is not configured yet. You can still use email and password.</p>
+      </div>
+      <div class="auth-divider">or continue with email</div>
       <form id="auth-form" class="auth-form">
         <input id="auth-email" type="email" placeholder="you@company.com" autocomplete="email" required />
         <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required />
@@ -1713,6 +1760,8 @@
       trainingStartedAt: 0,
       authMode: "signup",
       authUser: null,
+      authProviders: { google_enabled: false, google_client_id: null },
+      googleButtonRendered: false,
       billingPlans: [],
       guestSessionId: null,
       pendingEmbedSiteId: null,
@@ -1741,6 +1790,8 @@
     const authNote = document.getElementById("auth-note");
     const authTabSignup = document.getElementById("auth-tab-signup");
     const authTabLogin = document.getElementById("auth-tab-login");
+    const googleAuthSlot = document.getElementById("google-auth-slot");
+    const googleAuthHelp = document.getElementById("google-auth-help");
     const launchTitle = document.getElementById("launch-title");
     const launchCopy = document.getElementById("launch-copy");
     const nextStepCopy = document.getElementById("next-step-copy");
@@ -1944,6 +1995,85 @@
         ? "You can train and test as a guest. Signup is only required when you want the live embed script."
         : "Logging in on this browser will also attach any guest-created sites from this session to your account.";
       authPassword.setAttribute("autocomplete", signupMode ? "new-password" : "current-password");
+      if (googleAuthSlot) {
+        googleAuthSlot.innerHTML = "";
+      }
+      state.googleButtonRendered = false;
+      renderGoogleAuthButton();
+    }
+
+    async function fetchAuthProviders() {
+      try {
+        const response = await fetch("/api/auth/providers");
+        const data = await response.json();
+        if (!response.ok) return;
+        state.authProviders = data || { google_enabled: false, google_client_id: null };
+        renderGoogleAuthButton();
+      } catch (err) {
+      }
+    }
+
+    async function handleGoogleAuthResponse(token) {
+      if (!token) {
+        setFeedback("Google sign-in did not return a credential.", "error");
+        return;
+      }
+      try {
+        const response = await fetch("/api/auth/google", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credential: token })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setFeedback(formatApiError(data, "Unable to continue with Google right now."), "error");
+          return;
+        }
+        state.authUser = data.user || null;
+        state.guestSessionId = data.guest_session_id || null;
+        await fetchAuthState();
+        closeAuthModal();
+        await fetchSites();
+        setFeedback("Google sign-in complete. Your workspace is ready.", "success");
+        if (state.pendingEmbedSiteId) {
+          const pendingSiteId = state.pendingEmbedSiteId;
+          state.pendingEmbedSiteId = null;
+          await showEmbedCode(pendingSiteId);
+        }
+      } catch (err) {
+        setFeedback("Unable to reach the backend while signing in with Google.", "error");
+      }
+    }
+
+    function renderGoogleAuthButton() {
+      if (!googleAuthSlot || !googleAuthHelp) return;
+      const config = state.authProviders || {};
+      const clientId = config.google_client_id;
+      if (!config.google_enabled || !clientId || !window.google || !window.google.accounts || !window.google.accounts.id) {
+        googleAuthSlot.classList.remove("visible");
+        googleAuthSlot.innerHTML = "";
+        googleAuthHelp.classList.add("visible");
+        return;
+      }
+      googleAuthHelp.classList.remove("visible");
+      googleAuthSlot.classList.add("visible");
+      if (state.googleButtonRendered) return;
+      googleAuthSlot.innerHTML = "";
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: function (response) {
+          handleGoogleAuthResponse(response && response.credential);
+        }
+      });
+      window.google.accounts.id.renderButton(googleAuthSlot, {
+        theme: "outline",
+        size: "large",
+        type: "standard",
+        text: state.authMode === "signup" ? "signup_with" : "signin_with",
+        shape: "pill",
+        width: Math.min(380, Math.max(280, googleAuthSlot.clientWidth || 320))
+      });
+      state.googleButtonRendered = true;
     }
 
     function openAuthModal(mode, siteId) {
@@ -1953,6 +2083,7 @@
       setAuthMode(mode || state.authMode);
       authModal.classList.add("visible");
       authModal.setAttribute("aria-hidden", "false");
+      renderGoogleAuthButton();
       window.setTimeout(function () { authEmail.focus(); }, 40);
     }
 
@@ -2032,6 +2163,9 @@
       try {
         await fetch("/api/auth/logout", { method: "POST" });
       } catch (err) {
+      }
+      if (window.google && window.google.accounts && window.google.accounts.id && typeof window.google.accounts.id.disableAutoSelect === "function") {
+        window.google.accounts.id.disableAutoSelect();
       }
       state.authUser = null;
       state.billingPlans = [];
@@ -2775,9 +2909,12 @@
     });
 
     loadCachedSites();
+    fetchAuthProviders();
     fetchAuthState();
     fetchSites();
     loadMarked().catch(function () {});
+    window.setTimeout(renderGoogleAuthButton, 800);
+    window.setTimeout(renderGoogleAuthButton, 1800);
     setAuthMode("signup");
     handleBillingReturn();
     if (new URLSearchParams(window.location.search).get("onboarding")) {

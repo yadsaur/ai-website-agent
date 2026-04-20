@@ -55,6 +55,8 @@ AUTH_COOKIE_MAX_AGE_SECONDS = int(os.getenv("AUTH_COOKIE_MAX_AGE_SECONDS", str(6
 GUEST_COOKIE_MAX_AGE_SECONDS = int(os.getenv("GUEST_COOKIE_MAX_AGE_SECONDS", str(60 * 60 * 24 * 30)))
 AUTH_COOKIE_SAMESITE = os.getenv("AUTH_COOKIE_SAMESITE", "lax")
 AUTH_COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "1" if BASE_URL.startswith("https://") else "0").lower() in {"1", "true", "yes"}
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "").strip()
+GOOGLE_GSI_SCRIPT_URL = "https://accounts.google.com/gsi/client"
 
 BILLING_PLAN_ORDER = ("starter", "growth", "pro")
 BILLING_PLAN_CONFIG = {
