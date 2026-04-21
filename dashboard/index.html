@@ -2200,7 +2200,7 @@
       pollTimer: null,
       sites: [],
       activeEventSource: null,
-      sessionId: "sitecloser-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
+      sessionId: "5minbot-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
       suggestedQuestionsCache: {},
       suggestedQuestionsRequested: {},
       starterDismissed: false,
@@ -2292,7 +2292,7 @@
       if (window.marked && typeof window.marked.parse === "function") return Promise.resolve(window.marked);
       if (markedLoader) return markedLoader;
       markedLoader = new Promise(function (resolve, reject) {
-        const existing = document.querySelector('script[data-sitecloser-marked="true"]');
+        const existing = document.querySelector('script[data-5minbot-marked="true"]');
         if (existing) {
           existing.addEventListener("load", function () { resolve(window.marked); }, { once: true });
           existing.addEventListener("error", reject, { once: true });
@@ -2301,7 +2301,7 @@
         const markedScript = document.createElement("script");
         markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
         markedScript.async = true;
-        markedScript.setAttribute("data-sitecloser-marked", "true");
+        markedScript.setAttribute("data-5minbot-marked", "true");
         markedScript.onload = function () { resolve(window.marked); };
         markedScript.onerror = reject;
         document.head.appendChild(markedScript);
@@ -3080,7 +3080,7 @@
       closeExistingEventSource();
       chatMessages.innerHTML = "";
       chatInput.value = "";
-      state.sessionId = "sitecloser-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      state.sessionId = "5minbot-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
       state.starterDismissed = false;
     }
 

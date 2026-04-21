@@ -114,6 +114,8 @@ def init_db() -> None:
         if engine.dialect.name == "postgresql":
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_user_id ON sites (user_id)"))
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_guest_session_id ON sites (guest_session_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_chunks_site_id ON chunks (site_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_site_vectors_site_id ON site_vectors (site_id)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_google_sub ON users (google_sub) WHERE google_sub IS NOT NULL"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_subscription_id ON users (subscription_id)"))
@@ -121,6 +123,8 @@ def init_db() -> None:
         else:
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_user_id ON sites (user_id)"))
             connection.execute(text("CREATE INDEX IF NOT EXISTS ix_sites_guest_session_id ON sites (guest_session_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_chunks_site_id ON chunks (site_id)"))
+            connection.execute(text("CREATE INDEX IF NOT EXISTS ix_site_vectors_site_id ON site_vectors (site_id)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email ON users (email)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_google_sub ON users (google_sub)"))
             connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_subscription_id ON users (subscription_id)"))

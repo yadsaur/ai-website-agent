@@ -100,6 +100,14 @@ FALLBACK_MESSAGE = (
     "{site_name} would be able to give you a definitive answer. "
     "Is there anything else about the product I can help you with?"
 )
+GREETING_RESPONSES = {
+    "hi": "Hi! How can I help you today?",
+    "hello": "Hello! I can help answer questions about this site.",
+    "hey": "Hey! What would you like to know about this website?",
+    "good morning": "Good morning! What would you like to know about this website?",
+    "good afternoon": "Good afternoon! What can I help you find on this site?",
+    "good evening": "Good evening! I can help answer questions about this site.",
+}
 SYNTHETIC_SECTIONS = {"Site Overview", "UI Layout & Navigation"}
 STARTER_QUESTION_FALLBACK = [
     "What does this website do?",
@@ -113,6 +121,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WIDGET_PATH = BASE_DIR / "widget" / "agent.js"
 DASHBOARD_PATH = BASE_DIR / "dashboard" / "index.html"
 WEBSITE_DIR = BASE_DIR / "website"
+
+
+def _normalize_simple_message(value: str) -> str:
+    return re.sub(r"\s+", " ", re.sub(r"[^\w\s]", " ", value.lower())).strip()
+
+
+def _simple_conversational_reply(query: str) -> str | None:
+    normalized = _normalize_simple_message(query)
+    if not normalized:
+        return None
+    if normalized in GREETING_RESPONSES:
+        return GREETING_RESPONSES[normalized]
+
+    tokens = normalized.split()
+    if 1 <= len(tokens) <= 3 and tokens[0] in {"hi", "hello", "hey"}:
+        return GREETING_RESPONSES[tokens[0]]
+
+    for phrase in ("good morning", "good afternoon", "good evening"):
+        if normalized.startswith(phrase):
+            return GREETING_RESPONSES[phrase]
+    return None
 
 
 def _utc_iso(value: datetime | None) -> str | None:
@@ -423,7 +452,7 @@ def _get_cached_suggested_questions(site_id: str) -> list[str] | None:
 def _set_cached_suggested_questions(site_id: str, questions: list[str]) -> None:
     _suggested_question_cache[site_id] = {"timestamp": time(), "questions": list(questions)}
 
-app = FastAPI(title="SiteCloser")
+app = FastAPI(title="5minBot")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -1149,6 +1178,14 @@ async def chat(site_id: str = Query(...), q: str = Query(...), session_id: str |
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
             return
 
+        greeting_reply = _simple_conversational_reply(q)
+        if greeting_reply is not None:
+            append_turn(site_id, session_id, "user", q)
+            append_turn(site_id, session_id, "assistant", greeting_reply)
+            yield f"data: {json.dumps({'type': 'token', 'content': greeting_reply})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
+
         history = get_history(site_id, session_id)
         effective_query = build_contextual_query(q, history)
         chunks, intent = await asyncio.to_thread(retrieve, site_id, effective_query)
@@ -1161,10 +1198,27 @@ async def chat(site_id: str = Query(...), q: str = Query(...), session_id: str |
             return
 
         chunk_ids = [chunk.chunk_id for chunk in chunks]
-        positions_by_chunk_id = {
-            chunk_row.id: chunk_row.position
-            for chunk_row in db.execute(select(Chunk).where(Chunk.id.in_(chunk_ids))).scalars().all()
-        }
+        chunk_rows = db.execute(
+            select(Chunk).where(Chunk.site_id == site_id, Chunk.id.in_(chunk_ids))
+        ).scalars().all()
+        positions_by_chunk_id = {chunk_row.id: chunk_row.position for chunk_row in chunk_rows}
+        valid_chunk_ids = set(positions_by_chunk_id)
+        if len(valid_chunk_ids) != len(chunk_ids):
+            dropped = len(chunk_ids) - len(valid_chunk_ids)
+            logger.warning(
+                "Discarded %s retrieved chunks for site %s because they did not match the requested site",
+                dropped,
+                site_id,
+            )
+            chunks = [chunk for chunk in chunks if chunk.chunk_id in valid_chunk_ids]
+
+        if not chunks:
+            append_turn(site_id, session_id, "user", q)
+            append_turn(site_id, session_id, "assistant", fallback_text)
+            yield f"data: {json.dumps({'type': 'no_answer', 'message': fallback_text})}\n\n"
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            return
+
         append_turn(site_id, session_id, "user", q)
         response_parts: list[str] = []
         async for token in generate_answer(q, chunks, site.name or site.url, intent=intent, history=history):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -10,10 +11,12 @@ from typing import Any
 
 import aiofiles
 import numpy as np
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import sessionmaker
 
 from backend.config import DATABASE_URL, EMBEDDING_MODEL, VECTOR_CACHE_TTL_SECONDS, VECTORS_DIR
+from backend.database import engine as app_engine
+from backend.models import Chunk
 
 
 @dataclass
@@ -27,6 +30,7 @@ class LoadedVectorStore:
 
 
 _vector_cache: dict[str, LoadedVectorStore] = {}
+logger = logging.getLogger(__name__)
 
 
 def _use_postgres() -> bool:
@@ -50,6 +54,54 @@ _Session = sessionmaker(bind=_pg_engine, future=True) if _pg_engine is not None 
 
 def _vector_path(site_id: str) -> Path:
     return Path(VECTORS_DIR) / f"{site_id}.json"
+
+
+def _filter_chunks_for_site(
+    site_id: str,
+    chunks: list[dict[str, Any]],
+    embeddings: np.ndarray | None = None,
+) -> tuple[list[dict[str, Any]], np.ndarray | None]:
+    if not chunks:
+        return chunks, embeddings
+
+    chunk_ids = [str(chunk.get("chunk_id", "")).strip() for chunk in chunks if str(chunk.get("chunk_id", "")).strip()]
+    if not chunk_ids:
+        return [], np.empty((0, 384), dtype=np.float32) if embeddings is not None else None
+
+    with app_engine.connect() as connection:
+        valid_ids = {
+            row[0]
+            for row in connection.execute(
+                select(Chunk.id).where(Chunk.site_id == site_id, Chunk.id.in_(chunk_ids))
+            ).all()
+        }
+
+    filtered_chunks: list[dict[str, Any]] = []
+    filtered_embedding_rows: list[np.ndarray] = []
+
+    for index, chunk in enumerate(chunks):
+        chunk_id = str(chunk.get("chunk_id", "")).strip()
+        if not chunk_id or chunk_id not in valid_ids:
+            continue
+        normalized_chunk = dict(chunk)
+        normalized_chunk["site_id"] = site_id
+        filtered_chunks.append(normalized_chunk)
+        if embeddings is not None and index < len(embeddings):
+            filtered_embedding_rows.append(np.asarray(embeddings[index], dtype=np.float32))
+
+    dropped = len(chunks) - len(filtered_chunks)
+    if dropped:
+        logger.warning(
+            "Dropped %s vector chunks that did not belong to requested site %s during vector store load",
+            dropped,
+            site_id,
+        )
+
+    if embeddings is None:
+        return filtered_chunks, None
+
+    matrix = np.stack(filtered_embedding_rows) if filtered_embedding_rows else np.empty((0, 384), dtype=np.float32)
+    return filtered_chunks, matrix
 
 
 def _ensure_site_vectors_table() -> None:
@@ -95,6 +147,7 @@ async def write_vector_store(site_id: str, chunks: list[dict[str, Any]], embeddi
         payload["chunks"].append(
             {
                 "chunk_id": chunk["chunk_id"],
+                "site_id": site_id,
                 "page_url": chunk["page_url"],
                 "page_title": chunk["page_title"],
                 "section": chunk["section"],
@@ -147,8 +200,12 @@ def load_vector_store(site_id: str) -> LoadedVectorStore | None:
     now = datetime.now(timezone.utc).timestamp()
     cached = _vector_cache.get(site_id)
     if cached is not None:
-        cached.last_accessed = now
-        return cached
+        if any(chunk.get("site_id") != site_id for chunk in cached.chunks):
+            logger.warning("Invalidating cached vector store for site %s due to missing or mismatched site ownership metadata", site_id)
+            _vector_cache.pop(site_id, None)
+        else:
+            cached.last_accessed = now
+            return cached
 
     if _use_postgres():
         store = _load_vector_store_postgres(site_id, now)
@@ -165,6 +222,7 @@ def load_vector_store(site_id: str) -> LoadedVectorStore | None:
 
     chunks = payload.get("chunks", [])
     embeddings = np.asarray([chunk["embedding"] for chunk in chunks], dtype=np.float32) if chunks else np.empty((0, 384), dtype=np.float32)
+    chunks, embeddings = _filter_chunks_for_site(site_id, chunks, embeddings)
     store = LoadedVectorStore(
         model=payload.get("model", EMBEDDING_MODEL),
         dimension=int(payload.get("dimension", 384)),
@@ -214,12 +272,14 @@ def _load_vector_store_postgres(site_id: str, now: float) -> LoadedVectorStore |
                 "position": row.position,
                 "text": row.text,
                 "token_count": row.token_count,
+                "site_id": site_id,
                 "embedding": embedding,
             }
         )
         embeddings.append(np.asarray(embedding, dtype=np.float32))
 
     matrix = np.stack(embeddings) if embeddings else np.empty((0, 384), dtype=np.float32)
+    chunks, matrix = _filter_chunks_for_site(site_id, chunks, matrix)
     return LoadedVectorStore(
         model=EMBEDDING_MODEL,
         dimension=int(matrix.shape[1]) if matrix.size else 384,
