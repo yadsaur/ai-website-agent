@@ -5,7 +5,7 @@
     dashboardUrl: "/dashboard?onboarding=1",
     workspaceUrl: "/dashboard",
     supportUrl: "/support",
-    fallbackDemoSiteId: "d94c64af-65d2-410f-a6d4-c9f05f9919c0",
+    fallbackDemoSiteId: "fa8a88b5-12cf-426b-9e2c-fe161ad1c6af",
     fallbackAppUrl: "https://ai-website-agent-aikinley.onrender.com",
     appUrl: window.location.origin,
     heroPreviewPath: "/website/hero-preview.html",

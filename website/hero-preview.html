@@ -400,7 +400,7 @@
   <script>
     (function () {
       var params = new URLSearchParams(window.location.search);
-      var siteId = params.get("site_id") || "d94c64af-65d2-410f-a6d4-c9f05f9919c0";
+      var siteId = params.get("site_id") || "fa8a88b5-12cf-426b-9e2c-fe161ad1c6af";
       var appUrl = params.get("app_url") || window.location.origin;
       var mode = params.get("mode") || "default";
       var FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
@@ -704,7 +704,7 @@
 
       window.addEventListener("message", function (event) {
         var data = event.data || {};
-        if ((data.type === "sitecloser:ask" || data.type === "5minbot:ask") && typeof data.question === "string") {
+        if (data.type === "5minbot:ask" && typeof data.question === "string") {
           sendChat(data.question);
         }
       });
