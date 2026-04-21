@@ -7,14 +7,17 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #050912;
-      --panel: rgba(14, 18, 29, 0.84);
-      --panel-strong: rgba(20, 24, 38, 0.92);
+      --bg: #07070e;
+      --panel: rgba(12, 16, 30, 0.88);
+      --panel-strong: rgba(16, 22, 38, 0.96);
+      --panel-soft: rgba(255, 255, 255, 0.05);
       --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(139, 92, 246, 0.26);
       --text: #f5f7ff;
-      --muted: #98a2b9;
-      --accent: #7c3aed;
-      --accent-strong: #5b21b6;
+      --muted: #a8b0cb;
+      --accent: #6d28d9;
+      --accent-strong: #8b5cf6;
+      --accent-cyan: #22d3ee;
     }
 
     * { box-sizing: border-box; }
@@ -25,14 +28,14 @@
       min-height: 100%;
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 28%),
-        linear-gradient(180deg, #070b14, #05070d);
+        radial-gradient(circle at top left, rgba(109, 40, 217, 0.18), transparent 30%),
+        linear-gradient(180deg, #0a0d18, #05060d);
       color: var(--text);
       overflow: hidden;
     }
 
     body {
-      padding: 18px;
+      padding: 16px;
     }
 
     body.mode-hero {
@@ -40,54 +43,50 @@
     }
 
     .preview-page {
+      height: calc(100vh - 32px);
       display: grid;
-      grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+      grid-template-columns: minmax(220px, 0.84fr) minmax(0, 1.16fr);
       gap: 16px;
-      height: calc(100vh - 36px);
-      min-height: calc(100vh - 36px);
-      min-width: 0;
     }
 
     body.mode-hero .preview-page {
+      height: 100vh;
       grid-template-columns: 1fr;
       gap: 0;
-      height: 100vh;
-      min-height: 100vh;
-      align-items: stretch;
     }
 
-    .glass-panel {
-      border-radius: 24px;
+    .panel {
+      border-radius: 26px;
       border: 1px solid var(--border);
       background: var(--panel);
-      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
-      backdrop-filter: blur(16px);
+      box-shadow: 0 24px 80px rgba(2, 6, 23, 0.4);
+      backdrop-filter: blur(18px);
     }
 
-    .preview-sidebar {
-      padding: 22px 20px;
+    .sidebar {
       display: grid;
       align-content: start;
       gap: 16px;
+      padding: 24px 22px;
     }
 
-    body.mode-hero .preview-sidebar {
+    body.mode-hero .sidebar {
       display: none;
     }
 
     .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       width: fit-content;
-      padding: 8px 12px;
+      padding: 9px 14px;
       border-radius: 999px;
-      border: 1px solid rgba(167, 139, 250, 0.16);
-      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.24);
+      background: rgba(109, 40, 217, 0.14);
       color: #e9ddff;
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
@@ -96,80 +95,83 @@
       width: 8px;
       height: 8px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #c4b5fd, var(--accent));
-      box-shadow: 0 0 16px rgba(124, 58, 237, 0.65);
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent-cyan));
+      box-shadow: 0 0 18px rgba(139, 92, 246, 0.5);
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(2rem, 4vw, 2.85rem);
-      line-height: 0.96;
-      letter-spacing: -0.05em;
+      font-size: clamp(2rem, 4vw, 2.9rem);
+      line-height: 0.98;
+      letter-spacing: -0.06em;
     }
 
     p {
       margin: 0;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.7;
       font-size: 14px;
     }
 
-    .prompt-list {
+    .prompt-list,
+    .info-stack,
+    .chip-stack,
+    .followup-stack {
       display: grid;
       gap: 10px;
     }
 
-    .prompt-chip {
+    .prompt-chip,
+    .chat-chip {
       display: inline-flex;
       align-items: center;
       justify-content: flex-start;
       width: fit-content;
       max-width: 100%;
-      padding: 10px 14px;
+      padding: 11px 16px;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
       background: rgba(255, 255, 255, 0.04);
-      color: #eef2ff;
+      color: var(--text);
       cursor: pointer;
       font-size: 13px;
-      line-height: 1.35;
+      font-weight: 600;
       text-align: left;
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .prompt-chip:hover {
+    .prompt-chip:hover,
+    .chat-chip:hover {
       transform: translateY(-1px);
-      border-color: rgba(167, 139, 250, 0.32);
-      background: rgba(124, 58, 237, 0.12);
+      border-color: var(--border-strong);
+      background: rgba(109, 40, 217, 0.1);
     }
 
     .mini-card {
-      padding: 15px 16px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 16px;
+      border-radius: 20px;
+      background: var(--panel-soft);
+      border: 1px solid var(--border);
     }
 
     .mini-card strong {
       display: block;
-      margin-bottom: 6px;
-      font-size: 13px;
-      color: #f8faff;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-size: 14px;
     }
 
-    .preview-chat {
+    .chat-shell {
       display: flex;
       flex-direction: column;
       min-height: 0;
-      height: 100%;
-      min-width: 0;
       overflow: hidden;
       background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 28%),
-        linear-gradient(180deg, rgba(10, 14, 24, 0.96), rgba(7, 10, 18, 0.98));
+        radial-gradient(circle at top left, rgba(109, 40, 217, 0.16), transparent 30%),
+        linear-gradient(180deg, rgba(9, 12, 24, 0.98), rgba(5, 6, 15, 1));
     }
 
-    body.mode-hero .preview-chat {
+    body.mode-hero .chat-shell {
       border-radius: 0;
       border: 0;
       box-shadow: none;
@@ -178,12 +180,11 @@
 
     .chat-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      align-items: center;
+      gap: 14px;
       padding: 16px 18px;
-      background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(91, 33, 182, 0.92));
-      color: #ffffff;
+      background: linear-gradient(135deg, rgba(109, 40, 217, 0.94), rgba(139, 92, 246, 0.92));
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
@@ -198,40 +199,30 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.12);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .chat-messages {
       flex: 1;
       min-height: 0;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      padding: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
-      scrollbar-color: rgba(167, 139, 250, 0.45) transparent;
+      scrollbar-color: rgba(139, 92, 246, 0.42) transparent;
     }
 
-    .chat-messages::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    .chat-messages::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
+    .chat-messages::-webkit-scrollbar { width: 10px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
     .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(139, 92, 246, 0.32);
       border-radius: 999px;
-      background: rgba(167, 139, 250, 0.34);
       border: 2px solid transparent;
       background-clip: padding-box;
-    }
-
-    body.mode-hero .chat-messages {
-      padding: 18px 18px 14px;
     }
 
     .chat-row {
@@ -245,98 +236,51 @@
     .chat-row.assistant {
       justify-content: flex-start;
       flex-direction: column;
-      align-items: flex-start;
       gap: 8px;
+      align-items: flex-start;
     }
 
     .bubble {
       max-width: 88%;
-      padding: 12px 14px;
+      padding: 13px 15px;
       border-radius: 18px;
       font-size: 14px;
-      line-height: 1.55;
+      line-height: 1.6;
       word-break: break-word;
     }
 
     .chat-row.user .bubble {
       background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #ffffff;
+      color: white;
       border-top-right-radius: 8px;
-      box-shadow: 0 12px 30px rgba(91, 33, 182, 0.18);
+      box-shadow: 0 14px 32px rgba(109, 40, 217, 0.22);
     }
 
     .chat-row.assistant .bubble {
       background: rgba(255, 255, 255, 0.08);
-      color: #f8fbff;
+      color: var(--text);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-top-left-radius: 8px;
-      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
     }
 
-    .assistant-bubble,
-    .assistant-bubble * { color: inherit; }
     .assistant-bubble p { margin: 0 0 8px; }
     .assistant-bubble p:last-child { margin-bottom: 0; }
-    .assistant-bubble strong { font-weight: 600; }
+    .assistant-bubble strong { font-weight: 700; }
     .assistant-bubble em { font-style: italic; }
-    .assistant-bubble ol,
-    .assistant-bubble ul { margin: 6px 0; padding-left: 20px; }
-    .assistant-bubble li { margin-bottom: 4px; line-height: 1.5; }
-    .assistant-bubble h1,
-    .assistant-bubble h2,
-    .assistant-bubble h3 { font-size: 14px; font-weight: 600; margin: 8px 0 4px; }
-
-    .typing {
-      opacity: 0.78;
-      font-style: italic;
-      color: #d7ddf6;
-    }
-
-    .chip-stack,
-    .chip-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-start;
-    }
-
-    .starter-stack {
-      margin-bottom: 10px;
-    }
-
-    .chat-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-start;
-      width: fit-content;
-      max-width: 90%;
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.04);
-      color: #eef2ff;
-      cursor: pointer;
-      font-size: 13px;
-      line-height: 1.35;
-      text-align: left;
-    }
-
-    .followup-chip {
-      font-size: 12px;
-      padding: 6px 14px;
-    }
+    .assistant-bubble ul,
+    .assistant-bubble ol { margin: 8px 0; padding-left: 18px; }
+    .assistant-bubble li { margin-bottom: 4px; }
 
     .sources {
-      display: flex;
-      flex-direction: column;
+      display: grid;
       gap: 8px;
     }
 
     .sources-label {
       font-size: 11px;
       font-weight: 700;
-      letter-spacing: 0.04em;
       text-transform: uppercase;
+      letter-spacing: 0.1em;
       color: var(--muted);
     }
 
@@ -352,12 +296,12 @@
       max-width: 100%;
       padding: 7px 11px;
       border-radius: 999px;
-      background: rgba(124, 58, 237, 0.14);
+      background: rgba(109, 40, 217, 0.14);
       color: #efe9ff;
       text-decoration: none;
       font-size: 12px;
-      font-weight: 600;
-      border: 1px solid rgba(167, 139, 250, 0.22);
+      font-weight: 700;
+      border: 1px solid rgba(139, 92, 246, 0.22);
     }
 
     .chat-controls {
@@ -366,23 +310,22 @@
       gap: 10px;
       padding: 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(9, 12, 20, 0.96);
+      background: rgba(8, 11, 21, 0.96);
     }
 
     .chat-input {
       width: 100%;
       min-width: 0;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
       border-radius: 999px;
       padding: 12px 14px;
       background: rgba(255, 255, 255, 0.05);
-      color: #f8fafc;
-      font: inherit;
+      color: var(--text);
       outline: none;
     }
 
     .chat-input::placeholder {
-      color: #8f9ab8;
+      color: var(--muted);
     }
 
     .chat-send {
@@ -390,61 +333,67 @@
       border-radius: 999px;
       padding: 10px 16px;
       background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #ffffff;
+      color: white;
       font-weight: 700;
-      font: inherit;
-      cursor: pointer;
     }
 
     .chat-footer {
       padding: 10px 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(8, 11, 21, 0.96);
       color: var(--muted);
       font-size: 11px;
-      background: rgba(9, 12, 20, 0.96);
     }
 
     @media (max-width: 900px) {
-      body { padding: 14px; }
-      .preview-page { grid-template-columns: 1fr; min-height: calc(100vh - 28px); }
-      .preview-sidebar { gap: 14px; }
-      .chat-messages { min-height: 320px; }
+      body { padding: 12px; }
+      .preview-page {
+        height: calc(100vh - 24px);
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        display: none;
+      }
       body.mode-hero { padding: 0; }
     }
   </style>
 </head>
 <body>
   <div class="preview-page">
-    <section class="preview-sidebar glass-panel">
+    <aside class="sidebar panel">
       <span class="eyebrow">Live website preview</span>
-      <h1>Ask what buyers actually ask</h1>
-<p>This preview talks to the same live chatbot used on the dashboard and embedded widget, but inside a contained layout that feels native to the page.</p>
-      <div class="prompt-list">
-        <button class="prompt-chip" type="button" data-prompt="What does this product do?">&rarr; What does this product do?</button>
-        <button class="prompt-chip" type="button" data-prompt="How much does it cost?">&rarr; How much does it cost?</button>
-        <button class="prompt-chip" type="button" data-prompt="How do I get started?">&rarr; How do I get started?</button>
-      </div>
-      <div class="mini-card">
-        <strong>Contained preview</strong>
-        <p>No floating widget overlay here. This keeps the macbook-style preview clean while staying fully interactive.</p>
-      </div>
-      <div class="mini-card">
-        <strong>Grounded answers</strong>
-        <p>Answers come from processed site content and show a source chip only when a real page supports the reply.</p>
-      </div>
-    </section>
+      <h1>Ask what serious buyers ask before they convert</h1>
+      <p>This preview talks to the same live chatbot experience used by the demo and workspace, just inside a cleaner browser shell.</p>
 
-    <section class="preview-chat glass-panel">
+      <div class="prompt-list">
+        <button class="prompt-chip" type="button" data-prompt="What does this product do?">→ What does this product do?</button>
+        <button class="prompt-chip" type="button" data-prompt="How much does it cost?">→ How much does it cost?</button>
+        <button class="prompt-chip" type="button" data-prompt="How do I get started?">→ How do I get started?</button>
+      </div>
+
+      <div class="info-stack">
+        <div class="mini-card">
+          <strong>Grounded answers</strong>
+          <p>When a real page supports the answer, the chatbot can show a source chip. If support is missing, it falls back instead of guessing.</p>
+        </div>
+        <div class="mini-card">
+          <strong>Built for buyer intent</strong>
+          <p>Pricing, fit, support, and setup questions are the best way to evaluate whether the bot feels useful.</p>
+        </div>
+      </div>
+    </aside>
+
+    <section class="chat-shell panel">
       <div class="chat-header">
-      <div class="chat-title" id="chat-title">Chat with 5minBot</div>
+        <div class="chat-title" id="chat-title">Chat with 5minBot</div>
         <span class="chat-pill">Interactive</span>
       </div>
       <div class="chat-messages" id="chat-messages"></div>
       <div class="chat-controls">
-        <input id="chat-input" class="chat-input" type="text" placeholder="Ask a question..." />
+        <input id="chat-input" class="chat-input" type="text" placeholder="Ask a question...">
         <button id="chat-send" class="chat-send" type="button">Send</button>
       </div>
-    <div class="chat-footer">Powered by 5minBot</div>
+      <div class="chat-footer">Powered by 5minBot</div>
     </section>
   </div>
 
@@ -455,9 +404,8 @@
       var appUrl = params.get("app_url") || window.location.origin;
       var mode = params.get("mode") || "default";
       var FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
-      var markedLoader = null;
       var state = {
-      siteName: "5minBot",
+        siteName: "5minBot",
         sessionId: "preview-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
         activeEventSource: null,
         suggestedQuestions: null,
@@ -474,36 +422,41 @@
         document.body.classList.add("mode-hero");
       }
 
-      function loadMarked() {
-        if (window.marked && typeof window.marked.parse === "function") {
-          return Promise.resolve(window.marked);
+      function escapeHtml(value) {
+        return String(value || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function renderInlineMarkdown(value) {
+        return escapeHtml(value)
+          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.+?)\*/g, "<em>$1</em>");
+      }
+
+      function renderSimpleMarkdown(value) {
+        var blocks = String(value || "").trim().split(/\n\s*\n/).filter(Boolean);
+        if (!blocks.length) {
+          return "";
         }
-        if (markedLoader) return markedLoader;
-        markedLoader = new Promise(function (resolve, reject) {
-          var existing = document.querySelector('script[data-sitecloser-marked="true"]');
-          if (existing) {
-            existing.addEventListener("load", function () { resolve(window.marked); }, { once: true });
-            existing.addEventListener("error", reject, { once: true });
-            return;
+
+        return blocks.map(function (block) {
+          var lines = block.split("\n").map(function (line) { return line.trim(); }).filter(Boolean);
+          var allBullets = lines.length && lines.every(function (line) { return /^[-*]\s+/.test(line); });
+          if (allBullets) {
+            return "<ul>" + lines.map(function (line) {
+              return "<li>" + renderInlineMarkdown(line.replace(/^[-*]\s+/, "")) + "</li>";
+            }).join("") + "</ul>";
           }
-          var markedScript = document.createElement("script");
-          markedScript.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
-          markedScript.async = true;
-          markedScript.setAttribute("data-sitecloser-marked", "true");
-          markedScript.onload = function () { resolve(window.marked); };
-          markedScript.onerror = reject;
-          document.head.appendChild(markedScript);
-        });
-        return markedLoader;
+          return "<p>" + lines.map(renderInlineMarkdown).join("<br>") + "</p>";
+        }).join("");
       }
 
       function renderAssistantContent(bubble, text) {
-        var value = text || "";
-        if (window.marked && typeof window.marked.parse === "function") {
-          bubble.innerHTML = window.marked.parse(value);
-        } else {
-          bubble.textContent = value;
-        }
+        bubble.innerHTML = renderSimpleMarkdown(text || "");
       }
 
       function scrollChatToBottom() {
@@ -525,13 +478,14 @@
         var row = document.createElement("div");
         row.className = "chat-row " + role;
         var bubble = document.createElement("div");
-        bubble.className = "bubble";
+        bubble.className = "bubble" + (role === "assistant" ? " assistant-bubble" : "");
+
         if (role === "assistant") {
-          bubble.className += " assistant-bubble";
           renderAssistantContent(bubble, text);
         } else {
           bubble.textContent = text;
         }
+
         row.appendChild(bubble);
         chatMessages.appendChild(row);
         scrollChatToBottom();
@@ -563,12 +517,14 @@
       function appendSourceLinks(container, payload) {
         var sources = normalizeSources(payload);
         if (!sources.length) return;
+
         var wrap = document.createElement("div");
         wrap.className = "sources";
         var label = document.createElement("div");
         label.className = "sources-label";
         label.textContent = "Sources";
         wrap.appendChild(label);
+
         var list = document.createElement("div");
         list.className = "source-list";
         sources.forEach(function (source, index) {
@@ -577,7 +533,7 @@
           link.target = "_blank";
           link.rel = "noopener noreferrer";
           link.className = "source-chip";
-          link.textContent = source.title && source.section ? (source.title + " - " + source.section) : (source.title || ("Source " + (index + 1)));
+          link.textContent = source.title && source.section ? (source.title + " · " + source.section) : (source.title || ("Source " + (index + 1)));
           list.appendChild(link);
         });
         wrap.appendChild(list);
@@ -588,13 +544,15 @@
       function renderStarterSuggestions(questions) {
         if (!questions || !questions.length || state.starterDismissed || hasConversationMessages()) return;
         if (chatMessages.querySelector(".starter-stack")) return;
+
         var wrap = document.createElement("div");
         wrap.className = "chip-stack starter-stack";
+
         questions.slice(0, 3).forEach(function (question) {
           var chip = document.createElement("button");
           chip.type = "button";
           chip.className = "chat-chip";
-          chip.textContent = "-> " + question;
+          chip.textContent = "→ " + question;
           chip.addEventListener("click", function () {
             removeStarterChips();
             chatInput.value = question;
@@ -602,6 +560,7 @@
           });
           wrap.appendChild(chip);
         });
+
         chatMessages.appendChild(wrap);
         scrollChatToBottom();
       }
@@ -616,18 +575,18 @@
           if (!data.questions || !data.questions.length) return;
           state.suggestedQuestions = data.questions.slice(0, 3);
           renderStarterSuggestions(state.suggestedQuestions);
-        } catch (err) {}
+        } catch (error) {}
       }
 
       function appendFollowups(container, questions) {
         if (!questions || !questions.length) return;
         var wrap = document.createElement("div");
-        wrap.className = "chip-group followup-stack";
+        wrap.className = "followup-stack";
         questions.slice(0, 2).forEach(function (question) {
           var chip = document.createElement("button");
           chip.type = "button";
-          chip.className = "chat-chip followup-chip";
-          chip.textContent = "-> " + question;
+          chip.className = "chat-chip";
+          chip.textContent = "→ " + question;
           chip.addEventListener("click", function () {
             wrap.remove();
             sendChat(question, { preserveStarter: true, preserveFollowups: true });
@@ -657,7 +616,7 @@
           var data = await response.json();
           if (!data.questions || !data.questions.length) return;
           appendFollowups(container, data.questions);
-        } catch (err) {}
+        } catch (error) {}
       }
 
       function isFallbackAnswer(text) {
@@ -675,6 +634,7 @@
 
         addMessage("user", question);
         chatInput.value = "";
+
         var assistantMessage = addMessage("assistant", "");
         var assistantBubble = assistantMessage.bubble;
         var answerText = "";
@@ -687,9 +647,6 @@
 
         state.activeEventSource = source;
         renderAssistantContent(assistantBubble, "Thinking...");
-        loadMarked().then(function () {
-          renderAssistantContent(assistantBubble, answerText ? answerText : "Thinking...");
-        }).catch(function () {});
 
         source.onmessage = function (event) {
           try {
@@ -713,7 +670,7 @@
               }
             }
             scrollChatToBottom();
-          } catch (err) {
+          } catch (error) {
             renderAssistantContent(assistantBubble, "Something went wrong. Please try again.");
             source.close();
             state.activeEventSource = null;
@@ -736,7 +693,7 @@
           var data = await response.json();
           state.siteName = data.name || "this site";
           chatTitle.textContent = "Chat with " + state.siteName;
-        } catch (err) {}
+        } catch (error) {}
       }
 
       document.querySelectorAll("[data-prompt]").forEach(function (button) {
@@ -747,7 +704,7 @@
 
       window.addEventListener("message", function (event) {
         var data = event.data || {};
-        if (data.type === "sitecloser:ask" && typeof data.question === "string") {
+        if ((data.type === "sitecloser:ask" || data.type === "5minbot:ask") && typeof data.question === "string") {
           sendChat(data.question);
         }
       });
@@ -762,7 +719,6 @@
 
       loadSiteName();
       prefetchStarterSuggestions();
-      loadMarked().catch(function () {});
     })();
   </script>
 </body>

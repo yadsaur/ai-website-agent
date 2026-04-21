@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5minBot demo | Try the live website chatbot</title>
-  <meta name="description" content="Try the live 5minBot demo. Ask real pricing, setup, and navigation questions, and see what grounded website chat feels like before you launch.">
-  <meta property="og:title" content="5minBot demo | Try the live website chatbot">
-  <meta property="og:description" content="A live, interactive demo of 5minBot trained on the product website.">
+  <title>Live AI Chatbot Demo | 5minBot</title>
+  <meta name="description" content="Try the live 5minBot demo. Ask pricing, setup, support, and navigation questions to see how a grounded website chatbot feels before launch.">
+  <meta property="og:title" content="Live AI Chatbot Demo | 5minBot">
+  <meta property="og:description" content="Use the real floating 5minBot widget on this page and test how it responds to real buyer questions.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://5minbot.com/demo">
   <meta property="og:site_name" content="5minBot">
-  <meta name="theme-color" content="#f7f8fc">
+  <meta name="theme-color" content="#07070e">
+  <link rel="canonical" href="https://5minbot.com/demo">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,72 +22,85 @@
   <div class="site-shell">
     <div class="noise"></div>
     <header class="site-nav" data-nav></header>
+
     <main class="page">
       <section class="page-hero">
         <div class="container">
-          <div class="section-header centered" data-reveal>
-            <span class="eyebrow">Interactive demo</span>
-            <h1>Try the chatbot the way a real <span class="gradient-text">website visitor</span> would</h1>
-            <p class="lede">This page uses the same 5minBot experience you can put on your own site. Ask about pricing, setup, and where to click next, then decide whether it feels ready for your website.</p>
+          <div class="section-header centered">
+            <span class="eyebrow" data-reveal>Live demo</span>
+            <h1 data-reveal>See 5minBot answer real website questions in <span class="gradient-text">real time</span></h1>
+            <p class="lede" data-reveal>This page uses the real floating widget. Ask about pricing, setup, support, or where to click next, and judge whether the experience feels ready for your own site.</p>
           </div>
         </div>
       </section>
 
       <section class="section">
-        <div class="container demo-grid">
-          <article class="demo-card glass-card" data-reveal>
-            <h3>Use the real widget</h3>
-            <p>The floating widget in the bottom-right corner is the actual production experience. Use the prompt chips below to send real questions into it and see how it behaves on a live page.</p>
-            <div class="demo-prompts">
+        <div class="container demo-layout">
+          <div>
+            <div class="section-header">
+              <span class="eyebrow" data-reveal>What to try</span>
+              <h2 data-reveal>Pressure-test the questions buyers actually ask</h2>
+            </div>
+            <div class="prompt-list" data-reveal>
               <button class="prompt-chip" type="button" data-demo-ask="How much does it cost?">How much does it cost?</button>
               <button class="prompt-chip" type="button" data-demo-ask="What does this product do?">What does this product do?</button>
               <button class="prompt-chip" type="button" data-demo-ask="How do I get started?">How do I get started?</button>
               <button class="prompt-chip" type="button" data-demo-ask="Where do I click to start?">Where do I click to start?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="Is there a free trial?">Is there a free trial?</button>
+              <button class="prompt-chip" type="button" data-demo-ask="Who is this best for?">Who is this best for?</button>
             </div>
 
-            <div class="detail-grid" style="grid-template-columns:1fr; gap:14px; margin-top: 10px;">
-              <article class="detail-card glass-card" style="padding:20px;">
+            <div class="two-up-grid" style="margin-top: 24px;">
+              <article class="doc-card glass-card lift-card" data-reveal>
                 <h3>What good looks like</h3>
-                <p>Look for short, grounded answers, one clean source chip when a real page supports the reply, and useful follow-up prompts that keep the conversation moving.</p>
+                <p>Look for short answers, useful next steps, and a source chip only when a real page supports the reply.</p>
               </article>
-              <article class="detail-card glass-card" style="padding:20px;">
-                <h3>What to test next</h3>
-                <p>Try pricing, onboarding, trust, support, and where-to-click questions. That gives you the fastest signal on whether the chatbot feels ready for your own site.</p>
+              <article class="doc-card glass-card lift-card" data-reveal>
+                <h3>What to notice</h3>
+                <p>Test pricing, fit, support, and navigation questions. Those are the fastest signals of whether the chatbot feels genuinely helpful.</p>
               </article>
             </div>
-          </article>
+          </div>
 
-          <article class="demo-card glass-card" data-reveal>
-            <h3>Why this demo matters</h3>
-            <p>This page intentionally stays clean so the real widget can behave exactly like it would on your website. You are testing the same floating product your visitors would use after launch.</p>
-            <div class="detail-grid" style="grid-template-columns:1fr; gap:14px;">
-              <article class="detail-card glass-card" style="padding:20px;">
-                <h3>Look for grounded behavior</h3>
-                <p>Test answer quality, source visibility, and whether the chatbot keeps the conversation useful instead of sounding generic or robotic.</p>
-              </article>
-              <article class="detail-card glass-card" style="padding:20px;">
-                <h3>Then move into onboarding</h3>
-                <p>If the widget feels clear and trustworthy here, the next step is simple: add your site in the workspace and test the same prompts on your own content.</p>
-              </article>
+          <div class="demo-stage glass-card lift-card" data-reveal>
+            <div class="demo-stage-content">
+              <span class="eyebrow">Real widget on this page</span>
+              <h3>The floating chat in the bottom-right corner is the actual product experience.</h3>
+              <p>We intentionally keep this page clean so you can focus on the real widget behavior instead of a contained mockup. Click a prompt chip or open the widget manually and start asking questions.</p>
+
+              <div class="demo-stage-panel">
+                <strong style="display:block; margin-bottom:10px; color:var(--text-soft);">Suggested test sequence</strong>
+                <ul class="plain-list">
+                  <li>Ask a pricing question.</li>
+                  <li>Ask how setup works.</li>
+                  <li>Ask where to click to begin.</li>
+                  <li>Ask who the product is for.</li>
+                </ul>
+              </div>
+
+              <div class="demo-stage-panel">
+                <strong style="display:block; margin-bottom:10px; color:var(--text-soft);">Why this matters</strong>
+                <p style="margin:0;">If the widget feels clear and trustworthy here, the next step is simple: train 5minBot on your own website and run the same test flow in the workspace.</p>
+              </div>
             </div>
-          </article>
+          </div>
         </div>
       </section>
 
       <section class="section-tight">
         <div class="container">
-          <div class="detail-grid">
-            <article class="detail-card glass-card" data-reveal>
-              <h3>See pricing handling</h3>
-              <p>Test whether the chatbot answers high-intent buying questions clearly and without unnecessary filler.</p>
+          <div class="three-up-grid">
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>Pricing questions</h3>
+              <p>See whether the chatbot answers cost and plan questions directly without turning them into vague marketing copy.</p>
             </article>
-            <article class="detail-card glass-card" data-reveal>
-              <h3>Pressure-test trust</h3>
-              <p>Ask where to click, how setup works, or what happens next to see how grounded the replies feel.</p>
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>Setup questions</h3>
+              <p>Check whether the bot explains the rollout clearly enough for a first-time evaluator to act.</p>
             </article>
-            <article class="detail-card glass-card" data-reveal>
-              <h3>Move straight into onboarding</h3>
-              <p>Once the quality feels right, add your own site and run the same test flow in the workspace.</p>
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>Navigation questions</h3>
+              <p>Test whether the widget can guide someone to the right page or button instead of just summarizing content.</p>
             </article>
           </div>
         </div>
@@ -92,11 +108,11 @@
 
       <section class="section">
         <div class="container">
-          <div class="cta-panel glass-card" data-reveal>
+          <div class="final-cta glass-card" data-reveal>
             <div>
               <span class="eyebrow">Next step</span>
               <h2 style="margin-top: 18px;">Ready to put the same chatbot on your own website?</h2>
-              <p class="lede" style="margin-top: 12px;">The workspace lets you process one site, inspect the answers, and launch only when the experience feels production-ready.</p>
+              <p class="lede">Launch the workspace, process one public URL, and test the exact same questions on your own site content.</p>
             </div>
             <div class="button-row">
               <a class="button button-primary" href="/dashboard?onboarding=1">Add your site</a>
@@ -106,59 +122,9 @@
         </div>
       </section>
     </main>
+
     <footer class="footer" data-footer></footer>
   </div>
   <script src="/website/js/main.js"></script>
-  <script>
-    (function () {
-      async function bootstrapDemoWidget() {
-        if (document.getElementById("aiwa-widget")) {
-          return;
-        }
-
-        const fallbackSiteId = "fc067e83-d493-43e5-a97d-022a65738ba1";
-        let siteId = fallbackSiteId;
-
-        try {
-          const response = await fetch("/api/sites");
-          if (response.ok) {
-            const payload = await response.json();
-            const sites = Array.isArray(payload.sites) ? payload.sites : [];
-            const readySite =
-              sites.find((site) => site && site.status === "ready" && String(site.url || "").includes("5minbot.com")) ||
-              sites.find((site) => site && site.status === "ready");
-            if (readySite && readySite.site_id) {
-              siteId = readySite.site_id;
-            }
-          }
-        } catch (error) {}
-
-        if (document.querySelector('script[data-5minbot-demo-inline="true"]')) {
-          return;
-        }
-
-        const script = document.createElement("script");
-        script.src = window.location.origin + "/widget/agent.js";
-        script.setAttribute("data-site-id", siteId);
-        script.setAttribute("data-5minbot-demo-inline", "true");
-        script.onload = function () {
-          window.setTimeout(function () {
-            const toggle = document.getElementById("aiwa-toggle");
-            const panel = document.getElementById("aiwa-panel");
-            if (toggle && panel && !panel.classList.contains("aiwa-open")) {
-              toggle.click();
-            }
-          }, 320);
-        };
-        document.body.appendChild(script);
-      }
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", bootstrapDemoWidget);
-      } else {
-        bootstrapDemoWidget();
-      }
-    })();
-  </script>
 </body>
 </html>

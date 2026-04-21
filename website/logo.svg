@@ -1,0 +1,21 @@
+<svg width="226" height="52" viewBox="0 0 226 52" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">5minBot</title>
+  <desc id="logoDesc">5minBot wordmark with gradient icon</desc>
+  <defs>
+    <linearGradient id="logoGradient" x1="5" y1="4" x2="44" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="0.52" stop-color="#6D28D9"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="textGradient" x1="63" y1="8" x2="170" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F7FF"/>
+      <stop offset="0.78" stop-color="#D7DAF8"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="44" height="44" rx="15" fill="url(#logoGradient)"/>
+  <path d="M19.5 26.2L26.7 17H33L27.9 24.4H35.3L22.9 37L27.4 28.8H19.5V26.2Z" fill="white"/>
+  <path d="M63.2 36V15.5H70.1V36H63.2ZM73.7 36V20.7H80.1V23C81 21.3 82.8 20.2 85.2 20.2C87.7 20.2 89.4 21.4 90.2 23.3C91.3 21.4 93.3 20.2 95.8 20.2C99.7 20.2 102.2 22.8 102.2 27.4V36H95.4V28.7C95.4 26.7 94.4 25.6 92.8 25.6C91.2 25.6 90.1 26.8 90.1 28.8V36H83.4V28.7C83.4 26.7 82.4 25.6 80.8 25.6C79.1 25.6 78 26.8 78 28.8V36H73.7Z" fill="url(#textGradient)"/>
+  <path d="M105.8 36V13.6H112.6V36H105.8ZM105.5 18.1V13.2H112.9V18.1H105.5Z" fill="url(#textGradient)"/>
+  <path d="M122.2 36.5C117.2 36.5 114 33.4 114 28.5C114 23.7 117.2 20.2 122.2 20.2C127.1 20.2 130.5 23.6 130.5 28.5C130.5 33.4 127.1 36.5 122.2 36.5ZM122.2 31C123.9 31 125 30 125 28.4C125 26.8 123.9 25.7 122.2 25.7C120.5 25.7 119.4 26.8 119.4 28.4C119.4 30 120.5 31 122.2 31Z" fill="url(#textGradient)"/>
+  <path d="M132.4 36V20.7H138.8V23.4C139.8 21.4 141.8 20.2 144.5 20.2C148.7 20.2 151.5 23.1 151.5 27.7V36H144.7V28.9C144.7 26.8 143.6 25.6 141.9 25.6C140.1 25.6 139 26.9 139 29V36H132.4Z" fill="url(#textGradient)"/>
+</svg>

@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5minBot security</title>
-  <meta name="description" content="Current security posture and product safeguards for the 5minBot hosted application.">
-  <meta property="og:title" content="5minBot security">
-  <meta property="og:description" content="Current security posture and product safeguards for the 5minBot hosted application.">
+  <title>5minBot Security</title>
+  <meta name="description" content="Understand the current 5minBot security posture, grounded-answer model, and the boundaries of the hosted product.">
+  <meta property="og:title" content="5minBot Security">
+  <meta property="og:description" content="Clear, honest notes on how 5minBot handles grounded answers, public-site use, and current product safeguards.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://5minbot.com/security">
   <meta property="og:site_name" content="5minBot">
-  <meta name="theme-color" content="#f7f8fc">
+  <meta name="theme-color" content="#07070e">
+  <link rel="canonical" href="https://5minbot.com/security">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,41 +24,35 @@
     <header class="site-nav" data-nav></header>
     <main class="page">
       <section class="page-hero">
-        <div class="container support-shell">
-          <div class="section-header" data-reveal>
-            <span class="eyebrow">Security</span>
-            <h1>Practical safeguards, clear boundaries, and honest claims</h1>
-            <p class="lede">5minBot is built to give teams confidence without overselling security posture. This page reflects the current hosted product as it exists today.</p>
+        <div class="container doc-shell">
+          <div class="section-header">
+            <span class="eyebrow" data-reveal>Security</span>
+            <h1 data-reveal>Practical safeguards, honest boundaries, and no inflated claims</h1>
+            <p class="lede" data-reveal>5minBot is designed to be trustworthy without pretending the current hosted product is something it is not. This page reflects the product as it exists today.</p>
           </div>
         </div>
       </section>
 
       <section class="section">
-        <div class="container support-grid support-shell">
-          <article class="support-card glass-card" data-reveal>
-            <h3>Grounded answers reduce hallucination risk</h3>
-            <p>The chatbot is designed to answer from processed site content and fall back when the answer is not supported.</p>
-          </article>
-          <article class="support-card glass-card" data-reveal>
-            <h3>Source display for supported answers</h3>
-            <p>When the product can cite a real page, it shows the page link so teams and visitors can verify the answer path.</p>
-          </article>
-          <article class="support-card glass-card" data-reveal>
-            <h3>Hosted service architecture</h3>
-            <p>The current hosted deployment runs on managed infrastructure and uses external AI services for embeddings and response generation.</p>
-          </article>
-          <article class="support-card glass-card" data-reveal>
-            <h3>Public content only</h3>
-            <p>The current product is best suited for public websites and public product information, not highly sensitive internal knowledge.</p>
-          </article>
-          <article class="support-card glass-card" data-reveal>
-            <h3>No unsupported certification claims</h3>
-            <p>5minBot does not claim certifications or compliance programs that are not explicitly in place. If your team needs a specific review, ask before rollout.</p>
-          </article>
-          <article class="support-card glass-card" data-reveal>
-            <h3>Need a deeper review?</h3>
-            <p>Use the support page to request a product walkthrough or ask questions about your specific deployment requirements.</p>
-          </article>
+        <div class="container doc-shell">
+          <div class="doc-grid">
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>Grounded answers first</h3>
+              <p>The chatbot is designed to answer from processed public site content and fall back when the answer is not supported.</p>
+            </article>
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>Source-backed when possible</h3>
+              <p>When a real page supports the response, 5minBot can show a source chip so the answer path is easier to verify.</p>
+            </article>
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>Built for public websites</h3>
+              <p>The product is best suited for public marketing, product, pricing, and support content rather than private internal knowledge.</p>
+            </article>
+            <article class="doc-card glass-card lift-card" data-reveal>
+              <h3>No unsupported certification claims</h3>
+              <p>If a certification or compliance program is not explicitly in place, 5minBot does not claim it. Teams with strict requirements should review fit before rollout.</p>
+            </article>
+          </div>
         </div>
       </section>
     </main>
