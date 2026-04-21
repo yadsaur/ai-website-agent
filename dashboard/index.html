@@ -1558,6 +1558,345 @@
       }
     }
   </style>
+  <style>
+    :root {
+      color-scheme: dark;
+      --app-text: #f5f7ff;
+      --app-muted: #97a1c3;
+      --app-border: rgba(255,255,255,0.08);
+      --app-shadow: 0 24px 60px rgba(2,6,23,0.42);
+      --app-panel: linear-gradient(180deg, rgba(15,19,32,0.84), rgba(11,14,22,0.96));
+    }
+    body {
+      background:
+        radial-gradient(circle at 12% 12%, rgba(115,103,240,0.22), transparent 22%),
+        radial-gradient(circle at 82% 18%, rgba(66,214,255,0.12), transparent 20%),
+        radial-gradient(circle at 50% 82%, rgba(115,103,240,0.12), transparent 24%),
+        linear-gradient(180deg, #06070b 0%, #090b12 36%, #05060a 100%) !important;
+      color: var(--app-text) !important;
+    }
+    .workspace-shell::before {
+      opacity: 0.12 !important;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px) !important;
+      background-size: 120px 120px !important;
+      mask-image: radial-gradient(circle at center, black 42%, transparent 90%) !important;
+    }
+    .workspace-shell::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -4;
+      background:
+        radial-gradient(circle at 6% 0%, rgba(115,103,240,0.22), transparent 28%),
+        radial-gradient(circle at 90% 14%, rgba(66,214,255,0.14), transparent 24%),
+        radial-gradient(circle at 48% 100%, rgba(115,103,240,0.16), transparent 24%);
+      filter: blur(8px);
+    }
+    .workspace-container { width: min(1180px, calc(100% - 48px)) !important; }
+    .workspace-topbar {
+      background: rgba(6,7,11,0.72) !important;
+      backdrop-filter: blur(18px) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      box-shadow: none !important;
+    }
+    .workspace-topbar-inner {
+      min-height: 88px !important;
+      display: grid !important;
+      grid-template-columns: auto 1fr auto !important;
+      gap: 24px !important;
+    }
+    .workspace-brand,
+    .workspace-brand small,
+    .workspace-links,
+    .workspace-links a,
+    .workspace-hero p,
+    .card-header p,
+    .card-subtitle,
+    .progress-meta,
+    .chat-empty-hint,
+    .site-card-note,
+    .status-note,
+    .auth-panel p,
+    .auth-note,
+    .google-auth-help { color: var(--app-muted) !important; }
+    .workspace-brand span > span,
+    .workspace-hero h1,
+    .card-header h2,
+    .hero-story h2,
+    .auth-panel h3,
+    .site-card-main strong,
+    .chat-header { color: var(--app-text) !important; }
+    .workspace-links a:hover,
+    .workspace-brand,
+    .chat-stage-badge,
+    .source-link,
+    .copied-note,
+    .account-badge .account-status { color: #efeaff !important; }
+    .brand-mark {
+      width: 20px !important;
+      height: 20px !important;
+      border-radius: 8px !important;
+      background: linear-gradient(135deg, #9b8cff, #7367f0) !important;
+      box-shadow: 0 0 0 8px rgba(115,103,240,0.12) !important;
+      position: relative;
+    }
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 2px solid rgba(255,255,255,0.82);
+      border-radius: 5px;
+      transform: rotate(45deg);
+    }
+    .workspace-main { padding: 34px 0 84px !important; }
+    .workspace-hero,
+    .workspace-card,
+    .auth-panel {
+      background: var(--app-panel) !important;
+      border: 1px solid var(--app-border) !important;
+      box-shadow: var(--app-shadow) !important;
+      backdrop-filter: blur(18px) !important;
+      border-radius: 28px !important;
+      color: var(--app-text) !important;
+    }
+    .workspace-hero {
+      display: grid !important;
+      grid-template-columns: minmax(0,1.15fr) minmax(340px,0.85fr) !important;
+      gap: 24px !important;
+      padding: 34px !important;
+      margin-bottom: 22px !important;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(115,103,240,0.16), transparent 30%),
+        linear-gradient(180deg, rgba(15,19,32,0.82), rgba(11,14,22,0.96)) !important;
+    }
+    .eyebrow,
+    .step-pill,
+    .summary-chip,
+    .billing-meta-list span,
+    .account-badge,
+    .topbar-button,
+    .row-button,
+    .secondary-button,
+    .ghost-button,
+    .chat-chip {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: var(--app-text) !important;
+      box-shadow: 0 12px 28px rgba(2,6,23,0.16) !important;
+    }
+    .eyebrow {
+      color: #ece8ff !important;
+      background: rgba(115,103,240,0.09) !important;
+      border-color: rgba(115,103,240,0.2) !important;
+    }
+    .eyebrow::before,
+    .status-dot {
+      background: linear-gradient(135deg, #9b8cff, #7367f0) !important;
+      box-shadow: 0 0 12px rgba(155,140,255,0.7) !important;
+    }
+    .hero-summary,
+    .workspace-subcard,
+    .embed-box,
+    .summary-tile,
+    .hero-story,
+    .state-step,
+    .billing-plan,
+    .site-card,
+    .empty-state {
+      background: rgba(255,255,255,0.035) !important;
+      border: 1px solid rgba(255,255,255,0.06) !important;
+      box-shadow: none !important;
+    }
+    .workspace-subcard,
+    .embed-box,
+    .hero-story {
+      padding: 18px !important;
+      border-radius: 22px !important;
+      min-height: 100%;
+    }
+    .hero-summary {
+      display: grid !important;
+      gap: 16px !important;
+      padding: 22px !important;
+      border-color: rgba(115,103,240,0.18) !important;
+    }
+    .hero-summary-top { display: flex; align-items: center; justify-content: space-between; }
+    .hero-summary-kicker,
+    .section-kicker,
+    .chat-stage-bar,
+    .chat-footer,
+    .source-label,
+    .auth-divider { color: #dfe4ff !important; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; }
+    .hero-summary-kicker { display: inline-flex; align-items: center; }
+    .section-kicker { display: block; margin-bottom: 12px; font-size: 11px; }
+    .next-step-copy { color: #dfe4ff !important; line-height: 1.7; font-size: 14px; }
+    .hero-summary-kicker::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 8px;
+      background: linear-gradient(135deg, #42d6ff, #7367f0);
+      box-shadow: 0 0 14px rgba(66,214,255,0.35);
+      vertical-align: middle;
+    }
+    .summary-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 12px !important; }
+    .workspace-grid { display: grid !important; grid-template-columns: minmax(0,1.12fr) minmax(320px,0.88fr) !important; gap: 22px !important; margin-bottom: 22px !important; }
+    .workspace-grid.workspace-grid-bottom { grid-template-columns: minmax(0,1.06fr) minmax(360px,0.94fr) !important; }
+    .workspace-flow-grid { display: grid !important; grid-template-columns: minmax(0,0.95fr) minmax(0,1.05fr) !important; gap: 16px !important; }
+    .setup-form, .chat-toolbar, .chat-controls { display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; gap: 12px !important; }
+    .setup-form input,
+    .chat-controls input,
+    .auth-form input,
+    .chat-toolbar select {
+      min-height: 58px !important;
+      border-radius: 18px !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      background: rgba(255,255,255,0.045) !important;
+      color: var(--app-text) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
+    }
+    .primary-button,
+    .topbar-button.primary,
+    .row-button.primary,
+    .auth-toggle button.active {
+      background: linear-gradient(135deg, #7367f0, #5b4ee5) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+      box-shadow: 0 18px 34px rgba(115,103,240,0.24) !important;
+    }
+    .progress-track { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.04) !important; }
+    .progress-fill { background: linear-gradient(135deg, #7367f0, #9b8cff 52%, #d5cfff) !important; }
+    .state-step-list { display: grid !important; gap: 12px !important; }
+    .state-step { display: grid !important; grid-template-columns: auto 1fr !important; gap: 14px !important; border-radius: 18px !important; }
+    .state-step-badge {
+      width: 30px !important;
+      height: 30px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border-radius: 999px !important;
+      background: rgba(255,255,255,0.08) !important;
+      color: #fff !important;
+    }
+    .state-step.completed .state-step-badge { background: rgba(52,211,153,0.18) !important; color: #dcfff4 !important; }
+    .state-step.active .state-step-badge { background: rgba(115,103,240,0.24) !important; color: #f5f2ff !important; }
+    .embed-box { display: none; }
+    .embed-box.visible { display: block !important; }
+    #embed-code {
+      background: rgba(6,7,11,0.95) !important;
+      border: 1px solid rgba(255,255,255,0.06) !important;
+      color: #ece8ff !important;
+      border-radius: 18px !important;
+    }
+    .billing-status-pill {
+      background: rgba(115,103,240,0.14) !important;
+      border: 1px solid rgba(115,103,240,0.24) !important;
+      color: #ece8ff !important;
+    }
+    .billing-status-pill.active,
+    .badge.ready { background: rgba(52,211,153,0.16) !important; color: #dcfff4 !important; }
+    .billing-status-pill.warning,
+    .billing-status-pill.past_due,
+    .billing-status-pill.cancelled,
+    .billing-status-pill.expired { background: rgba(255,204,117,0.14) !important; color: #fff3d6 !important; border-color: rgba(255,204,117,0.22) !important; }
+    .badge.pending { background: rgba(66,214,255,0.14) !important; color: #dff9ff !important; }
+    .badge.crawling, .badge.embedding { background: rgba(115,103,240,0.16) !important; color: #efeaff !important; }
+    .badge.error { background: rgba(251,113,133,0.16) !important; color: #ffe5eb !important; }
+    .site-list { display: grid !important; gap: 14px !important; }
+    .site-card-top,
+    .embed-meta { display: flex !important; align-items: flex-start !important; justify-content: space-between !important; gap: 12px !important; }
+    .site-card-actions { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; }
+    .chat-shell {
+      border-radius: 30px !important;
+      background:
+        radial-gradient(circle at top right, rgba(115,103,240,0.16), transparent 34%),
+        linear-gradient(180deg, rgba(8,10,16,0.96), rgba(7,9,14,0.98)) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      box-shadow: 0 32px 120px rgba(2,6,23,0.58) !important;
+    }
+    .chat-stage-bar {
+      display: grid !important;
+      grid-template-columns: auto 1fr auto !important;
+      min-height: 58px !important;
+      padding: 0 18px !important;
+      background: rgba(255,255,255,0.03) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .chat-stage-dots span:nth-child(1) { background: #fb7185 !important; }
+    .chat-stage-dots span:nth-child(2) { background: #fbbf24 !important; }
+    .chat-stage-dots span:nth-child(3) { background: #34d399 !important; }
+    .chat-stage-badge {
+      background: rgba(115,103,240,0.16) !important;
+      border-radius: 999px !important;
+      min-height: 34px !important;
+      padding: 0 12px !important;
+    }
+    .chat-messages { min-height: 420px !important; max-height: 540px !important; }
+    .bubble {
+      background: rgba(255,255,255,0.06) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      color: var(--app-text) !important;
+      border-radius: 22px !important;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.16) !important;
+    }
+    .chat-row.user .bubble {
+      background: linear-gradient(135deg, #8b7cff, #5b4ee5) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+    }
+    .assistant-markdown-bubble strong { color: #fff !important; }
+    .auth-modal { background: rgba(5,7,10,0.74) !important; backdrop-filter: blur(18px) !important; }
+    .auth-toggle,
+    .auth-divider::before,
+    .auth-divider::after { border-color: rgba(255,255,255,0.08) !important; background: rgba(255,255,255,0.04) !important; }
+    .attention-glow { animation: workspaceGlow 1.8s ease !important; }
+    @keyframes workspaceGlow {
+      0% { box-shadow: 0 0 0 0 rgba(115,103,240,0.18); }
+      40% { box-shadow: 0 0 0 16px rgba(115,103,240,0.03), 0 0 0 1px rgba(115,103,240,0.22); }
+      100% { box-shadow: 0 0 0 0 rgba(115,103,240,0); }
+    }
+    @media (max-width: 1180px) {
+      .workspace-hero,
+      .workspace-grid,
+      .workspace-grid.workspace-grid-bottom,
+      .workspace-flow-grid { grid-template-columns: minmax(0,1fr) !important; }
+      .workspace-hero h1 { max-width: none !important; }
+    }
+    @media (max-width: 920px) {
+      .workspace-topbar-inner { grid-template-columns: 1fr !important; justify-items: start !important; padding: 16px 0 !important; }
+      .workspace-links { justify-self: start !important; flex-wrap: wrap !important; }
+      .workspace-topbar-right { width: 100% !important; justify-content: flex-start !important; }
+      .summary-grid,
+      .setup-form,
+      .chat-toolbar,
+      .chat-controls,
+      .auth-actions,
+      .billing-plan { grid-template-columns: minmax(0,1fr) !important; }
+    }
+    @media (max-width: 640px) {
+      .workspace-container { width: min(1180px, calc(100% - 24px)) !important; }
+      .workspace-main { padding: 20px 0 54px !important; }
+      .workspace-hero,
+      .workspace-card,
+      .auth-panel { padding: 20px !important; border-radius: 24px !important; }
+      .workspace-links { display: none !important; }
+      .workspace-topbar-right { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+      .account-badge { grid-column: 1 / -1; }
+      .primary-button,
+      .secondary-button,
+      .ghost-button,
+      .row-button,
+      .topbar-button { width: 100% !important; }
+      .chat-messages { min-height: 360px !important; }
+    }
+  </style>
 </head>
 <body>
   <div class="workspace-shell">
@@ -1589,78 +1928,104 @@
       <div class="workspace-container">
         <section class="workspace-hero">
           <div>
-            <span class="eyebrow">Workspace</span>
-            <h1>Launch a website chatbot without the messy setup process</h1>
-            <p>Paste one public URL, let 5minBot train on the pages that matter, test the answers, and copy the live embed code when the site is ready.</p>
+            <span class="eyebrow">5-minute launch workspace</span>
+            <h1>Train, test, and launch your website chatbot from one clean control room</h1>
+            <p>Paste your URL, let 5minBot learn the pages that sell your product, review the answers, then copy the live embed script when you are ready to go live.</p>
             <div class="step-pills">
-              <span class="step-pill">Add website</span>
-              <span class="step-pill">Train and review</span>
-              <span class="step-pill">Test and publish</span>
+              <span class="step-pill">Paste URL</span>
+              <span class="step-pill">Train on your pages</span>
+              <span class="step-pill">Test before launch</span>
             </div>
           </div>
           <div class="hero-summary">
+            <div class="hero-summary-top">
+              <span class="hero-summary-kicker">Workspace pulse</span>
+            </div>
             <div class="summary-grid">
               <div class="summary-tile">
                 <strong id="metric-sites">0</strong>
-                <span>Sites in workspace</span>
+                <span>Sites in this workspace</span>
               </div>
               <div class="summary-tile">
                 <strong id="metric-ready">0</strong>
-                <span>Ready to launch</span>
+                <span>Ready for testing</span>
               </div>
               <div class="summary-tile">
                 <strong id="metric-active">0</strong>
-                <span>Training now</span>
+                <span>Currently training</span>
               </div>
             </div>
-            <div id="launch-title" class="visually-hidden">Start with one main website</div>
-            <div id="launch-copy" class="visually-hidden">Use the website that already explains your product, pricing, and main call to action clearly.</div>
+            <div class="hero-story">
+              <h2 id="launch-title">Start with one main website</h2>
+              <p id="launch-copy">Use the site that already explains your offer, pricing, and primary call to action clearly. That gives 5minBot the strongest first training run.</p>
+            </div>
           </div>
         </section>
 
         <div id="feedback-banner" class="feedback-banner" role="status" aria-live="polite"></div>
 
-        <section class="workspace-grid single-column">
-          <section class="workspace-card">
+        <section class="workspace-grid">
+          <section class="workspace-card workspace-card-xl">
             <div class="card-header">
               <div>
+                <div class="section-kicker">Step 1</div>
                 <h2>Add your website</h2>
-                <p>Paste one public URL. We will crawl it, prepare grounded answers, and get the chatbot ready for launch.</p>
+                <p>Use one public URL to start. 5minBot crawls the pages that matter, builds grounded answers, and prepares the bot for a real launch.</p>
               </div>
             </div>
 
             <form id="site-form" class="setup-form">
               <input id="site-url" type="url" placeholder="https://yourwebsite.com" required />
-              <button id="site-submit" class="primary-button" type="submit">Add your site</button>
+              <button id="site-submit" class="primary-button" type="submit">Train chatbot</button>
             </form>
 
             <div class="status-line"><span class="status-dot"></span><span id="status-line">Ready when you are. Add a site to begin training.</span></div>
             <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
             <div id="progress-meta" class="progress-meta"><strong>Pages crawled:</strong> 0 <span>&bull;</span> <strong>Chunks created:</strong> 0 <span>&bull;</span> <strong>ETA:</strong> waiting to start</div>
 
-            <div id="onboarding-steps" class="visually-hidden"></div>
-            <div id="next-step-copy" class="visually-hidden"></div>
-
-            <div id="embed-box" class="embed-box" aria-live="polite">
-              <div class="embed-meta">
-                <div>
-                  <h3 style="margin: 0 0 6px;">Embed code</h3>
-                  <p class="card-subtitle" id="embed-copy">Copy this script tag into the page where you want the chatbot available.</p>
-                </div>
-                <button id="copy-embed" class="secondary-button" type="button">Copy script</button>
+            <div class="workspace-flow-grid">
+              <div class="workspace-subcard">
+                <div class="section-kicker">Launch flow</div>
+                <div id="onboarding-steps" class="state-step-list"></div>
+                <p id="next-step-copy" class="next-step-copy">Add one site first, then move straight into testing and embed setup when training finishes.</p>
               </div>
-              <pre id="embed-code"></pre>
-              <div id="copied-note" class="copied-note"></div>
+
+              <div id="embed-box" class="embed-box" aria-live="polite">
+                <div class="embed-meta">
+                  <div>
+                    <div class="section-kicker">Step 2</div>
+                    <h3 style="margin: 0 0 6px;">Embed code</h3>
+                    <p class="card-subtitle" id="embed-copy">Copy this script tag into the page where you want the chatbot available.</p>
+                  </div>
+                  <button id="copy-embed" class="secondary-button" type="button">Copy script</button>
+                </div>
+                <pre id="embed-code"></pre>
+                <div id="copied-note" class="copied-note"></div>
+              </div>
             </div>
+          </section>
+
+          <section id="billing-card" class="workspace-card billing-card">
+            <div class="card-header">
+              <div>
+                <div class="section-kicker">Billing</div>
+                <h2>Trial and plan access</h2>
+                <p>Train and test in guest mode, then upgrade when you want the live script and paid capacity to stay active.</p>
+              </div>
+            </div>
+            <div id="billing-summary" class="billing-summary"></div>
+            <div id="billing-plans" class="billing-plans"></div>
+            <div id="billing-note" class="status-note">Paid plans activate after Dodo confirms the checkout webhook.</div>
           </section>
         </section>
 
-        <section class="workspace-grid secondary">
+        <section class="workspace-grid workspace-grid-bottom">
           <section class="workspace-card">
             <div class="card-header">
               <div>
+                <div class="section-kicker">Step 3</div>
                 <h2>Test the chatbot</h2>
-                <p>Ask the same questions your visitors will ask before you put the widget live on your site.</p>
+                <p>Run the same conversations buyers will have on your site before you publish the widget to production.</p>
               </div>
             </div>
             <div class="chat-toolbar">
@@ -1669,12 +2034,12 @@
               </select>
               <button id="open-selected-embed" class="ghost-button" type="button">Show code</button>
             </div>
-            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to start testing. Strong first prompts: pricing, setup, feature fit, and where-to-click questions.</div>
+            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to begin. The best prompts to test first are pricing, setup, who-it’s-for, and “where do I click?” questions.</div>
             <div id="chat-shell" class="chat-shell">
               <div class="chat-stage-bar">
                 <div class="chat-stage-dots"><span></span><span></span><span></span></div>
-                <div class="chat-stage-address">5minbot.com/widget-preview</div>
-                <div class="chat-stage-badge">Live preview</div>
+                <div class="chat-stage-address">5minbot.com/live-preview</div>
+                <div class="chat-stage-badge">Chat lab</div>
               </div>
               <div class="chat-header" id="chat-title">Chat with your site</div>
               <div class="chat-messages" id="chat-messages"></div>
@@ -1686,34 +2051,21 @@
             </div>
           </section>
 
-          <div class="workspace-side-stack">
-            <section id="billing-card" class="workspace-card billing-card">
-              <div class="card-header">
-                <div>
-                  <h2>Billing</h2>
-                  <p>Stay on trial while you validate the bot, then upgrade when you are ready to keep it live.</p>
-                </div>
+          <section class="workspace-card sites-card">
+            <div class="card-header">
+              <div>
+                <div class="section-kicker">Library</div>
+                <h2>Your processed sites</h2>
+                <p>Everything you train stays here so you can reopen chat testing, copy code again, or rerun a site if training fails.</p>
               </div>
-              <div id="billing-summary" class="billing-summary"></div>
-              <div id="billing-plans" class="billing-plans"></div>
-              <div id="billing-note" class="status-note">Paid plans activate after Dodo confirms the checkout webhook.</div>
-            </section>
-
-            <section class="workspace-card">
-              <div class="card-header">
-                <div>
-                  <h2>Processed sites</h2>
-                  <p>Every processed site stays here so you can test it, copy the script, or rerun it if something fails.</p>
-                </div>
-              </div>
-              <div id="site-summary-row" class="site-summary-row"></div>
-              <div id="empty-sites-state" class="empty-state">
-                <h3>No sites yet</h3>
-                <p>Add your first website above and it will appear here as soon as training begins.</p>
-              </div>
-              <div id="site-list" class="site-list"></div>
-            </section>
-          </div>
+            </div>
+            <div id="site-summary-row" class="site-summary-row"></div>
+            <div id="empty-sites-state" class="empty-state">
+              <h3>No sites yet</h3>
+              <p>Add your first website above and it will appear here as soon as training begins.</p>
+            </div>
+            <div id="site-list" class="site-list"></div>
+          </section>
         </section>
       </div>
     </main>
