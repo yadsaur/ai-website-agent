@@ -57,6 +57,7 @@ Use browser automation only for:
 - Render environment/config actions
 - GitHub/hosted dashboards requiring active login
 - Dodo or other third-party dashboards requiring manual-session access
+- Google Cloud or Google account setup when the user has already opened the required tabs
 
 Do not use browser automation for:
 - Simple endpoint verification
@@ -68,6 +69,22 @@ If a task depends on authenticated third-party dashboards and deterministic acce
 - stop the loop
 - ask the user for the missing credential, key, or manual action
 - resume with the smallest possible follow-up step
+
+## Active Browser Session Rule
+
+If the browser is already open:
+- do not close it just to obtain access
+- do not kill Edge processes as a default workflow
+- prefer using the active session or reopening the exact required URL in the already active browser context
+- assume the user may have important tabs or authenticated sessions open
+
+Only close or kill the browser when:
+- the user explicitly allows it for that task, or
+- there is no other viable path and the user has been warned first
+
+When the user says a required tab is already open:
+- trust that as the primary path
+- reuse that live tab/session instead of cloning, resetting, or restarting the browser unless absolutely necessary
 
 ## Lightweight Working Notes
 

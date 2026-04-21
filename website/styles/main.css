@@ -584,17 +584,6 @@ li {
     linear-gradient(180deg, rgba(10, 13, 24, 1), rgba(5, 7, 14, 1));
 }
 
-.hero-preview::after {
-  content: "";
-  position: absolute;
-  inset: auto 24px 18px 24px;
-  height: 70px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, transparent, rgba(5, 7, 14, 0.92));
-  pointer-events: none;
-  z-index: 2;
-}
-
 .hero-preview-frame {
   width: 100%;
   height: 100%;
@@ -1195,7 +1184,7 @@ li {
   font-size: 14px;
 }
 
-.person span {
+.person > div > span {
   display: block;
   color: var(--text-dim);
   font-size: 12px;
@@ -1662,7 +1651,7 @@ li {
 }
 
 .footer-logo {
-  width: 164px;
+  width: 223px;
 }
 
 .social-links {
@@ -1716,7 +1705,7 @@ li {
 }
 
 .brand {
-  width: 158px;
+  width: 223px;
 }
 
 .brand-logo {

@@ -129,6 +129,9 @@
       font-weight: 700;
     }
     .topbar-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-height: 42px;
       padding: 0 14px;
       border-radius: 999px;
@@ -136,6 +139,7 @@
       background: rgba(255, 255, 255, 0.04);
       color: #ffffff;
       font-weight: 700;
+      text-align: center;
     }
     .topbar-button.primary {
       background: linear-gradient(135deg, #7c3aed, #5b21b6);
@@ -1820,6 +1824,7 @@
         linear-gradient(180deg, rgba(8,10,16,0.96), rgba(7,9,14,0.98)) !important;
       border: 1px solid rgba(255,255,255,0.08) !important;
       box-shadow: 0 32px 120px rgba(2,6,23,0.58) !important;
+      padding: 18px !important;
     }
     .chat-stage-bar {
       display: grid !important;
@@ -1839,6 +1844,87 @@
       padding: 0 12px !important;
     }
     .chat-messages { min-height: 420px !important; max-height: 540px !important; }
+    .chat-shell .chat-stage-bar,
+    .chat-shell .chat-header,
+    .chat-shell .chat-controls,
+    .chat-shell .chat-footer,
+    .chat-shell .chat-messages {
+      display: none !important;
+    }
+    .workspace-preview-shell {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)),
+        rgba(10, 12, 20, 0.9);
+      box-shadow: 0 24px 80px rgba(2, 6, 23, 0.4);
+      min-height: 620px;
+    }
+    .workspace-preview-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .workspace-preview-dots { display: inline-flex; gap: 8px; }
+    .workspace-preview-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .workspace-preview-dots span:nth-child(1) { background: #ff6b6b; }
+    .workspace-preview-dots span:nth-child(2) { background: #ffd166; }
+    .workspace-preview-dots span:nth-child(3) { background: #4ade80; }
+    .workspace-preview-address {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: #aeb6d4;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .workspace-preview-badge {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(115, 103, 240, 0.18);
+      border: 1px solid rgba(115, 103, 240, 0.22);
+      color: #ece8ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .workspace-preview-stage {
+      padding: 18px;
+      min-height: 560px;
+    }
+    .workspace-preview-frame-wrap {
+      height: 100%;
+      min-height: 524px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(10, 13, 24, 1), rgba(5, 7, 14, 1));
+    }
+    .workspace-preview-frame {
+      width: 100%;
+      height: 100%;
+      min-height: 524px;
+      border: 0;
+      display: block;
+      background: transparent;
+    }
     .bubble {
       background: rgba(255,255,255,0.06) !important;
       border: 1px solid rgba(255,255,255,0.08) !important;
@@ -2034,8 +2120,20 @@
               </select>
               <button id="open-selected-embed" class="ghost-button" type="button">Show code</button>
             </div>
-            <div id="chat-empty-hint" class="chat-empty-hint">Select a ready site to begin. The best prompts to test first are pricing, setup, who-it’s-for, and “where do I click?” questions.</div>
             <div id="chat-shell" class="chat-shell">
+              <div class="workspace-preview-shell">
+                <div class="workspace-preview-topbar">
+                  <div class="workspace-preview-dots"><span></span><span></span><span></span></div>
+                  <div class="workspace-preview-address">5minbot.com/live-preview</div>
+                  <div class="workspace-preview-badge">Live preview</div>
+                </div>
+                <div class="workspace-preview-stage">
+                  <div class="workspace-preview-frame-wrap">
+                    <iframe id="workspace-preview-frame" class="workspace-preview-frame" src="/website/hero-preview.html?mode=hero" title="Live chatbot preview" loading="lazy"></iframe>
+                  </div>
+                </div>
+              </div>
+              <!-- Hidden legacy nodes kept for existing dashboard chat logic compatibility. -->
               <div class="chat-stage-bar">
                 <div class="chat-stage-dots"><span></span><span></span><span></span></div>
                 <div class="chat-stage-address">5minbot.com/live-preview</div>
@@ -2169,8 +2267,8 @@
     const chatMessages = document.getElementById("chat-messages");
     const chatInput = document.getElementById("chat-input");
     const chatSend = document.getElementById("chat-send");
-    const chatEmptyHint = document.getElementById("chat-empty-hint");
     const chatShell = document.getElementById("chat-shell");
+    const workspacePreviewFrame = document.getElementById("workspace-preview-frame");
 
     function setFeedback(message, tone) {
       if (!message) {
@@ -2275,9 +2373,7 @@
 
       if (!user) {
         billingSummary.innerHTML = [
-          '<div class="billing-status-pill">Guest trial flow</div>',
-          '<div class="billing-copy"><strong>Train and test without signing up.</strong> Create an account only when you want the live embed script or a paid plan.</div>',
-          '<div class="billing-meta-list"><span>Signup starts your trial automatically.</span><span>Webhook confirmation activates paid plans after checkout.</span></div>'
+          '<div class="billing-status-pill">Guest trial flow</div>'
         ].join("");
       } else {
         const renewalDate = formatDateLabel(user.current_period_end || user.trial_ends_at);
@@ -3139,6 +3235,20 @@
       } catch (err) {}
     }
 
+    function updateWorkspacePreview(siteId) {
+      if (!workspacePreviewFrame) return;
+      if (!siteId) {
+        workspacePreviewFrame.src = "/website/hero-preview.html?mode=hero";
+        return;
+      }
+      const params = new URLSearchParams({
+        site_id: siteId,
+        app_url: window.location.origin,
+        mode: "hero"
+      });
+      workspacePreviewFrame.src = "/website/hero-preview.html?" + params.toString();
+    }
+
     function updateChatAvailability() {
       const selected = state.sites.find(function (site) { return site.site_id === testSiteSelect.value; });
       chatTitle.textContent = "Chat with " + (selected ? (selected.name || selected.url) : "your site");
@@ -3146,7 +3256,7 @@
       chatInput.disabled = !enabled;
       chatSend.disabled = !enabled;
       openSelectedEmbed.disabled = !enabled;
-      chatEmptyHint.style.display = enabled ? "none" : "block";
+      updateWorkspacePreview(testSiteSelect.value);
       if (enabled) {
         prefetchStarterSuggestions(testSiteSelect.value);
         ensureStarterSuggestions();

@@ -59,7 +59,22 @@
       <div class="container">
         <div class="nav-inner">
           <a class="brand" href="/" aria-label="${siteConfig.brand} home">
-            <img class="brand-logo" src="${siteConfig.logoPath}" alt="${siteConfig.brand}">
+            <svg class="brand-logo" width="240" height="44" viewBox="0 0 240 44" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${siteConfig.brand}">
+              <defs>
+                <linearGradient id="nav-logo-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#8B5CF6"/>
+                  <stop offset="100%" stop-color="#06B6D4"/>
+                </linearGradient>
+                <linearGradient id="nav-logo-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#8B5CF6"/>
+                  <stop offset="100%" stop-color="#06B6D4"/>
+                </linearGradient>
+              </defs>
+              <rect x="0" y="4" width="36" height="36" rx="10" fill="url(#nav-logo-icon-gradient)"/>
+              <path d="M19 12 L13 22 L18 22 L15 32 L23 20 L18 20 Z" fill="white"/>
+              <text x="50" y="29" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="800" fill="#F1F0FF" letter-spacing="-0.8px">5min</text>
+              <text x="108" y="29" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="800" fill="url(#nav-logo-text-gradient)" letter-spacing="-0.8px">Bot</text>
+            </svg>
           </a>
           <nav class="nav-links" aria-label="Primary navigation">
             ${navLinks
@@ -94,7 +109,22 @@
       <div class="container footer-grid">
         <div class="footer-intro">
           <a class="footer-logo" href="/" aria-label="${siteConfig.brand} home">
-            <img src="${siteConfig.logoPath}" alt="${siteConfig.brand}">
+            <svg class="brand-logo" width="240" height="44" viewBox="0 0 240 44" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${siteConfig.brand}">
+              <defs>
+                <linearGradient id="footer-logo-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#8B5CF6"/>
+                  <stop offset="100%" stop-color="#06B6D4"/>
+                </linearGradient>
+                <linearGradient id="footer-logo-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#8B5CF6"/>
+                  <stop offset="100%" stop-color="#06B6D4"/>
+                </linearGradient>
+              </defs>
+              <rect x="0" y="4" width="36" height="36" rx="10" fill="url(#footer-logo-icon-gradient)"/>
+              <path d="M19 12 L13 22 L18 22 L15 32 L23 20 L18 20 Z" fill="white"/>
+              <text x="50" y="29" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="800" fill="#F1F0FF" letter-spacing="-0.8px">5min</text>
+              <text x="108" y="29" font-family="system-ui,-apple-system,sans-serif" font-size="22" font-weight="800" fill="url(#footer-logo-text-gradient)" letter-spacing="-0.8px">Bot</text>
+            </svg>
           </a>
           <p>Launch a premium website chatbot trained on your public pages in minutes. Answer buyer questions, guide the next click, and keep selling after hours.</p>
           <div class="button-row">
@@ -104,7 +134,11 @@
           <div class="social-links" aria-label="Social links">
             <a href="/" aria-label="5minBot on X">X</a>
             <a href="/" aria-label="5minBot on LinkedIn">in</a>
-            <a href="/" aria-label="5minBot on GitHub">gh</a>
+            <a href="/" aria-label="5minBot on GitHub">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 0.5C5.65 0.5 0.5 5.65 0.5 12c0 5.09 3.3 9.41 7.88 10.93.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.21.7-3.89-1.55-3.89-1.55-.53-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.04 0 0 .98-.31 3.2 1.18.93-.26 1.93-.39 2.92-.39s1.99.13 2.92.39c2.22-1.49 3.2-1.18 3.2-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.26 5.68.41.35.78 1.03.78 2.08 0 1.5-.01 2.71-.01 3.08 0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+              </svg>
+            </a>
           </div>
         </div>
         ${footerColumns
