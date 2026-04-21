@@ -3,107 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How We Taught a Chatbot to Understand Website Layout | 5minBot</title>
-  <meta name="description" content="Learn why layout-aware answers matter for website chat and how 5minBot helps visitors find the right button, menu, or page when they ask where to click.">
-  <meta property="og:title" content="How We Taught a Chatbot to Understand Website Layout | 5minBot">
-  <meta property="og:description" content="Why layout-aware retrieval matters when visitors ask where the pricing page, search bar, or CTA actually lives.">
+  <title>How a Chatbot Learns Your Website | 5minBot</title>
+  <meta name="description" content="A plain-English explanation of how 5minBot crawls, processes, and retrieves website content to answer buyer questions more accurately.">
+  <meta property="og:title" content="How a Chatbot Learns Your Website | 5minBot">
+  <meta property="og:description" content="Understand how crawling and retrieval help a website chatbot answer from real pages instead of guessing.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://5minbot.com/blog/ui-layout-ai">
   <meta property="og:site_name" content="5minBot">
-  <meta name="theme-color" content="#07070e">
   <link rel="canonical" href="https://5minbot.com/blog/ui-layout-ai">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/website/styles/main.css">
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "How We Taught a Chatbot to Understand Website Layout",
-      "datePublished": "2026-04-21",
-      "author": {
-        "@type": "Organization",
-        "name": "5minBot"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "5minBot"
-      },
-      "description": "Why layout-aware retrieval matters when visitors ask where the pricing page, search bar, or CTA actually lives.",
-      "mainEntityOfPage": "https://5minbot.com/blog/ui-layout-ai"
-    }
-  </script>
 </head>
 <body data-page="blog">
   <div class="site-shell">
-    <div class="noise"></div>
+    <div class="page-grid"></div><div class="page-orb"></div><div class="page-orb-2"></div><div class="noise"></div>
     <header class="site-nav" data-nav></header>
-
-    <main class="page">
-      <section class="page-hero">
-        <div class="container">
-          <div class="section-header">
-            <div class="meta-row" data-reveal>
-              <span class="meta-pill">Product</span>
-              <span class="meta-pill">April 2026</span>
-              <span class="meta-pill">6 min read</span>
-            </div>
-            <h1 data-reveal>How We Taught a Chatbot to Understand Website Layout</h1>
-            <p class="lede" data-reveal>Plain-text answers are not enough when the visitor’s real question is “Where do I click?” A useful website chatbot needs to understand structure, not just copy.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container article-grid">
-          <article class="article-content">
-            <p data-reveal>Most chatbots are built as text systems. They read page copy, retrieve the relevant paragraph, and try to answer from that. That works reasonably well for questions about product benefits or plan details. It falls apart the moment the user asks something operational, like where the pricing page is, where the start button lives, or whether the search bar is in the header or the footer.</p>
-
-            <p data-reveal>Those are not just content questions. They are structure questions. A person asking “Where do I click to begin?” is not asking for a summary of the homepage. They are asking for orientation. If the chatbot cannot provide that orientation, the answer feels unhelpful even if the site technically contains the right words somewhere.</p>
-
-            <h2 data-reveal>Why structure gets lost in normal retrieval</h2>
-            <p data-reveal>When a page is flattened into raw text, almost everything that makes a layout useful disappears. Navigation becomes a list of words. Buttons lose their role as actions. Headers, footers, menus, and search bars become just more text. To a normal retriever, “Pricing” in the top navigation and “pricing” inside a paragraph can look almost the same.</p>
-
-            <p data-reveal>That is a big reason many website chat experiences feel clumsy. They can quote the site, but they cannot guide the user through the site. For product and marketing websites, that guidance matters more than many teams realize.</p>
-
-            <h2 data-reveal>What layout-aware extraction changes</h2>
-            <p data-reveal>5minBot keeps a second layer of understanding alongside the readable page content. It extracts common interface elements like navigation links, buttons, search bars, footers, and other obvious landmarks. Then it turns those into human-readable signals the retriever can use later.</p>
-
-            <p data-reveal>That means the chatbot can answer in a much more useful way. Instead of “The pricing information is on the site,” it can say “Check the pricing link in the top navigation.” Instead of guessing where a CTA might be, it can point to the visible page area where the action actually lives. That is a small shift technically, but a huge improvement in the real experience.</p>
-
-            <h2 data-reveal>Why this matters for conversion, not just convenience</h2>
-            <p data-reveal>Navigation questions often show up when a visitor is already close to acting. They have decided the product is worth exploring further. Now they just need the right click. If the website fails here, the friction feels bigger than it should. A helpful answer keeps momentum. A vague answer breaks it.</p>
-
-            <p data-reveal>This is why layout-aware answers are not a nice-to-have. They are part of the product experience. A website chatbot should make the site easier to use, not just easier to search. Once you see it that way, “where do I click?” becomes one of the most important questions the bot can answer well.</p>
-
-            <h2 data-reveal>What a better experience feels like</h2>
-            <p data-reveal>The best result is not magical. It simply feels clear. The visitor asks where something is. The chatbot answers in the language a helpful teammate would use: header, top navigation, footer, start button, support link. That clarity is what reduces friction. And when it shows up consistently, the website feels better organized and more trustworthy overall.</p>
-
-            <p data-reveal>That is the standard 5minBot aims for. The chatbot should not just know what the site says. It should help people move through the site more smoothly when they are ready to do something useful.</p>
+    <main class="page section">
+      <div class="container">
+        <div class="article-shell glass-card">
+          <article>
+            <div class="meta-line">Technology · 6 min read</div>
+            <h1 style="font-size:clamp(2.6rem,5vw,4.6rem);">How a chatbot learns your website without pretending it knows everything</h1>
+            <p class="lede">The safest website chatbot is not the one with the most words. It is the one that can find the right supporting content when a question arrives and admit when support is missing.</p>
+            <h2>Step one: read the public website</h2>
+            <p>5minBot starts by crawling public pages so it can work from the same content your visitors already see. That matters because it keeps the chatbot anchored to the real marketing and product language you have already published.</p>
+            <h2>Step two: break the content into useful pieces</h2>
+            <p>A long page is not useful to a chatbot as one giant block. The content has to be broken into smaller pieces so the system can retrieve the parts that matter for a particular question. Pricing questions should find pricing sections. Setup questions should find onboarding or help sections.</p>
+            <h2>Step three: retrieve before answering</h2>
+            <p>When a visitor asks something, the system looks for the most relevant supporting pieces before the answer is generated. This is what makes the reply feel grounded. It is not guessing from memory alone. It is using the site content as a reference layer.</p>
+            <h2>Why fallback behavior matters</h2>
+            <p>No public website covers every possible question. A trustworthy chatbot needs a graceful fallback when support is weak or missing. That is better than sounding confident and being wrong. A safe fallback protects both the buyer experience and your brand.</p>
+            <h2>Why this matters for product trust</h2>
+            <p>Most people do not care what retrieval system you use. They care whether the answer feels real, useful, and honest. Good frontend design helps with trust, but the underlying answer behavior is what keeps trust alive once someone starts typing.</p>
+            <p>That is why 5minBot is built around a simple promise: train on the public site, test what buyers actually ask, then go live only when the answers feel ready.</p>
           </article>
-
-          <aside class="article-side">
-            <div class="article-card glass-card" data-reveal>
-              <h3>Explore more</h3>
-              <div class="article-links">
-                <a href="/features">See the full feature set</a>
-                <a href="/how-it-works">See the workflow</a>
-              </div>
-            </div>
-            <div class="article-card glass-card" data-reveal>
-              <h3>Try it in the demo</h3>
-              <p>Ask where to click to begin, where pricing lives, or where support links are to feel the difference for yourself.</p>
-              <div class="button-row">
-                <a class="button button-primary" href="/demo">Open demo</a>
-              </div>
-            </div>
-          </aside>
         </div>
-      </section>
+      </div>
     </main>
-
     <footer class="footer" data-footer></footer>
   </div>
   <script src="/website/js/main.js"></script>

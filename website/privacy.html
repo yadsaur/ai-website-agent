@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>5minBot Privacy</title>
-  <meta name="description" content="Learn how 5minBot handles processed website content, chat usage, and the public-site assumptions behind the hosted product.">
-  <meta property="og:title" content="5minBot Privacy">
-  <meta property="og:description" content="A plain-language overview of how 5minBot handles website and chat data in the current hosted product.">
+  <title>Privacy | 5minBot</title>
+  <meta name="description" content="Privacy overview for 5minBot.">
+  <meta property="og:title" content="Privacy | 5minBot">
+  <meta property="og:description" content="Privacy overview for the 5minBot website chatbot product.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://5minbot.com/privacy">
   <meta property="og:site_name" content="5minBot">
-  <meta name="theme-color" content="#07070e">
   <link rel="canonical" href="https://5minbot.com/privacy">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,41 +19,24 @@
 </head>
 <body data-page="privacy">
   <div class="site-shell">
-    <div class="noise"></div>
+    <div class="page-grid"></div><div class="page-orb"></div><div class="page-orb-2"></div><div class="noise"></div>
     <header class="site-nav" data-nav></header>
-    <main class="page">
-      <section class="page-hero">
-        <div class="container doc-shell">
-          <div class="section-header">
-            <span class="eyebrow" data-reveal>Privacy</span>
-            <h1 data-reveal>How 5minBot handles website and chat data</h1>
-            <p class="lede" data-reveal>This page explains the current hosted product in plain language so teams can understand what is processed, what is stored, and what kind of content the product is designed for.</p>
-          </div>
+    <main class="page section">
+      <div class="container">
+        <div class="legal-shell glass-card">
+          <article>
+            <span class="eyebrow">Privacy</span>
+            <h1 style="font-size:clamp(2.6rem,5vw,4.2rem);">A simple privacy posture for a simple product.</h1>
+            <p class="lede">5minBot is focused on public website content and a clean testing-to-embed workflow. Privacy decisions should be understandable without digging through noise.</p>
+            <h2>What the product is designed for</h2>
+            <p>The product is designed to process and answer from public website pages so visitors can get help faster. It is not positioned as a generic knowledge bot for arbitrary private data sources.</p>
+            <h2>Why that matters</h2>
+            <p>Keeping the scope clear makes the product easier to reason about. It also makes the buyer experience more honest because expectations stay aligned with how the chatbot is actually trained.</p>
+            <h2>Practical principle</h2>
+            <p>If the content is already intended for your public audience, 5minBot helps that content become easier to access conversationally. That principle guides the privacy posture of the product.</p>
+          </article>
         </div>
-      </section>
-
-      <section class="section">
-        <div class="container doc-shell">
-          <div class="doc-grid">
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Public site content</h3>
-              <p>When you add a site, 5minBot crawls public pages from the URL you provide so it can build a chatbot around that content.</p>
-            </article>
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Stored product data</h3>
-              <p>The hosted app stores site records, processed pages, content chunks, and supporting vector data required to answer questions inside the product.</p>
-            </article>
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Chat interactions</h3>
-              <p>Short-lived conversational context is used to make follow-up answers more coherent inside the widget and workspace chat lab.</p>
-            </article>
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Product boundaries</h3>
-              <p>5minBot is intended for public website content. Teams should avoid using the hosted product for sensitive material they should not send to hosted services.</p>
-            </article>
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
     <footer class="footer" data-footer></footer>
   </div>

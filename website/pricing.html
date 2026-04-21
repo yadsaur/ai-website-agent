@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Chatbot Pricing | 5minBot</title>
-  <meta name="description" content="Compare 5minBot pricing for website chatbots. Start free, launch in minutes, and choose the right plan for one site, a growing team, or a larger rollout.">
+  <meta name="description" content="Simple AI chatbot pricing for websites. Compare 5minBot Starter, Growth, and Pro plans for fast website chatbot deployment.">
   <meta property="og:title" content="AI Chatbot Pricing | 5minBot">
-  <meta property="og:description" content="Simple pricing for adding a source-grounded AI chatbot to your website in about 5 minutes.">
+  <meta property="og:description" content="Choose a 5minBot plan, start on a free trial, and deploy a premium website chatbot in minutes.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://5minbot.com/pricing">
   <meta property="og:site_name" content="5minBot">
-  <meta name="theme-color" content="#07070e">
+  <meta name="theme-color" content="#06070b">
   <link rel="canonical" href="https://5minbot.com/pricing">
   <link rel="icon" type="image/svg+xml" href="/website/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,15 +27,7 @@
           "name": "Is there really a free trial?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Start with the trial, test the bot on your site, and upgrade only when you are ready to keep it live."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What happens after the trial ends?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "If you do not upgrade, the widget still loads but the chatbot stops replying until the subscription is active again."
+            "text": "Yes. You can test the chatbot before you embed it and upgrade only when it feels ready."
           }
         },
         {
@@ -43,7 +35,7 @@
           "name": "Can I change plans later?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. You can move between plans as your site count, traffic, or rollout scope changes."
+            "text": "Yes. Upgrade or downgrade as your rollout grows."
           }
         }
       ]
@@ -52,80 +44,100 @@
 </head>
 <body data-page="pricing">
   <div class="site-shell">
+    <div class="page-grid"></div>
+    <div class="page-orb"></div>
+    <div class="page-orb-2"></div>
     <div class="noise"></div>
     <header class="site-nav" data-nav></header>
 
     <main class="page">
-      <section class="page-hero">
+      <section class="section pricing-hero">
         <div class="container">
           <div class="section-header centered">
             <span class="eyebrow" data-reveal>Pricing</span>
-            <h1 data-reveal>Simple pricing. Serious website chatbot results.</h1>
-            <p class="lede" data-reveal>Start free, test the product on your own site, and choose a plan that matches how many websites and conversations you actually need.</p>
+            <h1 data-reveal>Simple pricing for a <span class="gradient-text">premium website chatbot</span>.</h1>
+            <p class="lede" data-reveal>Start with one site, test the answers, and upgrade only when 5minBot proves it belongs on your website.</p>
           </div>
-
-          <div class="pricing-toggle" data-pricing-toggle data-reveal style="display:flex; margin:0 auto;">
-            <button type="button" data-billing="monthly">Monthly</button>
-            <button type="button" data-billing="annual">Annual · save 20%</button>
+          <div class="center" data-reveal>
+            <div class="pricing-switch" data-pricing-toggle>
+              <button type="button" data-billing="monthly">Monthly</button>
+              <button type="button" data-billing="annual">Annual <span class="save-tag">Save 20%</span></button>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="section">
+      <section class="section-tight">
         <div class="container">
           <div class="pricing-grid">
-            <article class="plan-card glass-card lift-card" data-reveal data-plan data-monthly-price="$9" data-monthly-note="per month" data-annual-price="$7" data-annual-note="per month, billed annually">
-              <h3>Starter</h3>
-              <p>Perfect for one website and a focused first rollout.</p>
-              <div class="plan-price"><strong data-price>$9</strong><small>/ month</small></div>
-              <p class="price-note" data-price-note>per month</p>
-              <div class="plan-divider"></div>
-              <ul class="check-list">
+            <article class="price-card glass-card lift-card" data-plan data-monthly-price="$9" data-annual-price="$7" data-monthly-note="Billed monthly · best for one website" data-annual-note="Billed annually · save 20%">
+              <div class="plan-header">
+                <div>
+                  <small class="meta-line">Starter</small>
+                  <h3 style="margin-top:14px;">Perfect for solopreneurs</h3>
+                </div>
+              </div>
+              <div class="plan-price"><strong data-price>$9</strong><span>/month</span></div>
+              <div class="price-note" data-price-note>Billed monthly · best for one website</div>
+              <ul class="feature-list">
                 <li>1 website</li>
-                <li>500 AI conversations per month</li>
-                <li>Train on up to 50 pages</li>
+                <li>500 AI conversations / month</li>
+                <li>Up to 50 pages trained</li>
                 <li>Embeddable widget</li>
-                <li>Starter question chips</li>
+                <li>Starter prompt chips</li>
                 <li>Email support</li>
+                <li class="muted">No custom branding</li>
               </ul>
-              <a class="button button-secondary" href="/dashboard?onboarding=1">Start free trial</a>
+              <div class="button-row" style="margin-top:24px;">
+                <a class="button button-secondary" href="/dashboard?onboarding=1">Start free trial</a>
+              </div>
             </article>
 
-            <article class="plan-card glass-card featured" data-reveal data-plan data-monthly-price="$29" data-monthly-note="per month" data-annual-price="$23" data-annual-note="per month, billed annually">
-              <span class="plan-badge">Most popular</span>
-              <h3>Growth</h3>
-              <p>Best for growing businesses that want room to test and scale.</p>
-              <div class="plan-price"><strong data-price>$29</strong><small>/ month</small></div>
-              <p class="price-note" data-price-note>per month</p>
-              <div class="plan-divider"></div>
-              <ul class="check-list">
+            <article class="price-card glass-card popular lift-card" data-plan data-monthly-price="$29" data-annual-price="$23" data-monthly-note="Billed monthly · most popular for growing sites" data-annual-note="Billed annually · save 20%">
+              <div class="plan-header">
+                <div>
+                  <small class="meta-line">Growth</small>
+                  <h3 style="margin-top:14px;">Best for growing businesses</h3>
+                </div>
+                <span class="popular-badge">Most popular</span>
+              </div>
+              <div class="plan-price"><strong data-price>$29</strong><span>/month</span></div>
+              <div class="price-note" data-price-note>Billed monthly · most popular for growing sites</div>
+              <ul class="feature-list">
                 <li>5 websites</li>
-                <li>5,000 AI conversations per month</li>
-                <li>Train on up to 200 pages</li>
+                <li>5,000 AI conversations / month</li>
+                <li>Up to 200 pages trained</li>
                 <li>Everything in Starter</li>
                 <li>Follow-up question suggestions</li>
-                <li>Priority email support</li>
-                <li>Conversation analytics</li>
+                <li>Remove the 5minBot badge</li>
+                <li>Priority support</li>
               </ul>
-              <a class="button button-primary" href="/dashboard?onboarding=1">Start free trial</a>
+              <div class="button-row" style="margin-top:24px;">
+                <a class="button button-primary" href="/dashboard?onboarding=1">Start free trial</a>
+              </div>
             </article>
 
-            <article class="plan-card glass-card lift-card" data-reveal data-plan data-monthly-price="$79" data-monthly-note="per month" data-annual-price="$63" data-annual-note="per month, billed annually">
-              <h3>Pro</h3>
-              <p>For agencies, operators, and teams rolling out across many sites.</p>
-              <div class="plan-price"><strong data-price>$79</strong><small>/ month</small></div>
-              <p class="price-note" data-price-note>per month</p>
-              <div class="plan-divider"></div>
-              <ul class="check-list">
+            <article class="price-card glass-card lift-card" data-plan data-monthly-price="$79" data-annual-price="$63" data-monthly-note="Billed monthly · for agencies and power users" data-annual-note="Billed annually · save 20%">
+              <div class="plan-header">
+                <div>
+                  <small class="meta-line">Pro</small>
+                  <h3 style="margin-top:14px;">For agencies and advanced teams</h3>
+                </div>
+              </div>
+              <div class="plan-price"><strong data-price>$79</strong><span>/month</span></div>
+              <div class="price-note" data-price-note>Billed monthly · for agencies and power users</div>
+              <ul class="feature-list">
                 <li>Unlimited websites</li>
                 <li>Unlimited conversations</li>
-                <li>Unlimited crawled pages</li>
+                <li>Unlimited pages trained</li>
                 <li>Everything in Growth</li>
-                <li>White-label widget</li>
+                <li>White-label support</li>
                 <li>API access</li>
                 <li>Dedicated support</li>
               </ul>
-              <a class="button button-secondary" href="/dashboard?onboarding=1">Start free trial</a>
+              <div class="button-row" style="margin-top:24px;">
+                <a class="button button-secondary" href="/dashboard?onboarding=1">Start free trial</a>
+              </div>
             </article>
           </div>
         </div>
@@ -133,54 +145,30 @@
 
       <section class="section-tight">
         <div class="container">
-          <div class="three-up-grid">
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Start small, then expand</h3>
-              <p>Most teams should validate one site first, then upgrade only when they want more websites or more chat volume.</p>
-            </article>
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Switch plans later</h3>
-              <p>Move between Starter, Growth, and Pro as your rollout scope changes. You do not need to overbuy on day one.</p>
-            </article>
-            <article class="doc-card glass-card lift-card" data-reveal>
-              <h3>Support stays clear</h3>
-              <p>Every plan includes support, with faster response and more hands-on help as the rollout grows.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="container">
-          <div class="section-header">
-            <span class="eyebrow" data-reveal>Compare plans</span>
-            <h2 data-reveal>Choose based on site count, chat volume, and rollout ambition</h2>
-          </div>
-
-          <div class="comparison-shell glass-card" data-reveal>
-            <div style="overflow-x:auto;">
-              <table class="comparison-table">
-                <thead>
-                  <tr>
-                    <th>Feature</th>
-                    <th>Starter</th>
-                    <th>Growth</th>
-                    <th>Pro</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td>Websites</td><td>1</td><td>5</td><td>Unlimited</td></tr>
-                  <tr><td>AI conversations / month</td><td>500</td><td>5,000</td><td>Unlimited</td></tr>
-                  <tr><td>Pages crawled</td><td>50</td><td>200</td><td>Unlimited</td></tr>
-                  <tr><td>Source-backed answers</td><td>Included</td><td>Included</td><td>Included</td></tr>
-                  <tr><td>UI-aware guidance</td><td>Included</td><td>Included</td><td>Included</td></tr>
-                  <tr><td>Follow-up prompts</td><td>Included</td><td>Included</td><td>Included</td></tr>
-                  <tr><td>Conversation analytics</td><td>—</td><td>Included</td><td>Advanced</td></tr>
-                  <tr><td>White-label widget</td><td>—</td><td>—</td><td>Included</td></tr>
-                  <tr><td>Support</td><td>Email</td><td>Priority email</td><td>Dedicated</td></tr>
-                </tbody>
-              </table>
+          <div class="glass-card section-slab compare-shell" data-reveal>
+            <div class="section-header" style="margin-bottom:16px;">
+              <span class="eyebrow">Plan comparison</span>
+              <h2>Compare what changes as you scale</h2>
             </div>
+            <table class="compare-table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Starter</th>
+                  <th>Growth</th>
+                  <th>Pro</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Websites</td><td>1</td><td>5</td><td>Unlimited</td></tr>
+                <tr><td>AI conversations</td><td>500 / month</td><td>5,000 / month</td><td>Unlimited</td></tr>
+                <tr><td>Pages trained</td><td>50</td><td>200</td><td>Unlimited</td></tr>
+                <tr><td>Remove 5minBot badge</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+                <tr><td>Follow-up prompts</td><td>No</td><td>Yes</td><td>Yes</td></tr>
+                <tr><td>White-label</td><td>No</td><td>No</td><td>Yes</td></tr>
+                <tr><td>Support</td><td>Email</td><td>Priority email</td><td>Dedicated support</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -188,69 +176,29 @@
       <section class="section">
         <div class="container">
           <div class="section-header">
-            <span class="eyebrow" data-reveal>Pricing FAQ</span>
-            <h2 data-reveal>Questions teams ask before they put the bot live</h2>
+            <span class="eyebrow" data-reveal>FAQ</span>
+            <h2 data-reveal>The buying questions that should be easy to answer.</h2>
           </div>
-
           <div class="faq-list">
-            <article class="faq-item glass-card" data-faq-item data-reveal>
-              <button class="faq-trigger" type="button" data-faq-trigger>
-                <span>Is there really a free trial?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-content">
-                <div class="faq-content-inner">
-                  <p>Yes. Start with the free trial, train the bot on your own site, and see how it performs before you commit to a paid plan.</p>
-                </div>
-              </div>
+            <article class="faq-item" data-faq-item data-open="true">
+              <button class="faq-button" type="button" data-faq-trigger>Is there really a free trial?</button>
+              <div class="faq-content"><div><p>You can test the chatbot before embedding it widely, and you only upgrade when the answer quality and experience feel ready.</p></div></div>
             </article>
-
-            <article class="faq-item glass-card" data-faq-item data-reveal>
-              <button class="faq-trigger" type="button" data-faq-trigger>
-                <span>What happens after the trial ends?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-content">
-                <div class="faq-content-inner">
-                  <p>The widget still loads, but the chatbot stops replying until the subscription is active again. Your site does not break, and you can upgrade anytime.</p>
-                </div>
-              </div>
+            <article class="faq-item" data-faq-item>
+              <button class="faq-button" type="button" data-faq-trigger>What happens after the trial ends?</button>
+              <div class="faq-content"><div><p>The widget keeps loading safely, but chatbot responses stop until you upgrade. Nothing breaks on your website.</p></div></div>
             </article>
-
-            <article class="faq-item glass-card" data-faq-item data-reveal>
-              <button class="faq-trigger" type="button" data-faq-trigger>
-                <span>Can I change plans later?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-content">
-                <div class="faq-content-inner">
-                  <p>Yes. Upgrade when you need more sites or more chat volume, or step down if your rollout stays smaller than expected.</p>
-                </div>
-              </div>
+            <article class="faq-item" data-faq-item>
+              <button class="faq-button" type="button" data-faq-trigger>Can I change plans later?</button>
+              <div class="faq-content"><div><p>Yes. Start small, then move up as you add more websites or need more conversations and branding control.</p></div></div>
             </article>
-
-            <article class="faq-item glass-card" data-faq-item data-reveal>
-              <button class="faq-trigger" type="button" data-faq-trigger>
-                <span>How is a conversation counted?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-content">
-                <div class="faq-content-inner">
-                  <p>One visitor asking a question and getting one response counts as one conversation. Follow-up behavior may vary by session, but the idea is to keep billing simple and predictable.</p>
-                </div>
-              </div>
+            <article class="faq-item" data-faq-item>
+              <button class="faq-button" type="button" data-faq-trigger>What counts as a conversation?</button>
+              <div class="faq-content"><div><p>One visitor asking a question and getting a response counts as one conversation. It is meant to stay intuitive, not turn into billing theatre.</p></div></div>
             </article>
-
-            <article class="faq-item glass-card" data-faq-item data-reveal>
-              <button class="faq-trigger" type="button" data-faq-trigger>
-                <span>Does the bot support multiple languages?</span>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-content">
-                <div class="faq-content-inner">
-                  <p>Yes. The chatbot can respond in many languages, which makes it useful for websites serving buyers across markets and time zones.</p>
-                </div>
-              </div>
+            <article class="faq-item" data-faq-item>
+              <button class="faq-button" type="button" data-faq-trigger>Can agencies use this for multiple client sites?</button>
+              <div class="faq-content"><div><p>Yes. Growth works for a small portfolio, and Pro is the right fit when you need unlimited sites and more control.</p></div></div>
             </article>
           </div>
         </div>
@@ -258,15 +206,15 @@
 
       <section class="section">
         <div class="container">
-          <div class="final-cta glass-card" data-reveal>
-            <div>
-              <span class="eyebrow">Ready to evaluate</span>
-              <h2 style="margin-top: 18px;">Start with one site, validate the experience, then scale from there.</h2>
-              <p class="lede">That is the cleanest way to buy. Train the first bot, test the answers, and move up only when the chatbot proves it belongs in your stack.</p>
+          <div class="final-cta glass-card lift-card" data-reveal>
+            <div class="section-header" style="margin-bottom:0;">
+              <span class="eyebrow">Start here</span>
+              <h2>Try the product on your own site before you overthink the plan.</h2>
+              <p>Paste a public URL, test the chatbot, and only worry about upgrading when it proves itself.</p>
             </div>
             <div class="button-row">
-              <a class="button button-primary" href="/dashboard?onboarding=1">Start free trial</a>
-              <a class="button button-secondary" href="/demo">Try the live demo</a>
+              <a class="button button-primary" href="/dashboard?onboarding=1">Start free</a>
+              <a class="button button-secondary" href="/demo">See live demo</a>
             </div>
           </div>
         </div>

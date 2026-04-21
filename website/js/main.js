@@ -46,14 +46,6 @@
         { href: "/security", label: "Security" },
       ],
     },
-    {
-      title: "Get started",
-      links: [
-        { href: siteConfig.dashboardUrl, label: "Add your site" },
-        { href: siteConfig.workspaceUrl, label: "Workspace" },
-        { href: "/demo", label: "Try the demo" },
-      ],
-    },
   ];
 
   const pageName = document.body.dataset.page || "";
@@ -88,9 +80,7 @@
         </div>
       </div>
       <div class="nav-panel" aria-label="Mobile navigation">
-        ${navLinks
-          .map((link) => `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`)
-          .join("")}
+        ${navLinks.map((link) => `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`).join("")}
         <a href="${siteConfig.supportUrl}">Support</a>
         <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Sign in</a>
         <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free</a>
@@ -106,7 +96,7 @@
           <a class="footer-logo" href="/" aria-label="${siteConfig.brand} home">
             <img src="${siteConfig.logoPath}" alt="${siteConfig.brand}">
           </a>
-          <p>Launch a website chatbot trained on your public pages in about five minutes. Answer buyer questions, guide visitors to the next click, and stay live 24/7 without extra setup.</p>
+          <p>Launch a premium website chatbot trained on your public pages in minutes. Answer buyer questions, guide the next click, and keep selling after hours.</p>
           <div class="button-row">
             <a class="button button-primary button-sm" href="${siteConfig.dashboardUrl}">Start free</a>
             <a class="button button-ghost button-sm" href="/demo">Try demo</a>
@@ -131,8 +121,8 @@
           .join("")}
       </div>
       <div class="container footer-bottom">
-        <p>&copy; ${year} ${siteConfig.brand}. Built for founders who want a website chatbot live fast.</p>
-        <p>Your 24/7 AI salesman. Live in about 5 minutes.</p>
+        <p>&copy; ${year} ${siteConfig.brand}. Your 24/7 AI salesman. Live in 5 minutes.</p>
+        <p>Built for founders who want a fast website chatbot that actually helps buyers convert.</p>
       </div>
     `;
   }
@@ -143,7 +133,6 @@
 
     if (navHost) {
       navHost.innerHTML = buildNav();
-
       const toggle = navHost.querySelector(".nav-mobile-toggle");
       const panel = navHost.querySelector(".nav-panel");
       const scrim = navHost.querySelector(".nav-scrim");
@@ -160,33 +149,22 @@
 
       if (toggle && panel && scrim) {
         toggle.addEventListener("click", function () {
-          if (navHost.classList.contains("nav-open")) {
-            closePanel();
-          } else {
-            openPanel();
-          }
+          if (navHost.classList.contains("nav-open")) closePanel();
+          else openPanel();
         });
-
         scrim.addEventListener("click", closePanel);
         panel.querySelectorAll("a").forEach((link) => link.addEventListener("click", closePanel));
         document.addEventListener("keydown", function (event) {
-          if (event.key === "Escape") {
-            closePanel();
-          }
+          if (event.key === "Escape") closePanel();
         });
       }
 
-      const setScrolled = () => {
-        navHost.classList.toggle("is-scrolled", window.scrollY > 12);
-      };
-
+      const setScrolled = () => navHost.classList.toggle("is-scrolled", window.scrollY > 12);
       setScrolled();
       window.addEventListener("scroll", setScrolled, { passive: true });
     }
 
-    if (footerHost) {
-      footerHost.innerHTML = buildFooter();
-    }
+    if (footerHost) footerHost.innerHTML = buildFooter();
   }
 
   function setupRevealAnimations() {
@@ -194,16 +172,12 @@
     if (!targets.length) return;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
     targets.forEach((node, index) => {
       node.classList.add("reveal-ready");
-      const delay = Number(node.dataset.delay || 0) || (index % 3) * 70;
+      const delay = Number(node.dataset.delay || 0) || (index % 3) * 90;
       node.style.transitionDelay = `${delay}ms`;
-      if (prefersReducedMotion) {
-        node.classList.add("is-visible");
-      }
+      if (prefersReducedMotion) node.classList.add("is-visible");
     });
-
     if (prefersReducedMotion) return;
 
     const observer = new IntersectionObserver(
@@ -216,7 +190,6 @@
       },
       { threshold: 0.16, rootMargin: "0px 0px -10% 0px" }
     );
-
     targets.forEach((node) => observer.observe(node));
   }
 
@@ -229,11 +202,8 @@
     function tick(now) {
       const progress = Math.min((now - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(value * eased);
-      node.textContent = `${current}${suffix}`;
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      }
+      node.textContent = `${Math.round(value * eased)}${suffix}`;
+      if (progress < 1) requestAnimationFrame(tick);
     }
 
     requestAnimationFrame(tick);
@@ -242,7 +212,6 @@
   function setupCounters() {
     const counters = Array.from(document.querySelectorAll("[data-count-up]"));
     if (!counters.length) return;
-
     const observer = new IntersectionObserver(
       (entries, obs) => {
         entries.forEach((entry) => {
@@ -253,7 +222,6 @@
       },
       { threshold: 0.4 }
     );
-
     counters.forEach((node) => observer.observe(node));
   }
 
@@ -263,24 +231,49 @@
       const panels = Array.from(shell.querySelectorAll("[data-showcase-panel]"));
       if (!tabs.length || !panels.length) return;
 
+      let activeIndex = 0;
+      let timer = null;
+
       const activate = (index) => {
+        activeIndex = index;
         tabs.forEach((tab, tabIndex) => tab.classList.toggle("active", tabIndex === index));
         panels.forEach((panel, panelIndex) => panel.classList.toggle("active", panelIndex === index));
       };
 
+      const startAuto = () => {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        timer = window.setInterval(() => {
+          activate((activeIndex + 1) % tabs.length);
+        }, 5200);
+      };
+
+      const stopAuto = () => {
+        if (timer) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      };
+
       tabs.forEach((tab, index) => {
-        tab.addEventListener("click", () => activate(index));
+        tab.addEventListener("click", () => {
+          stopAuto();
+          activate(index);
+          startAuto();
+        });
       });
 
+      shell.addEventListener("mouseenter", stopAuto);
+      shell.addEventListener("mouseleave", startAuto);
       activate(0);
+      startAuto();
     });
   }
 
   function setupPricingToggle() {
     const toggle = document.querySelector("[data-pricing-toggle]");
     if (!toggle) return;
-
     const cards = Array.from(document.querySelectorAll("[data-plan]"));
+
     const update = (mode) => {
       document.body.classList.add("pricing-switching");
       toggle.querySelectorAll("button").forEach((button) => {
@@ -340,9 +333,7 @@
         event.preventDefault();
         const input = form.querySelector("input[name='url']");
         const raw = input ? input.value.trim() : "";
-        const target = raw
-          ? `${siteConfig.dashboardUrl}&url=${encodeURIComponent(raw)}`
-          : siteConfig.dashboardUrl;
+        const target = raw ? `${siteConfig.dashboardUrl}&url=${encodeURIComponent(raw)}` : siteConfig.dashboardUrl;
         window.location.href = target;
       });
     });
@@ -407,9 +398,7 @@
     if (pageName !== "demo") return;
 
     const demoConfig = await resolveDemoConfig();
-    if (demoWidgetBootstrapped || document.querySelector('script[data-5minbot-demo-widget="true"]')) {
-      return;
-    }
+    if (demoWidgetBootstrapped || document.querySelector('script[data-5minbot-demo-widget="true"]')) return;
 
     demoWidgetBootstrapped = true;
     demoWidgetReadyPromise = new Promise((resolve, reject) => {
@@ -421,9 +410,7 @@
         window.setTimeout(function () {
           const toggle = document.getElementById("aiwa-toggle");
           const panel = document.getElementById("aiwa-panel");
-          if (toggle && panel && !panel.classList.contains("aiwa-open")) {
-            toggle.click();
-          }
+          if (toggle && panel && !panel.classList.contains("aiwa-open")) toggle.click();
           resolve();
         }, 280);
       };
@@ -441,27 +428,19 @@
       const panel = document.querySelector("#aiwa-panel");
       const input = document.querySelector("#aiwa-input");
       const send = document.querySelector("#aiwa-send");
+      if (!toggle || !input || !send) return false;
 
-      if (!toggle || !input || !send) {
-        return false;
-      }
-
-      if (panel && !panel.classList.contains("aiwa-open")) {
-        toggle.click();
-      }
+      if (panel && !panel.classList.contains("aiwa-open")) toggle.click();
 
       window.setTimeout(function () {
         input.value = question;
         input.dispatchEvent(new Event("input", { bubbles: true }));
         send.click();
       }, 200);
-
       return true;
     };
 
-    if (tryRealWidget()) {
-      return true;
-    }
+    if (tryRealWidget()) return true;
 
     if (demoWidgetReadyPromise) {
       demoWidgetReadyPromise.then(function () {
@@ -470,14 +449,12 @@
       return true;
     }
 
-    const iframe = document.querySelector("[data-hero-preview] iframe");
-    if (!iframe || !iframe.contentWindow) {
-      return false;
-    }
+    const iframe = document.querySelector("[data-live-preview] iframe");
+    if (!iframe || !iframe.contentWindow) return false;
 
     try {
       const targetOrigin = new URL(iframe.src, window.location.href).origin;
-      iframe.contentWindow.postMessage({ type: "sitecloser:ask", question }, targetOrigin);
+      iframe.contentWindow.postMessage({ type: "5minbot:ask", question }, targetOrigin);
       return true;
     } catch (error) {
       return false;
@@ -488,9 +465,7 @@
     document.querySelectorAll("[data-demo-ask]").forEach((chip) => {
       chip.addEventListener("click", function () {
         const question = chip.dataset.demoAsk || "";
-        if (question) {
-          sendPromptToEmbeddedWidget(question);
-        }
+        if (question) sendPromptToEmbeddedWidget(question);
       });
     });
   }
@@ -503,7 +478,7 @@
     setupPricingToggle();
     setupFaqAccordions();
     setupUrlForms();
-    mountPreview("[data-hero-preview]", "hero");
+    mountPreview("[data-live-preview]", "hero");
     loadDemoFloatingWidget();
     wirePromptChips();
     document.body.classList.add("page-ready");
