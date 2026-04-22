@@ -846,14 +846,51 @@ async def auth_providers():
 
 @app.post("/api/auth/signup", response_model=AuthResponse)
 async def signup(payload: SignupRequest, request: Request, response: Response, db: Session = Depends(get_db)):
-    del payload, request, response, db
-    raise HTTPException(status_code=410, detail="Email/password signup is disabled. Continue with Google instead.")
+    email, password = _validate_credentials(payload.email, payload.password)
+    existing = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if existing is not None:
+        raise HTTPException(status_code=409, detail="An account with this email already exists.")
+
+    viewer = build_viewer_context(request, db, response=response)
+    now = datetime.utcnow()
+    user = User(
+        id=str(uuid4()),
+        email=email,
+        password_hash=hash_password(password),
+        created_at=now,
+        trial_start_at=now,
+        trial_ends_at=now + timedelta(days=TRIAL_DURATION_DAYS),
+        subscription_status="trial",
+        subscription_plan="trial",
+        sites_limit=DEFAULT_SITES_LIMIT,
+    )
+    db.add(user)
+    db.flush()
+    _transfer_guest_sites(db, viewer.guest_session_id, user.id)
+    db.commit()
+    db.refresh(user)
+    set_auth_cookie(response, user)
+    return _auth_response(db, user, guest_session_id=viewer.guest_session_id)
 
 
 @app.post("/api/auth/login", response_model=AuthResponse)
 async def login(payload: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db)):
-    del payload, request, response, db
-    raise HTTPException(status_code=410, detail="Email/password login is disabled. Continue with Google instead.")
+    email, password = _validate_credentials(payload.email, payload.password)
+    user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+    if is_google_only_user(user):
+        raise HTTPException(status_code=401, detail="This account uses Google sign-in. Continue with Google instead.")
+    if not verify_password(password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password.")
+
+    viewer = build_viewer_context(request, db, response=response)
+    _transfer_guest_sites(db, viewer.guest_session_id, user.id)
+    sync_user_subscription_status(db, user)
+    db.commit()
+    db.refresh(user)
+    set_auth_cookie(response, user)
+    return _auth_response(db, user, guest_session_id=viewer.guest_session_id)
 
 
 @app.post("/api/auth/google", response_model=AuthResponse)

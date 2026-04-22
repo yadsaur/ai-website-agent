@@ -1947,76 +1947,6 @@
       border-color: transparent !important;
     }
     .assistant-markdown-bubble strong { color: #fff !important; }
-    .panel-loading {
-      position: absolute;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: rgba(8, 16, 24, 0.58);
-      backdrop-filter: blur(10px);
-      color: #eef2ff;
-      font-weight: 600;
-      z-index: 2;
-    }
-    .panel-loading.visible { display: flex; }
-    .loading-spinner {
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      border: 2px solid rgba(255,255,255,0.18);
-      border-top-color: #a78bfa;
-      animation: spinLoader 0.8s linear infinite;
-      flex-shrink: 0;
-    }
-    .button-spinner {
-      width: 16px;
-      height: 16px;
-      margin-right: 10px;
-      vertical-align: middle;
-      display: inline-block;
-    }
-    .inline-loader {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-    .inline-loader span {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.82);
-      animation: loaderPulse 1s ease-in-out infinite;
-    }
-    .inline-loader span:nth-child(2) { animation-delay: 0.14s; }
-    .inline-loader span:nth-child(3) { animation-delay: 0.28s; }
-    .inline-loader-label { color: inherit; }
-    .chat-chip.is-loading {
-      opacity: 0.8;
-      position: relative;
-      overflow: hidden;
-    }
-    .chat-chip.is-loading::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-      transform: translateX(-100%);
-      animation: chipShimmer 1.15s ease-in-out infinite;
-    }
-    @keyframes spinLoader {
-      to { transform: rotate(360deg); }
-    }
-    @keyframes loaderPulse {
-      0%, 80%, 100% { opacity: 0.3; transform: scale(0.75); }
-      40% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes chipShimmer {
-      to { transform: translateX(100%); }
-    }
     .auth-modal { background: rgba(5,7,10,0.74) !important; backdrop-filter: blur(18px) !important; }
     .auth-toggle,
     .auth-divider::before,
@@ -2083,7 +2013,7 @@
         <div class="workspace-topbar-right">
           <div id="account-badge" class="account-badge">Guest mode</div>
           <button id="account-upgrade" class="topbar-button" type="button">Upgrade</button>
-          <button id="account-auth" class="topbar-button primary" type="button">Continue with Google</button>
+          <button id="account-auth" class="topbar-button primary" type="button">Sign up</button>
           <button id="account-logout" class="topbar-button" type="button" style="display:none;">Logout</button>
         </div>
       </div>
@@ -2208,11 +2138,7 @@
                 </div>
                 <div class="workspace-preview-stage">
                   <div class="workspace-preview-frame-wrap">
-                    <div id="workspace-preview-loading" class="panel-loading visible" aria-live="polite">
-                      <span class="loading-spinner" aria-hidden="true"></span>
-                      <span>Loading live preview...</span>
-                    </div>
-                    <iframe id="workspace-preview-frame" class="workspace-preview-frame" src="/website/hero-preview.html?mode=hero" title="Live chatbot preview"></iframe>
+                    <iframe id="workspace-preview-frame" class="workspace-preview-frame" src="/website/hero-preview.html?mode=hero" title="Live chatbot preview" loading="lazy"></iframe>
                   </div>
                 </div>
               </div>
@@ -2253,31 +2179,31 @@
   </div>
   <div id="auth-modal" class="auth-modal" aria-hidden="true">
     <div class="auth-panel">
-      <h3 id="auth-title">Continue with Google</h3>
+      <h3 id="auth-title">Create your account</h3>
       <p id="auth-subtitle">Save the sites you already trained and unlock the embed script.</p>
+      <div class="auth-toggle">
+        <button id="auth-tab-signup" type="button" class="active">Sign up</button>
+        <button id="auth-tab-login" type="button">Log in</button>
+      </div>
       <div class="google-auth-stack">
         <div id="google-auth-slot" class="google-auth-slot"></div>
-        <p id="google-auth-help" class="google-auth-help">Google sign-in is not configured yet. Ask the team to enable it for this workspace.</p>
+        <p id="google-auth-help" class="google-auth-help">Google sign-in is not configured yet. You can still use email and password.</p>
       </div>
-      <div class="auth-actions auth-actions-google-only">
-        <button id="auth-cancel" class="ghost-button" type="button">Cancel</button>
-      </div>
-      <div id="auth-note" class="auth-note">You can still train and test as a guest. Google sign-in is only required when you want the live embed script or paid billing.</div>
+      <div class="auth-divider">or continue with email</div>
+      <form id="auth-form" class="auth-form">
+        <input id="auth-email" type="email" placeholder="you@company.com" autocomplete="email" required />
+        <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required />
+        <div class="auth-actions">
+          <button id="auth-submit" class="primary-button" type="submit">Continue</button>
+          <button id="auth-cancel" class="ghost-button" type="button">Cancel</button>
+        </div>
+      </form>
+      <div id="auth-note" class="auth-note">You can train and test as a guest. Signup is only required when you want the live embed script.</div>
     </div>
   </div>
   <script>
     const FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
     const TRIAL_ENDED_MESSAGE = "This chatbot is inactive. Please upgrade.";
-    const STARTER_QUESTION_FALLBACK = [
-      "What does this website do?",
-      "How can I get started?",
-      "What are the main features?"
-    ];
-    const FOLLOWUP_QUESTION_FALLBACKS = {
-      pricing: ["What is included in this plan?", "Can I start a free trial?"],
-      setup: ["How long does setup take?", "What do I do after training?"],
-      value: ["Who is this for?", "How do I launch it on my site?"]
-    };
     let markedLoader = null;
     const state = {
       pollTimer: null,
@@ -2291,7 +2217,7 @@
       submitting: false,
       pendingSiteUrl: "",
       trainingStartedAt: 0,
-      authMode: "google",
+      authMode: "signup",
       authUser: null,
       authProviders: { google_enabled: false, google_client_id: null },
       googleButtonRendered: false,
@@ -2315,8 +2241,14 @@
     const authModal = document.getElementById("auth-modal");
     const authTitle = document.getElementById("auth-title");
     const authSubtitle = document.getElementById("auth-subtitle");
+    const authForm = document.getElementById("auth-form");
+    const authEmail = document.getElementById("auth-email");
+    const authPassword = document.getElementById("auth-password");
+    const authSubmit = document.getElementById("auth-submit");
     const authCancel = document.getElementById("auth-cancel");
     const authNote = document.getElementById("auth-note");
+    const authTabSignup = document.getElementById("auth-tab-signup");
+    const authTabLogin = document.getElementById("auth-tab-login");
     const googleAuthSlot = document.getElementById("google-auth-slot");
     const googleAuthHelp = document.getElementById("google-auth-help");
     const launchTitle = document.getElementById("launch-title");
@@ -2346,7 +2278,6 @@
     const chatSend = document.getElementById("chat-send");
     const chatShell = document.getElementById("chat-shell");
     const workspacePreviewFrame = document.getElementById("workspace-preview-frame");
-    const workspacePreviewLoading = document.getElementById("workspace-preview-loading");
 
     function setFeedback(message, tone) {
       if (!message) {
@@ -2363,9 +2294,7 @@
       siteSubmit.disabled = isSubmitting;
       siteUrl.readOnly = isSubmitting;
       siteUrl.setAttribute("aria-busy", isSubmitting ? "true" : "false");
-      siteSubmit.innerHTML = isSubmitting
-        ? '<span class="loading-spinner button-spinner" aria-hidden="true"></span><span>Training...</span>'
-        : "Add your site";
+      siteSubmit.textContent = isSubmitting ? "Training..." : "Add your site";
     }
 
     function loadMarked() {
@@ -2396,11 +2325,6 @@
       } else {
         bubble.textContent = value;
       }
-    }
-
-    function renderLoadingBubble(bubble, label) {
-      bubble.innerHTML = '<span class="inline-loader" aria-hidden="true"><span></span><span></span><span></span></span>' +
-        '<span class="inline-loader-label">' + escapeHtml(label || "Thinking...") + "</span>";
     }
 
     function formatApiError(payload, fallback) {
@@ -2458,10 +2382,6 @@
     function renderBillingPanel() {
       const user = state.authUser;
       const plans = Array.isArray(state.billingPlans) && state.billingPlans.length ? state.billingPlans : [];
-      const planRank = { starter: 0, growth: 1, pro: 2 };
-      const currentPlanRank = user && user.subscription_status === "active"
-        ? (planRank[(user.subscription_plan || "").toLowerCase()] ?? -1)
-        : -1;
       if (!billingSummary || !billingPlans) return;
       if (billingNote) {
         billingNote.textContent = user && user.subscription_status === "active"
@@ -2502,10 +2422,6 @@
 
       billingPlans.innerHTML = "";
       plans.forEach(function (plan) {
-        const planLevel = planRank[(plan.key || "").toLowerCase()] ?? -1;
-        if (currentPlanRank >= 0 && planLevel >= 0 && planLevel < currentPlanRank) {
-          return;
-        }
         const planCard = document.createElement("div");
         planCard.className = "billing-plan" + (plan.current ? " current" : "");
         const usageText = plan.usage_limit == null ? "Unlimited chats" : plan.usage_limit.toLocaleString() + " chats";
@@ -2532,10 +2448,19 @@
     }
 
     function setAuthMode(mode) {
-      state.authMode = "google";
-      authTitle.textContent = "Continue with Google";
-      authSubtitle.textContent = "Save the sites you already trained and unlock the embed script.";
-      authNote.textContent = "Logging in on this browser also attaches any guest-created sites from this session to your account.";
+      state.authMode = mode === "login" ? "login" : "signup";
+      const signupMode = state.authMode === "signup";
+      authTabSignup.classList.toggle("active", signupMode);
+      authTabLogin.classList.toggle("active", !signupMode);
+      authTitle.textContent = signupMode ? "Create your account" : "Log back in";
+      authSubtitle.textContent = signupMode
+        ? "Save the sites you already trained and unlock the embed script."
+        : "Log in to access your saved sites, trial status, and embed script.";
+      authSubmit.textContent = signupMode ? "Create account" : "Log in";
+      authNote.textContent = signupMode
+        ? "You can train and test as a guest. Signup is only required when you want the live embed script."
+        : "Logging in on this browser will also attach any guest-created sites from this session to your account.";
+      authPassword.setAttribute("autocomplete", signupMode ? "new-password" : "current-password");
       if (googleAuthSlot) {
         googleAuthSlot.innerHTML = "";
       }
@@ -2610,7 +2535,7 @@
         theme: "outline",
         size: "large",
         type: "standard",
-        text: "continue_with",
+        text: state.authMode === "signup" ? "signup_with" : "signin_with",
         shape: "pill",
         width: Math.min(380, Math.max(280, googleAuthSlot.clientWidth || 320))
       });
@@ -2625,18 +2550,13 @@
       authModal.classList.add("visible");
       authModal.setAttribute("aria-hidden", "false");
       renderGoogleAuthButton();
+      window.setTimeout(function () { authEmail.focus(); }, 40);
     }
 
     function closeAuthModal() {
       authModal.classList.remove("visible");
       authModal.setAttribute("aria-hidden", "true");
-    }
-
-    function syncMarketingAuthState(isAuthenticated) {
-      try {
-        window.localStorage.setItem("5minbot-marketing-auth", isAuthenticated ? "1" : "0");
-      } catch (err) {
-      }
+      authPassword.value = "";
     }
 
     function renderAccountState() {
@@ -2647,13 +2567,11 @@
         accountAuth.style.display = "none";
         accountLogout.style.display = "inline-flex";
         accountUpgrade.textContent = status === "active" ? "Billing" : "Upgrade";
-        syncMarketingAuthState(true);
       } else {
         accountBadge.textContent = "Guest mode";
         accountAuth.style.display = "inline-flex";
         accountLogout.style.display = "none";
         accountUpgrade.textContent = "Upgrade";
-        syncMarketingAuthState(false);
       }
       renderBillingPanel();
     }
@@ -2668,6 +2586,42 @@
         state.guestSessionId = data.guest_session_id || null;
         renderAccountState();
       } catch (err) {
+      }
+    }
+
+    async function submitAuth(event) {
+      event.preventDefault();
+      const endpoint = state.authMode === "signup" ? "/api/auth/signup" : "/api/auth/login";
+      authSubmit.disabled = true;
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: authEmail.value.trim(),
+            password: authPassword.value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setFeedback(formatApiError(data, "Unable to authenticate right now."), "error");
+          return;
+        }
+        state.authUser = data.user || null;
+        state.guestSessionId = data.guest_session_id || null;
+        await fetchAuthState();
+        closeAuthModal();
+        await fetchSites();
+        setFeedback(state.authMode === "signup" ? "Account created. Your guest sites were saved to your account." : "Welcome back. Your workspace is ready.", "success");
+        if (state.pendingEmbedSiteId) {
+          const pendingSiteId = state.pendingEmbedSiteId;
+          state.pendingEmbedSiteId = null;
+          await showEmbedCode(pendingSiteId);
+        }
+      } catch (err) {
+        setFeedback("Unable to reach the backend while signing in.", "error");
+      } finally {
+        authSubmit.disabled = false;
       }
     }
 
@@ -3026,7 +2980,6 @@
             state.pollTimer = null;
             settleTrainingInput(true);
             if (site.status === "ready") {
-              prefetchStarterSuggestions(site.site_id);
               testSiteSelect.value = site.site_id;
               resetChatPanel();
               updateChatAvailability();
@@ -3041,7 +2994,7 @@
         }
       }
       await tick();
-      state.pollTimer = window.setInterval(tick, 1500);
+      state.pollTimer = window.setInterval(tick, 3000);
     }
 
     async function handleCreateSite(event) {
@@ -3072,7 +3025,6 @@
           return;
         }
         await fetchSites();
-        updateWorkspacePreview(data.site_id);
         await pollStatus(data.site_id);
       } catch (err) {
         settleTrainingInput(false);
@@ -3167,15 +3119,6 @@
       chatMessages.querySelectorAll(".followup-chip-stack").forEach(function (node) { node.remove(); });
     }
 
-    function setPreviewLoading(loading, message) {
-      if (!workspacePreviewLoading) return;
-      workspacePreviewLoading.classList.toggle("visible", !!loading);
-      const label = workspacePreviewLoading.querySelector("span:last-child");
-      if (label && message) {
-        label.textContent = message;
-      }
-    }
-
     function addChatMessage(role, text) {
       const row = document.createElement("div");
       row.className = "chat-row " + role;
@@ -3237,10 +3180,8 @@
       const siteId = testSiteSelect.value;
       if (!siteId || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
       prefetchStarterSuggestions(siteId);
-      renderStarterSuggestions(state.suggestedQuestionsCache[siteId] || STARTER_QUESTION_FALLBACK, {
-        replace: true,
-        loading: !state.suggestedQuestionsCache[siteId]
-      });
+      if (!state.suggestedQuestionsCache[siteId]) return;
+      renderStarterSuggestions(state.suggestedQuestionsCache[siteId]);
     }
 
     async function prefetchStarterSuggestions(siteId) {
@@ -3256,24 +3197,18 @@
         const data = await response.json();
         if (!data.questions || !data.questions.length) return;
         state.suggestedQuestionsCache[siteId] = data.questions.slice(0, 3);
-        renderStarterSuggestions(state.suggestedQuestionsCache[siteId], { replace: true, loading: false });
       } catch (err) {}
     }
 
-    function renderStarterSuggestions(questions, options) {
-      options = options || {};
+    function renderStarterSuggestions(questions) {
       if (!questions || !questions.length || state.starterDismissed || chatMessages.querySelector(".chat-row")) return;
-      if (options.replace) {
-        chatMessages.querySelectorAll(".starter-chip-stack").forEach(function (node) { node.remove(); });
-      } else if (chatMessages.querySelector(".starter-chip-stack")) {
-        return;
-      }
+      if (chatMessages.querySelector(".starter-chip-stack")) return;
       const wrap = document.createElement("div");
       wrap.className = "chip-stack starter-chip-stack";
       questions.slice(0, 3).forEach(function (question) {
         const chip = document.createElement("button");
         chip.type = "button";
-        chip.className = "chat-chip" + (options.loading ? " is-loading" : "");
+        chip.className = "chat-chip";
         chip.textContent = "-> " + question;
         chip.addEventListener("click", function () {
           removeStarterChips();
@@ -3286,25 +3221,14 @@
       scrollChatToBottom();
     }
 
-    function inferFallbackFollowups(lastQuestion, lastAnswer) {
-      const combined = (String(lastQuestion || "") + " " + String(lastAnswer || "")).toLowerCase();
-      if (/(price|pricing|cost|plan|billing)/.test(combined)) return FOLLOWUP_QUESTION_FALLBACKS.pricing;
-      if (/(setup|get started|install|launch|embed|trial)/.test(combined)) return FOLLOWUP_QUESTION_FALLBACKS.setup;
-      return FOLLOWUP_QUESTION_FALLBACKS.value;
-    }
-
-    function appendFollowupChips(container, questions, options) {
-      options = options || {};
+    function appendFollowupChips(container, questions) {
       if (!questions || !questions.length) return;
-      if (options.replace) {
-        container.querySelectorAll(".followup-chip-stack").forEach(function (node) { node.remove(); });
-      }
       const wrap = document.createElement("div");
       wrap.className = "chip-group followup-chip-stack";
       questions.slice(0, 2).forEach(function (question) {
         const chip = document.createElement("button");
         chip.type = "button";
-        chip.className = "chat-chip followup-chip" + (options.loading ? " is-loading" : "");
+        chip.className = "chat-chip followup-chip";
         chip.textContent = "-> " + question;
         chip.addEventListener("click", function () {
           wrap.remove();
@@ -3319,7 +3243,6 @@
     async function fetchFollowupChips(lastQuestion, lastAnswer, container) {
       const siteId = testSiteSelect.value;
       if (!siteId) return;
-      appendFollowupChips(container, inferFallbackFollowups(lastQuestion, lastAnswer), { replace: true, loading: true });
       try {
         const controller = new AbortController();
         const timeoutId = window.setTimeout(function () { controller.abort(); }, 3000);
@@ -3333,18 +3256,14 @@
         if (!response.ok) return;
         const data = await response.json();
         if (!data.questions || !data.questions.length) return;
-        appendFollowupChips(container, data.questions, { replace: true, loading: false });
+        appendFollowupChips(container, data.questions);
       } catch (err) {}
     }
 
     function updateWorkspacePreview(siteId) {
       if (!workspacePreviewFrame) return;
       if (!siteId) {
-        const nextSrc = "/website/hero-preview.html?mode=hero";
-        if (workspacePreviewFrame.src !== new URL(nextSrc, window.location.origin).toString()) {
-          setPreviewLoading(true, "Loading live preview...");
-          workspacePreviewFrame.src = nextSrc;
-        }
+        workspacePreviewFrame.src = "/website/hero-preview.html?mode=hero";
         return;
       }
       const params = new URLSearchParams({
@@ -3352,11 +3271,7 @@
         app_url: window.location.origin,
         mode: "hero"
       });
-      const nextSrc = "/website/hero-preview.html?" + params.toString();
-      if (workspacePreviewFrame.src !== new URL(nextSrc, window.location.origin).toString()) {
-        setPreviewLoading(true, "Loading live preview...");
-        workspacePreviewFrame.src = nextSrc;
-      }
+      workspacePreviewFrame.src = "/website/hero-preview.html?" + params.toString();
     }
 
     function updateChatAvailability() {
@@ -3385,12 +3300,11 @@
       chatInput.value = "";
       const assistantMessage = addChatMessage("assistant", "");
       const assistantBubble = assistantMessage.bubble;
-      renderLoadingBubble(assistantBubble, "Thinking...");
       let answerText = "";
       let hadNoAnswer = false;
       const source = new EventSource("/api/chat?site_id=" + encodeURIComponent(siteId) + "&q=" + encodeURIComponent(question) + "&session_id=" + encodeURIComponent(state.sessionId));
       state.activeEventSource = source;
-      loadMarked().catch(function () {});
+      loadMarked().then(function () { renderAssistantContent(assistantBubble, answerText); }).catch(function () {});
       source.onmessage = function (event) {
         try {
           const data = JSON.parse(event.data);
@@ -3434,10 +3348,13 @@
     accountUpgrade.addEventListener("click", function () {
       scrollAndHighlight(billingCard);
     });
+    authTabSignup.addEventListener("click", function () { setAuthMode("signup"); });
+    authTabLogin.addEventListener("click", function () { setAuthMode("login"); });
     authCancel.addEventListener("click", function () { closeAuthModal(); });
     authModal.addEventListener("click", function (event) {
       if (event.target === authModal) closeAuthModal();
     });
+    authForm.addEventListener("submit", submitAuth);
     siteList.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-site-id]");
       if (!button) return;
@@ -3465,9 +3382,6 @@
     openSelectedEmbed.addEventListener("click", function () {
       if (testSiteSelect.value) showEmbedCode(testSiteSelect.value);
     });
-    workspacePreviewFrame.addEventListener("load", function () {
-      setPreviewLoading(false);
-    });
     billingPlans.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-plan]");
       if (!button) return;
@@ -3488,7 +3402,7 @@
     loadMarked().catch(function () {});
     window.setTimeout(renderGoogleAuthButton, 800);
     window.setTimeout(renderGoogleAuthButton, 1800);
-    setAuthMode("google");
+    setAuthMode("signup");
     handleBillingReturn();
     if (new URLSearchParams(window.location.search).get("onboarding")) {
       window.setTimeout(function () { siteUrl.focus(); }, 200);
