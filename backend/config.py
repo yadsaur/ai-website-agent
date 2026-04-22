@@ -43,7 +43,14 @@ OPENROUTER_SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://localhost:8000")
 HF_API_KEY = os.getenv("HF_API_KEY", "")
 DODO_PAYMENTS_API_KEY = os.getenv("DODO_PAYMENTS_API_KEY", "")
 DODO_PAYMENTS_WEBHOOK_KEY = os.getenv("DODO_PAYMENTS_WEBHOOK_KEY", "")
-DODO_PAYMENTS_BASE_URL = os.getenv("DODO_PAYMENTS_BASE_URL", "https://test.dodopayments.com").rstrip("/")
+DODO_PAYMENTS_ENVIRONMENT = os.getenv("DODO_PAYMENTS_ENVIRONMENT", "").strip().lower()
+_configured_dodo_base_url = os.getenv("DODO_PAYMENTS_BASE_URL", "").strip()
+if _configured_dodo_base_url:
+    DODO_PAYMENTS_BASE_URL = _configured_dodo_base_url.rstrip("/")
+elif DODO_PAYMENTS_ENVIRONMENT == "test_mode":
+    DODO_PAYMENTS_BASE_URL = "https://test.dodopayments.com"
+else:
+    DODO_PAYMENTS_BASE_URL = "https://live.dodopayments.com"
 DODO_SUCCESS_URL = os.getenv("DODO_SUCCESS_URL", f"{BASE_URL}/billing/success")
 DODO_CANCEL_URL = os.getenv("DODO_CANCEL_URL", f"{BASE_URL}/dashboard?billing=cancelled")
 DODO_STARTER_PRICE_ID = os.getenv("DODO_STARTER_PRICE_ID", "")
