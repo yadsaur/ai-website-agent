@@ -50,9 +50,17 @@
 
   const pageName = document.body.dataset.page || "";
   const year = new Date().getFullYear();
+  const MARKETING_AUTH_STORAGE_KEY = "5minbot-marketing-auth";
   let demoConfigPromise = null;
   let demoWidgetReadyPromise = null;
   let demoWidgetBootstrapped = false;
+  let marketingAuthState = { authenticated: false, user: null };
+
+  try {
+    marketingAuthState.authenticated = window.localStorage.getItem(MARKETING_AUTH_STORAGE_KEY) === "1";
+  } catch (error) {
+    marketingAuthState.authenticated = false;
+  }
 
   function buildNav() {
     return `
@@ -82,8 +90,14 @@
               .join("")}
           </nav>
           <div class="nav-cta">
-            <a class="button button-ghost button-sm" href="${siteConfig.workspaceUrl}">Sign in</a>
-            <a class="button button-primary button-sm" href="${siteConfig.dashboardUrl}">Start free</a>
+            <div class="nav-auth-guest" data-nav-guest>
+              <a class="button button-ghost button-sm" href="${siteConfig.workspaceUrl}">Sign in</a>
+              <a class="button button-primary button-sm" href="${siteConfig.dashboardUrl}">Start free</a>
+            </div>
+            <div class="nav-auth-user" data-nav-user hidden>
+              <a class="button button-ghost button-sm" href="${siteConfig.workspaceUrl}">Workspace</a>
+              <button class="button button-primary button-sm" type="button" data-nav-logout>Sign out</button>
+            </div>
             <button class="nav-mobile-toggle" type="button" aria-label="Open menu">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path d="M3 5H15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -97,8 +111,14 @@
       <div class="nav-panel" aria-label="Mobile navigation">
         ${navLinks.map((link) => `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`).join("")}
         <a href="${siteConfig.supportUrl}">Support</a>
-        <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Sign in</a>
-        <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free</a>
+        <div class="nav-auth-guest" data-nav-guest>
+          <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Sign in</a>
+          <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free</a>
+        </div>
+        <div class="nav-auth-user" data-nav-user hidden>
+          <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Workspace</a>
+          <button class="button button-primary" type="button" data-nav-logout>Sign out</button>
+        </div>
       </div>
       <div class="nav-scrim"></div>
     `;
@@ -199,6 +219,61 @@
     }
 
     if (footerHost) footerHost.innerHTML = buildFooter();
+  }
+
+  function applyMarketingAuthState() {
+    document.querySelectorAll("[data-nav-guest]").forEach((node) => {
+      node.hidden = !!marketingAuthState.authenticated;
+    });
+    document.querySelectorAll("[data-nav-user]").forEach((node) => {
+      node.hidden = !marketingAuthState.authenticated;
+    });
+  }
+
+  function persistMarketingAuthState() {
+    try {
+      window.localStorage.setItem(MARKETING_AUTH_STORAGE_KEY, marketingAuthState.authenticated ? "1" : "0");
+    } catch (error) {
+      // Ignore storage failures and keep the server response authoritative.
+    }
+  }
+
+  async function fetchMarketingAuthState() {
+    try {
+      const response = await fetch("/api/auth/me", { credentials: "same-origin" });
+      if (!response.ok) return;
+      const data = await response.json();
+      marketingAuthState = {
+        authenticated: !!data.authenticated,
+        user: data.user || null,
+      };
+    } catch (error) {
+      marketingAuthState = { authenticated: false, user: null };
+    } finally {
+      persistMarketingAuthState();
+      applyMarketingAuthState();
+    }
+  }
+
+  function wireMarketingLogout() {
+    document.addEventListener("click", async function (event) {
+      const button = event.target.closest("[data-nav-logout]");
+      if (!button) return;
+      event.preventDefault();
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = "Signing out...";
+      try {
+        await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+      } catch (error) {
+      }
+      marketingAuthState = { authenticated: false, user: null };
+      persistMarketingAuthState();
+      applyMarketingAuthState();
+      button.disabled = false;
+      button.textContent = original;
+      window.location.href = window.location.pathname;
+    });
   }
 
   function setupRevealAnimations() {
@@ -506,6 +581,9 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     mountSharedChrome();
+    applyMarketingAuthState();
+    wireMarketingLogout();
+    fetchMarketingAuthState();
     setupRevealAnimations();
     setupCounters();
     setupShowcases();

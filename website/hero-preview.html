@@ -404,6 +404,16 @@
       var appUrl = params.get("app_url") || window.location.origin;
       var mode = params.get("mode") || "default";
       var FALLBACK_MESSAGE = "I don't have that specific information here, but the team behind this site would be able to give you a definitive answer. Is there anything else I can help you with?";
+      var STARTER_QUESTION_FALLBACK = [
+        "What does this website do?",
+        "How can I get started?",
+        "What are the main features?"
+      ];
+      var FOLLOWUP_QUESTION_FALLBACKS = {
+        pricing: ["What is included in this plan?", "Can I start a free trial?"],
+        setup: ["How long does setup take?", "What happens after training?"],
+        value: ["Who is this for?", "How do I launch it on my site?"]
+      };
       var state = {
         siteName: "5minBot",
         sessionId: "preview-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
@@ -541,9 +551,14 @@
         scrollChatToBottom();
       }
 
-      function renderStarterSuggestions(questions) {
+      function renderStarterSuggestions(questions, options) {
+        options = options || {};
         if (!questions || !questions.length || state.starterDismissed || hasConversationMessages()) return;
-        if (chatMessages.querySelector(".starter-stack")) return;
+        if (options.replace) {
+          chatMessages.querySelectorAll(".starter-stack").forEach(function (node) { node.remove(); });
+        } else if (chatMessages.querySelector(".starter-stack")) {
+          return;
+        }
 
         var wrap = document.createElement("div");
         wrap.className = "chip-stack starter-stack";
@@ -568,18 +583,30 @@
       async function prefetchStarterSuggestions() {
         if (state.suggestedQuestionsRequested || Array.isArray(state.suggestedQuestions)) return;
         state.suggestedQuestionsRequested = true;
+        renderStarterSuggestions(STARTER_QUESTION_FALLBACK, { replace: true });
         try {
           var response = await fetch(appUrl + "/api/sites/" + encodeURIComponent(siteId) + "/suggested-questions");
           if (!response.ok) return;
           var data = await response.json();
           if (!data.questions || !data.questions.length) return;
           state.suggestedQuestions = data.questions.slice(0, 3);
-          renderStarterSuggestions(state.suggestedQuestions);
+          renderStarterSuggestions(state.suggestedQuestions, { replace: true });
         } catch (error) {}
       }
 
-      function appendFollowups(container, questions) {
+      function inferFallbackFollowups(lastQuestion, lastAnswer) {
+        var combined = (String(lastQuestion || "") + " " + String(lastAnswer || "")).toLowerCase();
+        if (/(price|pricing|cost|plan|billing)/.test(combined)) return FOLLOWUP_QUESTION_FALLBACKS.pricing;
+        if (/(setup|get started|install|launch|embed|trial)/.test(combined)) return FOLLOWUP_QUESTION_FALLBACKS.setup;
+        return FOLLOWUP_QUESTION_FALLBACKS.value;
+      }
+
+      function appendFollowups(container, questions, options) {
+        options = options || {};
         if (!questions || !questions.length) return;
+        if (options.replace) {
+          container.querySelectorAll(".followup-stack").forEach(function (node) { node.remove(); });
+        }
         var wrap = document.createElement("div");
         wrap.className = "followup-stack";
         questions.slice(0, 2).forEach(function (question) {
@@ -598,6 +625,7 @@
       }
 
       async function fetchFollowups(lastQuestion, lastAnswer, container) {
+        appendFollowups(container, inferFallbackFollowups(lastQuestion, lastAnswer), { replace: true });
         try {
           var controller = new AbortController();
           var timeoutId = window.setTimeout(function () { controller.abort(); }, 3000);
@@ -615,7 +643,7 @@
           if (!response.ok) return;
           var data = await response.json();
           if (!data.questions || !data.questions.length) return;
-          appendFollowups(container, data.questions);
+          appendFollowups(container, data.questions, { replace: true });
         } catch (error) {}
       }
 

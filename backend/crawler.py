@@ -15,7 +15,7 @@ import httpx
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
 
-from backend.config import CRAWL_DELAY_SECONDS, SITE_CRAWL_DEADLINE_SECONDS
+from backend.config import CRAWL_DELAY_SECONDS, MAX_CRAWL_CONCURRENCY, SITE_CRAWL_DEADLINE_SECONDS
 
 logger = logging.getLogger(__name__)
 PRIMARY_NAVIGATION_TIMEOUT_MS = 20000
@@ -195,6 +195,7 @@ async def crawl_site(
     queued: set[str] = {root_url}
     queue = deque([(root_url, 0)])
     results: list[PageResult] = []
+    result_urls: set[str] = set()
     crawl_started_at = monotonic()
 
     sitemap_urls = await _discover_sitemap_urls(root_url, root_netloc, min(MAX_SITEMAP_URLS, max_pages * 4))
@@ -220,26 +221,13 @@ async def crawl_site(
             user_agent=REAL_CHROME_UA,
             ignore_https_errors=True,
         )
-        page = await context.new_page()
 
-        while queue and len(results) < max_pages:
-            if results and (monotonic() - crawl_started_at) > SITE_CRAWL_DEADLINE_SECONDS:
-                logger.warning(
-                    "Stopping crawl for %s after %ss with %s pages collected",
-                    root_url,
-                    SITE_CRAWL_DEADLINE_SECONDS,
-                    len(results),
-                )
-                break
-            current_url, depth = queue.popleft()
-            queued.discard(current_url)
-            if current_url in visited or depth > max_depth:
-                continue
-
-            visited.add(current_url)
-            await asyncio.sleep(CRAWL_DELAY_SECONDS)
-
+        async def crawl_one(current_url: str, depth: int) -> tuple[PageResult | None, list[str], str]:
+            page = await context.new_page()
             try:
+                if CRAWL_DELAY_SECONDS > 0:
+                    await asyncio.sleep(CRAWL_DELAY_SECONDS)
+
                 try:
                     response = await page.goto(
                         current_url,
@@ -257,59 +245,111 @@ async def crawl_site(
                         timeout=FALLBACK_NAVIGATION_TIMEOUT_MS,
                     )
                     await page.wait_for_timeout(POST_COMMIT_WAIT_MS)
+
                 try:
                     await page.wait_for_load_state("networkidle", timeout=NETWORK_IDLE_TIMEOUT_MS)
                 except PlaywrightTimeoutError:
                     logger.warning("networkidle timeout for %s", current_url)
 
                 final_url = normalize_url(page.url)
-                if final_url != current_url:
-                    visited.add(final_url)
-                    queued.discard(final_url)
                 html = await page.content()
                 title = await page.title()
                 status = response.status if response is not None else None
-                if final_url != current_url and any(existing.url == final_url for existing in results):
-                    continue
-                results.append(PageResult(url=final_url, html=html, title=title or "", depth=depth, http_status=status))
-                await _emit_progress(
-                    progress_callback,
-                    {
-                        "pages_crawled": len(results),
-                        "pages_discovered": len(results) + len(queue),
-                        "current_url": final_url,
-                    },
-                )
 
-                if depth >= max_depth:
-                    continue
+                discovered_links: list[str] = []
+                if depth < max_depth:
+                    hrefs = await page.eval_on_selector_all(
+                        "a[href]",
+                        "elements => elements.map(el => el.getAttribute('href')).filter(Boolean)",
+                    )
+                    for href in hrefs:
+                        if href.startswith("#"):
+                            continue
+                        absolute = normalize_url(urljoin(final_url, href))
+                        if _is_skippable(absolute, root_netloc):
+                            continue
+                        discovered_links.append(absolute)
 
-                hrefs = await page.eval_on_selector_all(
-                    "a[href]",
-                    "elements => elements.map(el => el.getAttribute('href')).filter(Boolean)",
-                )
-                for href in hrefs:
-                    if href.startswith("#"):
-                        continue
-                    absolute = normalize_url(urljoin(final_url, href))
-                    if absolute in visited or absolute in queued:
-                        continue
-                    if _is_skippable(absolute, root_netloc):
-                        continue
-                    queue.append((absolute, depth + 1))
-                    queued.add(absolute)
-                await _emit_progress(
-                    progress_callback,
-                    {
-                        "pages_crawled": len(results),
-                        "pages_discovered": len(results) + len(queue),
-                        "current_url": final_url,
-                    },
+                return (
+                    PageResult(url=final_url, html=html, title=title or "", depth=depth, http_status=status),
+                    discovered_links,
+                    current_url,
                 )
             except PlaywrightTimeoutError:
                 logger.warning("Playwright timeout for %s", current_url)
+                return None, [], current_url
             except Exception as exc:
                 logger.warning("Failed to crawl %s: %s", current_url, exc)
+                return None, [], current_url
+            finally:
+                await page.close()
+
+        while queue and len(results) < max_pages:
+            if results and (monotonic() - crawl_started_at) > SITE_CRAWL_DEADLINE_SECONDS:
+                logger.warning(
+                    "Stopping crawl for %s after %ss with %s pages collected",
+                    root_url,
+                    SITE_CRAWL_DEADLINE_SECONDS,
+                    len(results),
+                )
+                break
+
+            batch: list[tuple[str, int]] = []
+            while queue and len(batch) < max(1, MAX_CRAWL_CONCURRENCY) and len(results) + len(batch) < max_pages:
+                current_url, depth = queue.popleft()
+                queued.discard(current_url)
+                if current_url in visited or depth > max_depth:
+                    continue
+                visited.add(current_url)
+                batch.append((current_url, depth))
+
+            if not batch:
+                break
+
+            crawled_batch = await asyncio.gather(*(crawl_one(current_url, depth) for current_url, depth in batch))
+
+            for page_result, discovered_links, original_url in crawled_batch:
+                if page_result is None:
+                    continue
+
+                final_url = page_result.url
+                if final_url != original_url:
+                    visited.add(final_url)
+                    queued.discard(final_url)
+                if final_url in result_urls:
+                    continue
+                if len(results) >= max_pages:
+                    break
+
+                result_urls.add(final_url)
+                results.append(page_result)
+
+                await _emit_progress(
+                    progress_callback,
+                    {
+                        "pages_crawled": len(results),
+                        "pages_discovered": len(results) + len(queue),
+                        "current_url": final_url,
+                    },
+                )
+
+                if page_result.depth >= max_depth:
+                    continue
+
+                for absolute in discovered_links:
+                    if absolute in visited or absolute in queued or absolute in result_urls:
+                        continue
+                    queue.append((absolute, page_result.depth + 1))
+                    queued.add(absolute)
+
+                await _emit_progress(
+                    progress_callback,
+                    {
+                        "pages_crawled": len(results),
+                        "pages_discovered": len(results) + len(queue),
+                        "current_url": final_url,
+                    },
+                )
 
         await context.close()
         await browser.close()

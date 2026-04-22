@@ -1741,6 +1741,19 @@ li {
   gap: 12px;
 }
 
+.nav-auth-guest,
+.nav-auth-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-panel .nav-auth-guest,
+.nav-panel .nav-auth-user {
+  display: grid;
+  gap: 12px;
+}
+
 .nav-mobile-toggle {
   display: none;
   width: 46px;
