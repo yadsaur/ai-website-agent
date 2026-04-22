@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 
 class CreateSiteRequest(BaseModel):
-    url: HttpUrl
+    url: str
 
 
 class CreateSiteResponse(BaseModel):

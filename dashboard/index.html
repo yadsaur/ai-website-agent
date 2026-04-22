@@ -1135,17 +1135,17 @@
     .setup-form input,
     .chat-toolbar select,
     .chat-controls input {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.045);
       color: var(--app-text);
-      border: 1px solid var(--app-border);
+      border: 1px solid rgba(255,255,255,0.08);
     }
 
     .chat-toolbar select option,
     .setup-form input,
     .chat-controls input,
     select option {
-      color: var(--app-text);
-      background: #ffffff;
+      color: #eef2ff;
+      background: #101827;
     }
 
     .setup-form input::placeholder,
@@ -1349,17 +1349,18 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 7px 10px;
+      padding: 7px 12px;
       border-radius: 999px;
-      background: #f8fafc;
-      border: 1px solid var(--app-border);
-      color: var(--app-muted);
+      background: rgba(124, 58, 237, 0.12);
+      border: 1px solid rgba(196, 181, 253, 0.18);
+      color: #dbe4ff;
       font-size: 12px;
       font-weight: 600;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
     }
 
     .site-meta-chip strong {
-      color: var(--app-text);
+      color: #ffffff;
       font-size: 12px;
     }
 
@@ -1766,6 +1767,14 @@
       color: var(--app-text) !important;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
     }
+    .chat-toolbar select {
+      color-scheme: dark !important;
+    }
+    .chat-toolbar select option,
+    #test-site-select option {
+      background: #101827 !important;
+      color: #eef2ff !important;
+    }
     .primary-button,
     .topbar-button.primary,
     .row-button.primary,
@@ -2061,7 +2070,7 @@
             </div>
 
             <form id="site-form" class="setup-form">
-              <input id="site-url" type="url" placeholder="https://yourwebsite.com" required />
+              <input id="site-url" type="text" inputmode="url" placeholder="https://yourwebsite.com" required />
               <button id="site-submit" class="primary-button" type="submit">Train chatbot</button>
             </form>
 
@@ -2326,6 +2335,15 @@
       }
       if (payload.message) return payload.message;
       return fallback;
+    }
+
+    function normalizeSubmittedUrl(value) {
+      const trimmed = String(value || "").trim();
+      if (!trimmed) return "";
+      if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed)) {
+        return trimmed;
+      }
+      return "https://" + trimmed;
     }
 
     function daysLabel(daysRemaining) {
@@ -2706,6 +2724,7 @@
 
     function progressText(site) {
       if (!site) return "Ready when you are. Add a site to begin onboarding.";
+      if (site.status === "crawling" && !(site.page_count || 0)) return "Connecting to the website and mapping public pages.";
       if (site.status === "crawling") return "Training in progress: crawling pages and gathering source material.";
       if (site.status === "embedding") return "Almost there: embedding the site so answers are ready to retrieve.";
       if (site.status === "ready") return "This site is ready to test and launch.";
@@ -2715,6 +2734,7 @@
 
     function etaText(site) {
       if (!site || !site.status || site.status === "pending") return "estimating";
+      if (site.status === "crawling" && !(site.page_count || 0)) return "starting";
       if (site.status === "crawling") {
         if ((site.page_count || 0) <= 1) return "about 1-2 min";
         if ((site.page_count || 0) <= 4) return "about 1 min";
@@ -2981,7 +3001,12 @@
       event.preventDefault();
       embedBox.classList.remove("visible");
       copiedNote.textContent = "";
-      const submittedUrl = siteUrl.value.trim();
+      const submittedUrl = normalizeSubmittedUrl(siteUrl.value);
+      if (!submittedUrl) {
+        setFeedback("Please enter a website URL.", "error");
+        return;
+      }
+      siteUrl.value = submittedUrl;
       state.pendingSiteUrl = submittedUrl;
       state.trainingStartedAt = Date.now();
       setSubmitting(true);

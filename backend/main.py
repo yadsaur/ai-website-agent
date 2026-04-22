@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import colorsys
 import json
 import logging
 import re
+from collections import Counter
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 from pathlib import Path
@@ -121,6 +123,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 WIDGET_PATH = BASE_DIR / "widget" / "agent.js"
 DASHBOARD_PATH = BASE_DIR / "dashboard" / "index.html"
 WEBSITE_DIR = BASE_DIR / "website"
+HEX_COLOR_PATTERN = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+RGB_COLOR_PATTERN = re.compile(r"rgba?\(([^)]+)\)")
+THEME_COLOR_META_PATTERN = re.compile(
+    r'<meta[^>]+name=["\']theme-color["\'][^>]+content=["\']([^"\']+)["\']',
+    flags=re.IGNORECASE,
+)
 
 
 def _normalize_simple_message(value: str) -> str:
@@ -148,6 +156,131 @@ def _utc_iso(value: datetime | None) -> str | None:
     if value is None:
         return None
     return value.isoformat()
+
+
+def _normalize_site_input_url(url: str) -> str:
+    candidate = (url or "").strip()
+    if not candidate:
+        raise ValueError("Please enter a website URL.")
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", candidate):
+        candidate = f"https://{candidate}"
+    return normalize_url(candidate)
+
+
+def _parse_color_token(token: str) -> tuple[int, int, int] | None:
+    value = token.strip()
+    if value.startswith("#"):
+        hex_value = value[1:]
+        if len(hex_value) in {3, 4}:
+            hex_value = "".join(ch * 2 for ch in hex_value[:3])
+        elif len(hex_value) >= 6:
+            hex_value = hex_value[:6]
+        if len(hex_value) != 6:
+            return None
+        try:
+            return tuple(int(hex_value[index : index + 2], 16) for index in (0, 2, 4))
+        except ValueError:
+            return None
+
+    match = RGB_COLOR_PATTERN.match(value)
+    if not match:
+        return None
+    parts = [part.strip() for part in match.group(1).split(",")]
+    if len(parts) < 3:
+        return None
+    rgb: list[int] = []
+    for part in parts[:3]:
+        try:
+            channel = int(float(part.replace("%", "")))
+        except ValueError:
+            return None
+        rgb.append(max(0, min(255, channel)))
+    return tuple(rgb)
+
+
+def _rgb_to_hex(rgb: tuple[int, int, int]) -> str:
+    return "#{:02x}{:02x}{:02x}".format(*rgb)
+
+
+def _relative_luminance(rgb: tuple[int, int, int]) -> float:
+    channels = [channel / 255 for channel in rgb]
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+
+
+def _color_saturation(rgb: tuple[int, int, int]) -> float:
+    return colorsys.rgb_to_hls(*(channel / 255 for channel in rgb))[2]
+
+
+def _mix(rgb: tuple[int, int, int], target: tuple[int, int, int], ratio: float) -> tuple[int, int, int]:
+    return tuple(
+        max(0, min(255, round(channel * (1 - ratio) + target_channel * ratio)))
+        for channel, target_channel in zip(rgb, target)
+    )
+
+
+def _extract_site_theme(page_html: str | None) -> dict[str, str]:
+    default = {
+        "accent": "#7c3aed",
+        "accent_strong": "#5b21b6",
+        "background": "#0a0f1d",
+        "panel_top": "#111827",
+        "panel_bottom": "#0b1120",
+        "text": "#f8fafc",
+        "muted": "#94a3b8",
+    }
+    if not page_html:
+        return default
+
+    tokens: list[str] = []
+    theme_match = THEME_COLOR_META_PATTERN.search(page_html)
+    if theme_match:
+        tokens.append(theme_match.group(1))
+    tokens.extend(HEX_COLOR_PATTERN.findall(page_html))
+    for match in RGB_COLOR_PATTERN.finditer(page_html):
+        tokens.append(match.group(0))
+
+    parsed = [_parse_color_token(token) for token in tokens]
+    colors = [item for item in parsed if item is not None]
+    if not colors:
+        return default
+
+    counts = Counter(colors)
+    dark_candidates = [color for color, _ in counts.most_common() if _relative_luminance(color) < 0.45]
+    light_candidates = [color for color, _ in counts.most_common() if _relative_luminance(color) >= 0.45]
+    accent_candidates = [
+        color
+        for color, _ in counts.most_common()
+        if _color_saturation(color) >= 0.25 and 0.12 < _relative_luminance(color) < 0.9
+    ]
+
+    background = dark_candidates[0] if dark_candidates else _parse_color_token(default["background"])
+    if background is None:
+        background = (10, 15, 29)
+    accent = accent_candidates[0] if accent_candidates else (124, 58, 237)
+    panel_top = _mix(background, accent, 0.12)
+    panel_bottom = _mix(background, (0, 0, 0), 0.2)
+    text_color = (248, 250, 252) if _relative_luminance(background) < 0.58 else (15, 23, 42)
+    muted_base = light_candidates[0] if light_candidates else text_color
+    muted = _mix(muted_base, background, 0.35 if _relative_luminance(background) < 0.58 else 0.55)
+
+    return {
+        "accent": _rgb_to_hex(accent),
+        "accent_strong": _rgb_to_hex(_mix(accent, (0, 0, 0), 0.22)),
+        "background": _rgb_to_hex(background),
+        "panel_top": _rgb_to_hex(panel_top),
+        "panel_bottom": _rgb_to_hex(panel_bottom),
+        "text": _rgb_to_hex(text_color),
+        "muted": _rgb_to_hex(muted),
+    }
+
+
+def _resolve_site_theme(db: Session, site_id: str) -> dict[str, str]:
+    homepage = db.execute(
+        select(Page).where(Page.site_id == site_id).order_by(Page.depth.asc(), Page.crawled_at.asc())
+    ).scalars().first()
+    if homepage is None:
+        return _extract_site_theme(None)
+    return _extract_site_theme(homepage.html_content)
 
 
 def _serialize_user(user: User | None, db: Session | None = None) -> UserSummary | None:
@@ -516,7 +649,22 @@ async def process_site(site_id: str, root_url: str):
                         site.error_msg = None
                         site.updated_at = datetime.utcnow()
 
-                pages = await crawl_site(root_url, site_id=site_id, max_pages=MAX_CRAWL_PAGES, max_depth=MAX_CRAWL_DEPTH)
+                async def crawl_progress(payload: dict[str, int | str]) -> None:
+                    with session_scope() as progress_db:
+                        progress_site = progress_db.get(Site, site_id)
+                        if progress_site is None:
+                            return
+                        progress_site.status = "crawling"
+                        progress_site.page_count = max(progress_site.page_count or 0, int(payload.get("pages_crawled", 0)))
+                        progress_site.updated_at = datetime.utcnow()
+
+                pages = await crawl_site(
+                    root_url,
+                    site_id=site_id,
+                    max_pages=MAX_CRAWL_PAGES,
+                    max_depth=MAX_CRAWL_DEPTH,
+                    progress_callback=crawl_progress,
+                )
                 if not pages:
                     raise ValueError("No content could be extracted")
 
@@ -825,7 +973,7 @@ async def dodo_webhook(request: Request, db: Session = Depends(get_db)):
 @app.post("/api/sites", response_model=CreateSiteResponse)
 async def create_site(payload: CreateSiteRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     try:
-        normalized_url = normalize_url(str(payload.url))
+        normalized_url = _normalize_site_input_url(str(payload.url))
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Invalid URL: {exc}") from exc
 
@@ -908,6 +1056,18 @@ async def public_site_status(site_id: str, db: Session = Depends(get_db)):
     if site is None:
         raise HTTPException(status_code=404, detail="Site not found")
     return _serialize_status(site)
+
+
+@app.get("/api/public/sites/{site_id}/theme")
+async def public_site_theme(site_id: str, db: Session = Depends(get_db)):
+    site = db.get(Site, site_id)
+    if site is None:
+        raise HTTPException(status_code=404, detail="Site not found")
+    return {
+        "site_id": site.id,
+        "name": site.name,
+        "theme": _resolve_site_theme(db, site_id),
+    }
 
 
 @app.get("/api/sites/{site_id}/status", response_model=SiteStatusResponse)

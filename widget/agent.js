@@ -15,6 +15,7 @@
   var state = {
     open: false,
     siteName: "this site",
+    siteTheme: null,
     sessionId: "aiwa-" + Math.random().toString(36).slice(2) + Date.now().toString(36),
     activeEventSource: null,
     suggestedQuestions: null,
@@ -27,7 +28,7 @@
   var root = document.createElement("div");
   root.id = "aiwa-widget";
   root.innerHTML = [
-    '<button id="aiwa-toggle" type="button" aria-label="Open 5minBot chat">5M</button>',
+    '<button id="aiwa-toggle" type="button" aria-label="Open website chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7.5C6 6.12 7.12 5 8.5 5h7A2.5 2.5 0 0 1 18 7.5v5A2.5 2.5 0 0 1 15.5 15H11l-3.75 3v-3H8.5A2.5 2.5 0 0 1 6 12.5v-5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>',
     '<div id="aiwa-panel" aria-hidden="true">',
     '  <div id="aiwa-header">',
     '    <div id="aiwa-title">Chat with this site</div>',
@@ -44,30 +45,30 @@
 
   var style = document.createElement("style");
   style.textContent = [
-    "#aiwa-widget { all: initial; font-family: system-ui, -apple-system, sans-serif; }",
+    "#aiwa-widget { all: initial; font-family: system-ui, -apple-system, sans-serif; --aiwa-accent: #7c3aed; --aiwa-accent-strong: #5b21b6; --aiwa-bg: #0a0f1d; --aiwa-panel-top: #12182a; --aiwa-panel-bottom: #090d18; --aiwa-text: #f8fafc; --aiwa-muted: #94a3b8; --aiwa-border: rgba(255, 255, 255, 0.1); }",
     "#aiwa-widget, #aiwa-widget * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }",
-    "#aiwa-widget { position: fixed; right: 20px; bottom: 20px; z-index: 9999; color: #f8fafc; }",
+    "#aiwa-widget { position: fixed; right: 20px; bottom: 20px; z-index: 9999; color: var(--aiwa-text); }",
     "#aiwa-widget button, #aiwa-widget input { border: none; outline: none; font: inherit; }",
-    "#aiwa-toggle { width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #ffffff; box-shadow: 0 16px 38px rgba(91, 33, 182, 0.42); cursor: pointer; font-weight: 800; letter-spacing: 0.04em; }",
+    "#aiwa-toggle { width: 58px; height: 58px; border-radius: 999px; background: linear-gradient(135deg, var(--aiwa-accent), var(--aiwa-accent-strong)); color: #ffffff; box-shadow: 0 16px 38px color-mix(in srgb, var(--aiwa-accent-strong) 42%, transparent); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }",
+    "#aiwa-toggle svg { width: 24px; height: 24px; }",
     "#aiwa-toggle:hover { transform: translateY(-2px); }",
-    "#aiwa-panel { position: absolute; right: 0; bottom: 74px; width: 380px; height: 560px; background: linear-gradient(180deg, rgba(10, 14, 24, 0.98), rgba(7, 10, 18, 0.98)); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 22px; box-shadow: 0 28px 80px rgba(2, 6, 23, 0.52); display: none; overflow: hidden; transform: translateY(12px); opacity: 0; }",
+    "#aiwa-panel { position: absolute; right: 0; bottom: 74px; width: 380px; height: 560px; background: linear-gradient(180deg, var(--aiwa-panel-top), var(--aiwa-panel-bottom)); border: 1px solid var(--aiwa-border); border-radius: 22px; box-shadow: 0 28px 80px rgba(2, 6, 23, 0.52); display: none; overflow: hidden; transform: translateY(12px); opacity: 0; }",
     "#aiwa-panel.aiwa-open { display: flex; flex-direction: column; animation: aiwa-slide-up 0.2s ease forwards; }",
-    "#aiwa-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.92), rgba(91, 33, 182, 0.92)); color: #ffffff; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }",
+    "#aiwa-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; background: linear-gradient(135deg, var(--aiwa-accent), var(--aiwa-accent-strong)); color: #ffffff; border-bottom: 1px solid var(--aiwa-border); }",
     "#aiwa-title { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; }",
     "#aiwa-close { background: transparent; color: #ffffff; cursor: pointer; font-size: 22px; line-height: 1; }",
-    "#aiwa-messages { flex: 1; overflow-y: auto; padding: 16px; background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 28%), linear-gradient(180deg, #0a0f1d, #080b14); }",
-    "#aiwa-input-row { display: flex; gap: 10px; padding: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(9, 12, 20, 0.96); }",
-    "#aiwa-input { flex: 1; min-width: 0; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; padding: 12px 14px; background: rgba(255, 255, 255, 0.05); color: #f8fafc; }",
-    "#aiwa-input::placeholder { color: #8f9ab8; }",
-    "#aiwa-send { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #ffffff; border-radius: 999px; padding: 10px 16px; cursor: pointer; font-weight: 700; }",
-    "#aiwa-footer { padding: 10px 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); color: #94a3b8; font-size: 11px; background: rgba(9, 12, 20, 0.96); }",
+    "#aiwa-messages { flex: 1; overflow-y: auto; padding: 16px; background: radial-gradient(circle at top left, color-mix(in srgb, var(--aiwa-accent) 16%, transparent), transparent 28%), linear-gradient(180deg, var(--aiwa-bg), var(--aiwa-panel-bottom)); }",
+    "#aiwa-input-row { display: flex; gap: 10px; padding: 14px; border-top: 1px solid var(--aiwa-border); background: color-mix(in srgb, var(--aiwa-panel-bottom) 88%, black 12%); }",
+    "#aiwa-input { flex: 1; min-width: 0; border: 1px solid var(--aiwa-border); border-radius: 999px; padding: 12px 14px; background: rgba(255, 255, 255, 0.05); color: var(--aiwa-text); }",
+    "#aiwa-input::placeholder { color: var(--aiwa-muted); }",
+    "#aiwa-send { background: linear-gradient(135deg, var(--aiwa-accent), var(--aiwa-accent-strong)); color: #ffffff; border-radius: 999px; padding: 10px 16px; cursor: pointer; font-weight: 700; }",
+    "#aiwa-footer { padding: 10px 14px; border-top: 1px solid var(--aiwa-border); color: var(--aiwa-muted); font-size: 11px; background: color-mix(in srgb, var(--aiwa-panel-bottom) 88%, black 12%); }",
     "#aiwa-widget .aiwa-row { display: flex; margin-bottom: 10px; }",
     "#aiwa-widget .aiwa-row.user { justify-content: flex-end; }",
     "#aiwa-widget .aiwa-row.assistant { justify-content: flex-start; flex-direction: column; align-items: flex-start; gap: 8px; }",
     "#aiwa-widget .aiwa-bubble { max-width: 85%; padding: 12px 14px; border-radius: 18px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }",
-    "#aiwa-widget .aiwa-row.user .aiwa-bubble { background: #2563eb; color: #ffffff; }",
-    "#aiwa-widget .aiwa-row.user .aiwa-bubble { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #ffffff; border-top-right-radius: 8px; box-shadow: 0 12px 30px rgba(91, 33, 182, 0.18); }",
-    "#aiwa-widget .aiwa-row.assistant .aiwa-bubble { background: rgba(255, 255, 255, 0.08); color: #f8fbff; border: 1px solid rgba(255, 255, 255, 0.08); border-top-left-radius: 8px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18); }",
+    "#aiwa-widget .aiwa-row.user .aiwa-bubble { background: linear-gradient(135deg, var(--aiwa-accent), var(--aiwa-accent-strong)); color: #ffffff; border-top-right-radius: 8px; box-shadow: 0 12px 30px color-mix(in srgb, var(--aiwa-accent-strong) 24%, transparent); }",
+    "#aiwa-widget .aiwa-row.assistant .aiwa-bubble { background: rgba(255, 255, 255, 0.08); color: var(--aiwa-text); border: 1px solid var(--aiwa-border); border-top-left-radius: 8px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18); }",
     "#aiwa-widget .aiwa-assistant-bubble, #aiwa-widget .aiwa-assistant-bubble * { color: inherit; }",
     "#aiwa-widget .aiwa-assistant-bubble p { margin: 0 0 8px 0; }",
     "#aiwa-widget .aiwa-assistant-bubble p:last-child { margin-bottom: 0; }",
@@ -77,16 +78,16 @@
     "#aiwa-widget .aiwa-assistant-bubble li { margin-bottom: 4px; line-height: 1.5; }",
     "#aiwa-widget .aiwa-assistant-bubble h1, #aiwa-widget .aiwa-assistant-bubble h2, #aiwa-widget .aiwa-assistant-bubble h3 { font-size: 14px; font-weight: 600; margin: 8px 0 4px 0; }",
     "#aiwa-widget .aiwa-sources { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }",
-    "#aiwa-widget .aiwa-sources-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: #94a3b8; }",
+    "#aiwa-widget .aiwa-sources-label { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--aiwa-muted); }",
     "#aiwa-widget .aiwa-source-list { display: flex; flex-wrap: wrap; gap: 8px; }",
-    "#aiwa-widget .aiwa-source-link { display: inline-flex; align-items: center; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: rgba(124, 58, 237, 0.14); color: #efe9ff; text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid rgba(167, 139, 250, 0.22); }",
-    "#aiwa-widget .aiwa-source-link:hover { background: rgba(124, 58, 237, 0.22); }",
+    "#aiwa-widget .aiwa-source-link { display: inline-flex; align-items: center; max-width: 100%; padding: 7px 11px; border-radius: 999px; background: color-mix(in srgb, var(--aiwa-accent) 16%, transparent); color: var(--aiwa-text); text-decoration: none; font-size: 12px; font-weight: 600; border: 1px solid color-mix(in srgb, var(--aiwa-accent) 28%, transparent); }",
+    "#aiwa-widget .aiwa-source-link:hover { background: color-mix(in srgb, var(--aiwa-accent) 24%, transparent); }",
     "#aiwa-widget .aiwa-chip-stack { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; margin-bottom: 12px; }",
     "#aiwa-widget .aiwa-chip-group { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }",
-    "#aiwa-widget .aiwa-chip { display: inline-flex; align-items: center; justify-content: flex-start; width: fit-content; max-width: 90%; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); color: #eef2ff; cursor: pointer; font-size: 13px; line-height: 1.35; text-align: left; }",
-    "#aiwa-widget .aiwa-chip:hover { background: rgba(124, 58, 237, 0.12); border-color: rgba(167, 139, 250, 0.32); }",
+    "#aiwa-widget .aiwa-chip { display: inline-flex; align-items: center; justify-content: flex-start; width: fit-content; max-width: 90%; padding: 8px 16px; border-radius: 20px; border: 1px solid var(--aiwa-border); background: rgba(255, 255, 255, 0.04); color: var(--aiwa-text); cursor: pointer; font-size: 13px; line-height: 1.35; text-align: left; }",
+    "#aiwa-widget .aiwa-chip:hover { background: color-mix(in srgb, var(--aiwa-accent) 12%, transparent); border-color: color-mix(in srgb, var(--aiwa-accent) 32%, transparent); }",
     "#aiwa-widget .aiwa-followup-chip { font-size: 12px; padding: 6px 14px; }",
-    "#aiwa-widget .aiwa-typing { opacity: 0.78; font-style: italic; color: #d7ddf6; }",
+    "#aiwa-widget .aiwa-typing { opacity: 0.78; font-style: italic; color: color-mix(in srgb, var(--aiwa-text) 78%, var(--aiwa-muted)); }",
     "@keyframes aiwa-slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }",
     "@media (max-width: 479px) { #aiwa-panel { width: 92vw; height: min(78vh, 560px); right: 0; } }"
   ].join("\n");
@@ -257,6 +258,19 @@
     return (text || "").trim() === FALLBACK_MESSAGE;
   }
 
+  function applyTheme(theme) {
+    if (!theme) return;
+    state.siteTheme = theme;
+    root.style.setProperty("--aiwa-accent", theme.accent || "#7c3aed");
+    root.style.setProperty("--aiwa-accent-strong", theme.accent_strong || "#5b21b6");
+    root.style.setProperty("--aiwa-bg", theme.background || "#0a0f1d");
+    root.style.setProperty("--aiwa-panel-top", theme.panel_top || "#12182a");
+    root.style.setProperty("--aiwa-panel-bottom", theme.panel_bottom || "#090d18");
+    root.style.setProperty("--aiwa-text", theme.text || "#f8fafc");
+    root.style.setProperty("--aiwa-muted", theme.muted || "#94a3b8");
+    root.style.setProperty("--aiwa-border", "color-mix(in srgb, " + (theme.accent || "#7c3aed") + " 22%, rgba(255,255,255,0.12))");
+  }
+
   async function loadSiteName() {
     try {
       var response = await fetch(baseUrl + "/api/public/sites/" + encodeURIComponent(siteId) + "/status");
@@ -264,6 +278,20 @@
       var data = await response.json();
       state.siteName = data.name || "this site";
       title.textContent = "Chat with " + state.siteName;
+    } catch (err) {
+    }
+  }
+
+  async function loadSiteTheme() {
+    try {
+      var response = await fetch(baseUrl + "/api/public/sites/" + encodeURIComponent(siteId) + "/theme");
+      if (!response.ok) return;
+      var data = await response.json();
+      if (data && data.name) {
+        state.siteName = data.name;
+        title.textContent = "Chat with " + state.siteName;
+      }
+      applyTheme(data && data.theme ? data.theme : null);
     } catch (err) {
     }
   }
@@ -438,6 +466,7 @@
   });
 
   loadSiteName();
+  loadSiteTheme();
   prefetchStarterSuggestions();
   loadMarked().catch(function () {});
 })();
