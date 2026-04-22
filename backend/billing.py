@@ -22,6 +22,12 @@ from backend.config import (
 )
 from backend.models import BillingWebhookEvent, User
 
+LIVE_FALLBACK_PRODUCT_IDS = {
+    "starter": "pdt_0NdER6uyezQDgsJWgN0Y0",
+    "growth": "pdt_0NdER6zLsWXSeBHVgBATD",
+    "pro": "pdt_0NdER71gBCOuCESTei6pY",
+}
+
 
 class BillingConfigError(RuntimeError):
     pass
@@ -86,14 +92,31 @@ def plan_from_dodo_price_id(dodo_price_id: str | None) -> str | None:
     for plan_key in BILLING_PLAN_ORDER:
         if get_plan_definition(plan_key).dodo_price_id == dodo_price_id:
             return plan_key
+        if LIVE_FALLBACK_PRODUCT_IDS.get(plan_key) == dodo_price_id:
+            return plan_key
     return None
 
 
 def require_billing_plan(plan_key: str) -> PlanDefinition:
     plan = get_plan_definition(plan_key)
-    if not plan.dodo_price_id:
+    if not plan.dodo_price_id and not (_is_live_dodo_mode() and LIVE_FALLBACK_PRODUCT_IDS.get(plan.key)):
         raise BillingConfigError(f"Dodo plan ID is not configured for '{plan.key}'.")
     return plan
+
+
+def _is_live_dodo_mode() -> bool:
+    return DODO_PAYMENTS_BASE_URL.rstrip("/").startswith("https://live.dodopayments.com")
+
+
+def _candidate_product_ids(plan: PlanDefinition) -> list[str]:
+    candidates: list[str] = []
+    configured = plan.dodo_price_id.strip()
+    if configured:
+        candidates.append(configured)
+    fallback = LIVE_FALLBACK_PRODUCT_IDS.get(plan.key, "").strip()
+    if _is_live_dodo_mode() and fallback and fallback not in candidates:
+        candidates.append(fallback)
+    return candidates
 
 
 async def create_checkout_session(user: User, plan_key: str) -> dict[str, Any]:
@@ -101,32 +124,57 @@ async def create_checkout_session(user: User, plan_key: str) -> dict[str, Any]:
         raise BillingConfigError("Dodo Payments API key is not configured.")
 
     plan = require_billing_plan(plan_key)
-    payload = {
-        "product_cart": [{"product_id": plan.dodo_price_id, "quantity": 1}],
-        "customer": {"email": user.email},
-        "allowed_payment_method_types": ["credit", "debit"],
-        "return_url": f"{DODO_SUCCESS_URL}?plan={plan.key}",
-        "cancel_url": DODO_CANCEL_URL,
-        "metadata": {
-            "user_id": user.id,
-            "plan": plan.key,
-            "sites_limit": str(plan.sites_limit),
-            "source": "workspace-upgrade",
-        },
-    }
     headers = {
         "Authorization": f"Bearer {DODO_PAYMENTS_API_KEY}",
         "Content-Type": "application/json",
     }
     timeout = httpx.Timeout(20.0, connect=10.0)
+    last_http_error: httpx.HTTPStatusError | None = None
+
     async with httpx.AsyncClient(timeout=timeout) as client:
-        response = await client.post(f"{DODO_PAYMENTS_BASE_URL}/checkouts", json=payload, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-    checkout_url = str(data.get("checkout_url") or "").strip()
-    if not checkout_url:
-        raise BillingConfigError("Dodo Payments did not return a checkout URL.")
-    return data
+        for product_id in _candidate_product_ids(plan):
+            payload = {
+                "product_cart": [{"product_id": product_id, "quantity": 1}],
+                "customer": {"email": user.email},
+                "allowed_payment_method_types": ["credit", "debit"],
+                "return_url": f"{DODO_SUCCESS_URL}?plan={plan.key}",
+                "cancel_url": DODO_CANCEL_URL,
+                "metadata": {
+                    "user_id": user.id,
+                    "plan": plan.key,
+                    "sites_limit": str(plan.sites_limit),
+                    "source": "workspace-upgrade",
+                },
+            }
+            response = await client.post(f"{DODO_PAYMENTS_BASE_URL}/checkouts", json=payload, headers=headers)
+            try:
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                last_http_error = exc
+                if product_id == plan.dodo_price_id:
+                    try:
+                        error_payload = response.json()
+                    except ValueError:
+                        error_payload = {}
+                    error_text = f"{error_payload.get('code', '')} {error_payload.get('message', '')}".lower()
+                    if (
+                        _is_live_dodo_mode()
+                        and "does not exist" in error_text
+                        and LIVE_FALLBACK_PRODUCT_IDS.get(plan.key)
+                        and LIVE_FALLBACK_PRODUCT_IDS[plan.key] != product_id
+                    ):
+                        continue
+                raise
+
+            data = response.json()
+            checkout_url = str(data.get("checkout_url") or "").strip()
+            if not checkout_url:
+                raise BillingConfigError("Dodo Payments did not return a checkout URL.")
+            return data
+
+    if last_http_error is not None:
+        raise last_http_error
+    raise BillingConfigError("Dodo Payments did not return a checkout URL.")
 
 
 def verify_webhook_payload(raw_body: str, headers: dict[str, str]) -> dict[str, Any]:
