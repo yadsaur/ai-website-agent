@@ -2011,9 +2011,7 @@
           <a href="/support">Support</a>
         </nav>
         <div class="workspace-topbar-right">
-          <div id="account-badge" class="account-badge">Guest mode</div>
-          <button id="account-upgrade" class="topbar-button" type="button">Upgrade</button>
-          <button id="account-auth" class="topbar-button primary" type="button">Sign up</button>
+          <button id="account-auth" class="topbar-button primary" type="button">Continue with Google</button>
           <button id="account-logout" class="topbar-button" type="button" style="display:none;">Logout</button>
         </div>
       </div>
@@ -2110,7 +2108,6 @@
             </div>
             <div id="billing-summary" class="billing-summary"></div>
             <div id="billing-plans" class="billing-plans"></div>
-            <div id="billing-note" class="status-note">Paid plans activate after Dodo confirms the checkout webhook.</div>
           </section>
         </section>
 
@@ -2179,26 +2176,16 @@
   </div>
   <div id="auth-modal" class="auth-modal" aria-hidden="true">
     <div class="auth-panel">
-      <h3 id="auth-title">Create your account</h3>
+      <h3 id="auth-title">Continue with Google</h3>
       <p id="auth-subtitle">Save the sites you already trained and unlock the embed script.</p>
-      <div class="auth-toggle">
-        <button id="auth-tab-signup" type="button" class="active">Sign up</button>
-        <button id="auth-tab-login" type="button">Log in</button>
-      </div>
       <div class="google-auth-stack">
         <div id="google-auth-slot" class="google-auth-slot"></div>
-        <p id="google-auth-help" class="google-auth-help">Google sign-in is not configured yet. You can still use email and password.</p>
+        <p id="google-auth-help" class="google-auth-help">Google sign-in is not configured yet. Ask the team to enable it for this workspace.</p>
       </div>
-      <div class="auth-divider">or continue with email</div>
-      <form id="auth-form" class="auth-form">
-        <input id="auth-email" type="email" placeholder="you@company.com" autocomplete="email" required />
-        <input id="auth-password" type="password" placeholder="Password" autocomplete="current-password" required />
-        <div class="auth-actions">
-          <button id="auth-submit" class="primary-button" type="submit">Continue</button>
-          <button id="auth-cancel" class="ghost-button" type="button">Cancel</button>
-        </div>
-      </form>
-      <div id="auth-note" class="auth-note">You can train and test as a guest. Signup is only required when you want the live embed script.</div>
+      <div class="auth-actions auth-actions-google-only">
+        <button id="auth-cancel" class="ghost-button" type="button">Cancel</button>
+      </div>
+      <div id="auth-note" class="auth-note">You can still train and test as a guest. Google sign-in is only required when you want the live embed script or paid billing.</div>
     </div>
   </div>
   <script>
@@ -2217,7 +2204,7 @@
       submitting: false,
       pendingSiteUrl: "",
       trainingStartedAt: 0,
-      authMode: "signup",
+      authMode: "google",
       authUser: null,
       authProviders: { google_enabled: false, google_client_id: null },
       googleButtonRendered: false,
@@ -2241,14 +2228,8 @@
     const authModal = document.getElementById("auth-modal");
     const authTitle = document.getElementById("auth-title");
     const authSubtitle = document.getElementById("auth-subtitle");
-    const authForm = document.getElementById("auth-form");
-    const authEmail = document.getElementById("auth-email");
-    const authPassword = document.getElementById("auth-password");
-    const authSubmit = document.getElementById("auth-submit");
     const authCancel = document.getElementById("auth-cancel");
     const authNote = document.getElementById("auth-note");
-    const authTabSignup = document.getElementById("auth-tab-signup");
-    const authTabLogin = document.getElementById("auth-tab-login");
     const googleAuthSlot = document.getElementById("google-auth-slot");
     const googleAuthHelp = document.getElementById("google-auth-help");
     const launchTitle = document.getElementById("launch-title");
@@ -2429,7 +2410,7 @@
         let buttonLabel = "Upgrade";
         let disabled = false;
         if (!state.authUser) {
-          buttonLabel = "Sign up";
+          buttonLabel = "Continue with Google";
         } else if (plan.current && state.authUser.subscription_status === "active") {
           buttonLabel = "Current plan";
           disabled = true;
@@ -2448,19 +2429,10 @@
     }
 
     function setAuthMode(mode) {
-      state.authMode = mode === "login" ? "login" : "signup";
-      const signupMode = state.authMode === "signup";
-      authTabSignup.classList.toggle("active", signupMode);
-      authTabLogin.classList.toggle("active", !signupMode);
-      authTitle.textContent = signupMode ? "Create your account" : "Log back in";
-      authSubtitle.textContent = signupMode
-        ? "Save the sites you already trained and unlock the embed script."
-        : "Log in to access your saved sites, trial status, and embed script.";
-      authSubmit.textContent = signupMode ? "Create account" : "Log in";
-      authNote.textContent = signupMode
-        ? "You can train and test as a guest. Signup is only required when you want the live embed script."
-        : "Logging in on this browser will also attach any guest-created sites from this session to your account.";
-      authPassword.setAttribute("autocomplete", signupMode ? "new-password" : "current-password");
+      state.authMode = "google";
+      authTitle.textContent = "Continue with Google";
+      authSubtitle.textContent = "Save the sites you already trained and unlock the embed script.";
+      authNote.textContent = "Logging in on this browser will also attach any guest-created sites from this session to your account.";
       if (googleAuthSlot) {
         googleAuthSlot.innerHTML = "";
       }
@@ -2535,7 +2507,7 @@
         theme: "outline",
         size: "large",
         type: "standard",
-        text: state.authMode === "signup" ? "signup_with" : "signin_with",
+        text: "continue_with",
         shape: "pill",
         width: Math.min(380, Math.max(280, googleAuthSlot.clientWidth || 320))
       });
@@ -2550,28 +2522,34 @@
       authModal.classList.add("visible");
       authModal.setAttribute("aria-hidden", "false");
       renderGoogleAuthButton();
-      window.setTimeout(function () { authEmail.focus(); }, 40);
     }
 
     function closeAuthModal() {
       authModal.classList.remove("visible");
       authModal.setAttribute("aria-hidden", "true");
-      authPassword.value = "";
     }
 
     function renderAccountState() {
       if (state.authUser) {
         const status = state.authUser.subscription_status || "trial";
         const remaining = daysLabel(state.authUser.days_remaining);
-        accountBadge.innerHTML = '<span>' + state.authUser.email + '</span><span class="account-status">' + (status === "trial" && remaining ? remaining : status) + '</span>';
+        if (accountBadge) {
+          accountBadge.innerHTML = '<span>' + state.authUser.email + '</span><span class="account-status">' + (status === "trial" && remaining ? remaining : status) + '</span>';
+        }
         accountAuth.style.display = "none";
         accountLogout.style.display = "inline-flex";
-        accountUpgrade.textContent = status === "active" ? "Billing" : "Upgrade";
+        if (accountUpgrade) {
+          accountUpgrade.textContent = status === "active" ? "Billing" : "Upgrade";
+        }
       } else {
-        accountBadge.textContent = "Guest mode";
+        if (accountBadge) {
+          accountBadge.textContent = "Guest mode";
+        }
         accountAuth.style.display = "inline-flex";
         accountLogout.style.display = "none";
-        accountUpgrade.textContent = "Upgrade";
+        if (accountUpgrade) {
+          accountUpgrade.textContent = "Upgrade";
+        }
       }
       renderBillingPanel();
     }
@@ -2586,42 +2564,6 @@
         state.guestSessionId = data.guest_session_id || null;
         renderAccountState();
       } catch (err) {
-      }
-    }
-
-    async function submitAuth(event) {
-      event.preventDefault();
-      const endpoint = state.authMode === "signup" ? "/api/auth/signup" : "/api/auth/login";
-      authSubmit.disabled = true;
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: authEmail.value.trim(),
-            password: authPassword.value
-          })
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          setFeedback(formatApiError(data, "Unable to authenticate right now."), "error");
-          return;
-        }
-        state.authUser = data.user || null;
-        state.guestSessionId = data.guest_session_id || null;
-        await fetchAuthState();
-        closeAuthModal();
-        await fetchSites();
-        setFeedback(state.authMode === "signup" ? "Account created. Your guest sites were saved to your account." : "Welcome back. Your workspace is ready.", "success");
-        if (state.pendingEmbedSiteId) {
-          const pendingSiteId = state.pendingEmbedSiteId;
-          state.pendingEmbedSiteId = null;
-          await showEmbedCode(pendingSiteId);
-        }
-      } catch (err) {
-        setFeedback("Unable to reach the backend while signing in.", "error");
-      } finally {
-        authSubmit.disabled = false;
       }
     }
 
@@ -2645,8 +2587,8 @@
     async function startCheckout(planKey, triggerButton) {
       if (!planKey) return;
       if (!state.authUser) {
-        openAuthModal("signup");
-        setFeedback("Create an account first, then choose a paid plan.", "info");
+        openAuthModal("google");
+        setFeedback("Continue with Google first, then choose a paid plan.", "info");
         return;
       }
       const originalLabel = triggerButton ? triggerButton.textContent : "";
@@ -3037,7 +2979,7 @@
         const response = await fetch("/api/sites/" + encodeURIComponent(siteId) + "/embed-script");
         const data = await response.json();
         if (response.status === 401) {
-          openAuthModal("signup", siteId);
+          openAuthModal("google", siteId);
           setFeedback(formatApiError(data, "Create an account to get the embed script."), "info");
           return;
         }
@@ -3343,18 +3285,17 @@
     }
 
     form.addEventListener("submit", handleCreateSite);
-    accountAuth.addEventListener("click", function () { openAuthModal("signup"); });
+    accountAuth.addEventListener("click", function () { openAuthModal("google"); });
     accountLogout.addEventListener("click", function () { handleLogout(); });
-    accountUpgrade.addEventListener("click", function () {
-      scrollAndHighlight(billingCard);
-    });
-    authTabSignup.addEventListener("click", function () { setAuthMode("signup"); });
-    authTabLogin.addEventListener("click", function () { setAuthMode("login"); });
+    if (accountUpgrade) {
+      accountUpgrade.addEventListener("click", function () {
+        scrollAndHighlight(billingCard);
+      });
+    }
     authCancel.addEventListener("click", function () { closeAuthModal(); });
     authModal.addEventListener("click", function (event) {
       if (event.target === authModal) closeAuthModal();
     });
-    authForm.addEventListener("submit", submitAuth);
     siteList.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-site-id]");
       if (!button) return;
@@ -3402,7 +3343,7 @@
     loadMarked().catch(function () {});
     window.setTimeout(renderGoogleAuthButton, 800);
     window.setTimeout(renderGoogleAuthButton, 1800);
-    setAuthMode("signup");
+    setAuthMode("google");
     handleBillingReturn();
     if (new URLSearchParams(window.location.search).get("onboarding")) {
       window.setTimeout(function () { siteUrl.focus(); }, 200);
