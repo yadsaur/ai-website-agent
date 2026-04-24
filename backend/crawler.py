@@ -34,6 +34,7 @@ FALLBACK_NAVIGATION_TIMEOUT_MS = 8000
 POST_COMMIT_WAIT_MS = 1200
 NETWORK_IDLE_TIMEOUT_MS = 2500
 SITEMAP_FETCH_TIMEOUT_SECONDS = 10
+HTTP_FALLBACK_TIMEOUT_SECONDS = 12
 MAX_SITEMAP_URLS = 300
 MAX_SITEMAP_FILES = 12
 MAX_DISCOVERY_MULTIPLIER = 3
@@ -265,6 +266,35 @@ async def _fetch_text(client: httpx.AsyncClient, url: str) -> str | None:
         return None
 
 
+async def _fetch_html_page(client: httpx.AsyncClient, url: str) -> tuple[str, str, int] | None:
+    """Fetch public HTML without browser rendering as a fallback for JS-heavy sites."""
+    try:
+        response = await client.get(url, follow_redirects=True, timeout=HTTP_FALLBACK_TIMEOUT_SECONDS)
+    except Exception as exc:
+        logger.info("HTTP fallback failed for %s: %s", url, exc)
+        return None
+
+    content_type = response.headers.get("content-type", "").lower()
+    if response.status_code >= 400:
+        return None
+    if content_type and "html" not in content_type and "text/plain" not in content_type:
+        return None
+    if len(response.content) > MAX_PAGE_HTML_BYTES:
+        logger.info("Skipping oversized HTTP fallback page %s", response.url)
+        return None
+    try:
+        final_url = normalize_url(str(response.url))
+    except ValueError:
+        return None
+    return final_url, response.text, response.status_code
+
+
+def _title_from_html(html: str) -> str:
+    soup = BeautifulSoup(html, "lxml")
+    title = soup.find("title")
+    return title.get_text(" ", strip=True) if title else ""
+
+
 def _extract_sitemap_locations(xml_text: str) -> list[str]:
     try:
         root = ElementTree.fromstring(xml_text)
@@ -469,6 +499,13 @@ async def crawl_site(
                 await route.continue_()
 
         await context.route("**/*", route_handler)
+        fallback_client = httpx.AsyncClient(
+            headers={
+                "User-Agent": REAL_CHROME_UA,
+                "Accept": "text/html,application/xhtml+xml",
+            },
+            follow_redirects=True,
+        )
 
         async def take_next() -> tuple[str, int] | None:
             async with queue_lock:
@@ -499,6 +536,66 @@ async def crawl_site(
                         continue
                     queue.append((absolute, depth + 1))
                     queued.add(absolute)
+
+        async def record_html_page(
+            source_url: str,
+            html: str,
+            depth: int,
+            http_status: int | None,
+            title: str = "",
+        ) -> bool:
+            try:
+                final_url = normalize_url(source_url)
+            except ValueError:
+                return False
+            if _is_skippable(final_url, root_netloc) or not _same_site_host(final_url, root_netloc):
+                return False
+            final_host = urlparse(final_url).hostname
+            if not final_host or not await host_is_public(final_host):
+                return False
+            if len(html.encode("utf-8", errors="ignore")) > MAX_PAGE_HTML_BYTES:
+                logger.info("Skipping oversized page %s", final_url)
+                return False
+
+            canonical_url = _extract_canonical_url(html, final_url, root_netloc)
+            if robots_parser and RESPECT_ROBOTS_TXT and not robots_parser.can_fetch(REAL_CHROME_UA, canonical_url):
+                return False
+            links = _extract_hrefs(html, canonical_url, root_netloc, robots_parser)
+            await enqueue_links(links, depth)
+
+            async with result_lock:
+                if canonical_url in result_urls or len(results) >= max_pages:
+                    return False
+                result_urls.add(canonical_url)
+                results.append(
+                    PageResult(
+                        url=canonical_url,
+                        html=html,
+                        title=title or _title_from_html(html),
+                        depth=depth,
+                        http_status=http_status,
+                    )
+                )
+                await _emit_progress(
+                    progress_callback,
+                    {
+                        "stage": "crawling",
+                        "pages_crawled": len(results),
+                        "pages_discovered": len(results) + len(queue),
+                        "current_url": canonical_url,
+                    },
+                )
+                return True
+
+        async def fetch_and_record_fallback(current_url: str, depth: int) -> bool:
+            fallback = await _fetch_html_page(fallback_client, current_url)
+            if fallback is None:
+                return False
+            final_url, html, status = fallback
+            recorded = await record_html_page(final_url, html, depth, status)
+            if recorded:
+                logger.info("Recovered %s with HTTP fallback", final_url)
+            return recorded
 
         async def crawl_worker(worker_id: int) -> None:
             page = await context.new_page()
@@ -531,50 +628,27 @@ async def crawl_site(
                             pass
 
                         final_url = normalize_url(page.url)
-                        if _is_skippable(final_url, root_netloc):
-                            continue
-                        if not _same_site_host(final_url, root_netloc):
-                            continue
-                        final_host = urlparse(final_url).hostname
-                        if not final_host or not await host_is_public(final_host):
-                            continue
-
                         html = await page.content()
-                        if len(html.encode("utf-8", errors="ignore")) > MAX_PAGE_HTML_BYTES:
-                            logger.info("Skipping oversized page %s", final_url)
-                            continue
-                        canonical_url = _extract_canonical_url(html, final_url, root_netloc)
-                        if robots_parser and RESPECT_ROBOTS_TXT and not robots_parser.can_fetch(REAL_CHROME_UA, canonical_url):
-                            continue
-                        links = _extract_hrefs(html, canonical_url, root_netloc, robots_parser)
-                        await enqueue_links(links, depth)
-
-                        async with result_lock:
-                            if canonical_url in result_urls or len(results) >= max_pages:
-                                continue
-                            result_urls.add(canonical_url)
-                            title = await page.title()
-                            status = response.status if response is not None else None
-                            results.append(PageResult(url=canonical_url, html=html, title=title or "", depth=depth, http_status=status))
-                            await _emit_progress(
-                                progress_callback,
-                                {
-                                    "stage": "crawling",
-                                    "pages_crawled": len(results),
-                                    "pages_discovered": len(results) + len(queue),
-                                    "current_url": canonical_url,
-                                },
-                            )
+                        title = await page.title()
+                        status = response.status if response is not None else None
+                        recorded = await record_html_page(final_url, html, depth, status, title)
+                        if not recorded and len(html.strip()) < 500:
+                            await fetch_and_record_fallback(current_url, depth)
                     except PlaywrightTimeoutError:
                         logger.info("Playwright timeout for %s", current_url)
+                        await fetch_and_record_fallback(current_url, depth)
                     except Exception as exc:
                         logger.info("Failed to crawl %s in worker %s: %s", current_url, worker_id, exc)
+                        await fetch_and_record_fallback(current_url, depth)
             finally:
                 await page.close()
 
         workers = [asyncio.create_task(crawl_worker(index)) for index in range(concurrency)]
-        await asyncio.gather(*workers)
-        await context.close()
-        await browser.close()
+        try:
+            await asyncio.gather(*workers)
+        finally:
+            await fallback_client.aclose()
+            await context.close()
+            await browser.close()
 
     return sorted(results, key=lambda page: _page_priority(page.url, page.depth))
