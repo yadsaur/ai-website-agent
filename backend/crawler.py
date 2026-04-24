@@ -38,6 +38,7 @@ HTTP_FALLBACK_TIMEOUT_SECONDS = 12
 MAX_SITEMAP_URLS = 300
 MAX_SITEMAP_FILES = 12
 MAX_DISCOVERY_MULTIPLIER = 3
+MAX_RAW_HTML_BYTES = 4 * 1024 * 1024
 
 REAL_CHROME_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -132,6 +133,25 @@ IMPORTANT_PATH_PARTS = (
     "customers",
     "case-studies",
 )
+IMPORTANT_PATH_RANK = {
+    "pricing": 0,
+    "plans": 0,
+    "features": 1,
+    "product": 1,
+    "products": 1,
+    "service": 1,
+    "services": 1,
+    "faq": 2,
+    "help": 2,
+    "support": 2,
+    "docs": 2,
+    "documentation": 2,
+    "integrations": 3,
+    "about": 4,
+    "contact": 4,
+    "customers": 5,
+    "case-studies": 5,
+}
 
 
 @dataclass
@@ -249,11 +269,12 @@ def _page_priority(url: str, depth: int) -> tuple[int, int, str]:
     path = (parsed.path or "/").lower()
     if path in {"", "/"}:
         return (0, depth, url)
-    if any(part in path for part in IMPORTANT_PATH_PARTS):
-        return (1, depth, url)
+    important_ranks = [rank for part, rank in IMPORTANT_PATH_RANK.items() if part in path]
+    if important_ranks:
+        return (1, min(important_ranks), depth, url)
     if "blog" in path or "article" in path or "post" in path or "news" in path:
-        return (4, depth, url)
-    return (2 + min(depth, 2), depth, url)
+        return (4, depth, url, "")
+    return (2 + min(depth, 2), depth, url, "")
 
 
 async def _fetch_text(client: httpx.AsyncClient, url: str) -> str | None:
@@ -279,7 +300,7 @@ async def _fetch_html_page(client: httpx.AsyncClient, url: str) -> tuple[str, st
         return None
     if content_type and "html" not in content_type and "text/plain" not in content_type:
         return None
-    if len(response.content) > MAX_PAGE_HTML_BYTES:
+    if len(response.content) > MAX_RAW_HTML_BYTES:
         logger.info("Skipping oversized HTTP fallback page %s", response.url)
         return None
     try:
@@ -293,6 +314,18 @@ def _title_from_html(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
     title = soup.find("title")
     return title.get_text(" ", strip=True) if title else ""
+
+
+def _compact_html(html: str) -> str:
+    """Drop heavy assets/scripts before the HTML is stored and extracted."""
+    soup = BeautifulSoup(html, "lxml")
+    for tag in soup(["script", "style", "noscript", "iframe", "svg", "canvas", "picture", "source"]):
+        tag.decompose()
+    for tag in soup.select("[srcset]"):
+        tag.attrs.pop("srcset", None)
+    for tag in soup.select("[style]"):
+        tag.attrs.pop("style", None)
+    return str(soup)
 
 
 def _extract_sitemap_locations(xml_text: str) -> list[str]:
@@ -485,20 +518,33 @@ async def crawl_site(
     result_lock = asyncio.Lock()
 
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(headless=True)
-        context = await browser.new_context(
-            viewport={"width": 1280, "height": 800},
-            user_agent=REAL_CHROME_UA,
-            ignore_https_errors=True,
-            java_script_enabled=True,
-        )
+        browser = None
+        context = None
+        browser_lock = asyncio.Lock()
+
         async def route_handler(route, request: PlaywrightRequest) -> None:
             if _should_abort_request(request, root_netloc):
                 await route.abort()
             else:
                 await route.continue_()
 
-        await context.route("**/*", route_handler)
+        async def get_browser_context():
+            nonlocal browser, context
+            if context is not None:
+                return context
+            async with browser_lock:
+                if context is not None:
+                    return context
+                browser = await playwright.chromium.launch(headless=True)
+                context = await browser.new_context(
+                    viewport={"width": 1024, "height": 720},
+                    user_agent=REAL_CHROME_UA,
+                    ignore_https_errors=True,
+                    java_script_enabled=True,
+                )
+                await context.route("**/*", route_handler)
+                return context
+
         fallback_client = httpx.AsyncClient(
             headers={
                 "User-Agent": REAL_CHROME_UA,
@@ -553,8 +599,8 @@ async def crawl_site(
             final_host = urlparse(final_url).hostname
             if not final_host or not await host_is_public(final_host):
                 return False
-            if len(html.encode("utf-8", errors="ignore")) > MAX_PAGE_HTML_BYTES:
-                logger.info("Skipping oversized page %s", final_url)
+            if len(html.encode("utf-8", errors="ignore")) > MAX_RAW_HTML_BYTES:
+                logger.info("Skipping oversized raw page %s", final_url)
                 return False
 
             canonical_url = _extract_canonical_url(html, final_url, root_netloc)
@@ -562,16 +608,26 @@ async def crawl_site(
                 return False
             links = _extract_hrefs(html, canonical_url, root_netloc, robots_parser)
             await enqueue_links(links, depth)
+            compact_html = _compact_html(html)
+            if len(compact_html.encode("utf-8", errors="ignore")) > MAX_PAGE_HTML_BYTES:
+                logger.info("Skipping page with oversized compact HTML %s", canonical_url)
+                return False
 
             async with result_lock:
-                if canonical_url in result_urls or len(results) >= max_pages:
+                if canonical_url in result_urls:
                     return False
+                if len(results) >= max_pages:
+                    worst_page = max(results, key=lambda page: _page_priority(page.url, page.depth))
+                    if _page_priority(canonical_url, depth) >= _page_priority(worst_page.url, worst_page.depth):
+                        return False
+                    results.remove(worst_page)
+                    result_urls.discard(worst_page.url)
                 result_urls.add(canonical_url)
                 results.append(
                     PageResult(
                         url=canonical_url,
-                        html=html,
-                        title=title or _title_from_html(html),
+                        html=compact_html,
+                        title=title or _title_from_html(compact_html),
                         depth=depth,
                         http_status=http_status,
                     )
@@ -597,8 +653,44 @@ async def crawl_site(
                 logger.info("Recovered %s with HTTP fallback", final_url)
             return recorded
 
+        async def crawl_with_browser(current_url: str, depth: int, worker_id: int) -> None:
+            page = None
+            try:
+                active_context = await get_browser_context()
+                page = await active_context.new_page()
+                try:
+                    response = await page.goto(
+                        current_url,
+                        wait_until="domcontentloaded",
+                        timeout=PRIMARY_NAVIGATION_TIMEOUT_MS,
+                    )
+                except PlaywrightTimeoutError:
+                    logger.info("Navigation timeout for %s, retrying with commit wait", current_url)
+                    response = await page.goto(
+                        current_url,
+                        wait_until="commit",
+                        timeout=FALLBACK_NAVIGATION_TIMEOUT_MS,
+                    )
+                    await page.wait_for_timeout(POST_COMMIT_WAIT_MS)
+                try:
+                    await page.wait_for_load_state("networkidle", timeout=NETWORK_IDLE_TIMEOUT_MS)
+                except PlaywrightTimeoutError:
+                    pass
+
+                final_url = normalize_url(page.url)
+                html = await page.content()
+                title = await page.title()
+                status = response.status if response is not None else None
+                await record_html_page(final_url, html, depth, status, title)
+            except PlaywrightTimeoutError:
+                logger.info("Playwright timeout for %s", current_url)
+            except Exception as exc:
+                logger.info("Failed to crawl %s in worker %s: %s", current_url, worker_id, exc)
+            finally:
+                if page is not None:
+                    await page.close()
+
         async def crawl_worker(worker_id: int) -> None:
-            page = await context.new_page()
             try:
                 while True:
                     if CRAWL_DELAY_SECONDS > 0:
@@ -607,48 +699,20 @@ async def crawl_site(
                     if item is None:
                         return
                     current_url, depth = item
-                    try:
-                        try:
-                            response = await page.goto(
-                                current_url,
-                                wait_until="domcontentloaded",
-                                timeout=PRIMARY_NAVIGATION_TIMEOUT_MS,
-                            )
-                        except PlaywrightTimeoutError:
-                            logger.info("Navigation timeout for %s, retrying with commit wait", current_url)
-                            response = await page.goto(
-                                current_url,
-                                wait_until="commit",
-                                timeout=FALLBACK_NAVIGATION_TIMEOUT_MS,
-                            )
-                            await page.wait_for_timeout(POST_COMMIT_WAIT_MS)
-                        try:
-                            await page.wait_for_load_state("networkidle", timeout=NETWORK_IDLE_TIMEOUT_MS)
-                        except PlaywrightTimeoutError:
-                            pass
-
-                        final_url = normalize_url(page.url)
-                        html = await page.content()
-                        title = await page.title()
-                        status = response.status if response is not None else None
-                        recorded = await record_html_page(final_url, html, depth, status, title)
-                        if not recorded and len(html.strip()) < 500:
-                            await fetch_and_record_fallback(current_url, depth)
-                    except PlaywrightTimeoutError:
-                        logger.info("Playwright timeout for %s", current_url)
-                        await fetch_and_record_fallback(current_url, depth)
-                    except Exception as exc:
-                        logger.info("Failed to crawl %s in worker %s: %s", current_url, worker_id, exc)
-                        await fetch_and_record_fallback(current_url, depth)
+                    recorded = await fetch_and_record_fallback(current_url, depth)
+                    if not recorded:
+                        await crawl_with_browser(current_url, depth, worker_id)
             finally:
-                await page.close()
+                return
 
         workers = [asyncio.create_task(crawl_worker(index)) for index in range(concurrency)]
         try:
             await asyncio.gather(*workers)
         finally:
             await fallback_client.aclose()
-            await context.close()
-            await browser.close()
+            if context is not None:
+                await context.close()
+            if browser is not None:
+                await browser.close()
 
     return sorted(results, key=lambda page: _page_priority(page.url, page.depth))
