@@ -1,48 +1,136 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
 import logging
 import re
+import socket
 from collections import deque
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from time import monotonic
-from xml.etree import ElementTree
 from typing import List
-from urllib.parse import parse_qsl, urljoin, urlparse, urlunparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
+from urllib.robotparser import RobotFileParser
+from xml.etree import ElementTree
 
 import httpx
+from bs4 import BeautifulSoup
+from playwright.async_api import Request as PlaywrightRequest
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
 
-from backend.config import CRAWL_DELAY_SECONDS, SITE_CRAWL_DEADLINE_SECONDS
+from backend.config import (
+    CRAWL_DELAY_SECONDS,
+    MAX_CRAWL_CONCURRENCY,
+    MAX_PAGE_HTML_BYTES,
+    RESPECT_ROBOTS_TXT,
+    SITE_CRAWL_DEADLINE_SECONDS,
+)
 
 logger = logging.getLogger(__name__)
-PRIMARY_NAVIGATION_TIMEOUT_MS = 20000
-FALLBACK_NAVIGATION_TIMEOUT_MS = 15000
-POST_COMMIT_WAIT_MS = 3000
-NETWORK_IDLE_TIMEOUT_MS = 8000
-SITEMAP_FETCH_TIMEOUT_SECONDS = 12
-MAX_SITEMAP_URLS = 250
+PRIMARY_NAVIGATION_TIMEOUT_MS = 14000
+FALLBACK_NAVIGATION_TIMEOUT_MS = 8000
+POST_COMMIT_WAIT_MS = 1200
+NETWORK_IDLE_TIMEOUT_MS = 2500
+SITEMAP_FETCH_TIMEOUT_SECONDS = 10
+MAX_SITEMAP_URLS = 300
 MAX_SITEMAP_FILES = 12
+MAX_DISCOVERY_MULTIPLIER = 3
 
 REAL_CHROME_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 )
-SKIP_EXTENSIONS = (".pdf", ".jpg", ".png", ".gif", ".svg", ".mp4", ".zip")
-SKIP_PATH_PREFIXES = ("/wp-admin", "/login", "/logout", "/cart", "/checkout", "/account")
+SKIP_EXTENSIONS = (
+    ".7z",
+    ".avi",
+    ".css",
+    ".csv",
+    ".doc",
+    ".docx",
+    ".gif",
+    ".gz",
+    ".ico",
+    ".jpg",
+    ".jpeg",
+    ".js",
+    ".json",
+    ".mov",
+    ".mp3",
+    ".mp4",
+    ".pdf",
+    ".png",
+    ".rar",
+    ".rss",
+    ".svg",
+    ".tar",
+    ".webm",
+    ".webp",
+    ".xls",
+    ".xlsx",
+    ".xml",
+    ".zip",
+)
+SKIP_PATH_PARTS = {
+    "account",
+    "admin",
+    "basket",
+    "cart",
+    "checkout",
+    "delete",
+    "login",
+    "logout",
+    "my-account",
+    "order",
+    "password",
+    "private",
+    "signin",
+    "signup",
+    "wp-admin",
+}
 SKIP_QUERY_KEYS = {
-    "session",
-    "sessionid",
-    "sid",
     "auth",
-    "token",
     "password",
     "redirect",
     "return",
     "returnto",
+    "session",
+    "sessionid",
+    "sid",
+    "token",
 }
+TRACKING_QUERY_KEYS = {
+    "_hsenc",
+    "_hsmi",
+    "fbclid",
+    "gclid",
+    "igshid",
+    "mc_cid",
+    "mc_eid",
+    "msclkid",
+    "ref",
+    "ref_src",
+}
+IMPORTANT_PATH_PARTS = (
+    "pricing",
+    "plans",
+    "features",
+    "product",
+    "products",
+    "service",
+    "services",
+    "about",
+    "contact",
+    "faq",
+    "help",
+    "support",
+    "docs",
+    "documentation",
+    "integrations",
+    "customers",
+    "case-studies",
+)
 
 
 @dataclass
@@ -61,16 +149,30 @@ def normalize_url(url: str) -> str:
     parsed = urlparse(candidate)
     scheme = parsed.scheme.lower()
     netloc = parsed.netloc.lower()
+    if not scheme or not netloc:
+        raise ValueError("URL must include a hostname.")
+    if parsed.username or parsed.password:
+        raise ValueError("URLs with credentials are not supported.")
     path = parsed.path or "/"
+    path = re.sub(r"/{2,}", "/", path)
+    if path.lower().endswith(("/index.html", "/index.htm")):
+        path = path.rsplit("/", 1)[0] or "/"
     if path != "/" and path.endswith("/"):
         path = path[:-1]
-    normalized = parsed._replace(scheme=scheme, netloc=netloc, path=path, params="", fragment="")
+    query_pairs = []
+    for key, value in parse_qsl(parsed.query, keep_blank_values=True):
+        key_lower = key.lower()
+        if key_lower.startswith("utm_") or key_lower in TRACKING_QUERY_KEYS:
+            continue
+        query_pairs.append((key, value))
+    query = urlencode(sorted(query_pairs), doseq=True)
+    normalized = parsed._replace(scheme=scheme, netloc=netloc, path=path, params="", query=query, fragment="")
     return urlunparse((normalized.scheme, normalized.netloc, normalized.path, "", normalized.query, ""))
 
 
 def _canonical_host(candidate: str) -> str:
     parsed = urlparse(candidate if "://" in candidate else f"https://{candidate}")
-    hostname = (parsed.hostname or parsed.netloc or "").lower()
+    hostname = (parsed.hostname or parsed.netloc or "").lower().rstrip(".")
     if hostname.startswith("www."):
         hostname = hostname[4:]
     return hostname
@@ -80,18 +182,57 @@ def _same_site_host(candidate: str, root_netloc: str) -> bool:
     return _canonical_host(candidate) == _canonical_host(root_netloc)
 
 
+def _is_private_ip(address: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return False
+    return (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_multicast
+        or ip.is_reserved
+        or ip.is_unspecified
+    )
+
+
+async def _hostname_resolves_public(hostname: str) -> bool:
+    if hostname in {"localhost", "localhost.localdomain"}:
+        return False
+    if _is_private_ip(hostname):
+        return False
+
+    def resolve() -> list[str]:
+        return [item[4][0] for item in socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)]
+
+    try:
+        addresses = await asyncio.to_thread(resolve)
+    except socket.gaierror:
+        return False
+    except Exception:
+        logger.warning("Unable to resolve hostname %s", hostname, exc_info=True)
+        return False
+    return bool(addresses) and all(not _is_private_ip(address) for address in addresses)
+
+
+def _has_skipped_path_part(path: str) -> bool:
+    parts = {part for part in path.lower().split("/") if part}
+    return bool(parts & SKIP_PATH_PARTS)
+
+
 def _is_skippable(candidate: str, root_netloc: str) -> bool:
     parsed = urlparse(candidate)
     if parsed.scheme not in {"http", "https"}:
         return True
-    if not _same_site_host(candidate, root_netloc):
+    if not parsed.hostname:
         return True
-    if parsed.fragment:
+    if not _same_site_host(candidate, root_netloc):
         return True
     path_lower = parsed.path.lower()
     if any(path_lower.endswith(ext) for ext in SKIP_EXTENSIONS):
         return True
-    if any(path_lower.startswith(prefix) for prefix in SKIP_PATH_PREFIXES):
+    if _has_skipped_path_part(path_lower):
         return True
     if parsed.query:
         query_pairs = parse_qsl(parsed.query, keep_blank_values=True)
@@ -100,6 +241,18 @@ def _is_skippable(candidate: str, root_netloc: str) -> bool:
         if re.search(r"(session|auth|token|password)=", parsed.query, flags=re.IGNORECASE):
             return True
     return False
+
+
+def _page_priority(url: str, depth: int) -> tuple[int, int, str]:
+    parsed = urlparse(url)
+    path = (parsed.path or "/").lower()
+    if path in {"", "/"}:
+        return (0, depth, url)
+    if any(part in path for part in IMPORTANT_PATH_PARTS):
+        return (1, depth, url)
+    if "blog" in path or "article" in path or "post" in path or "news" in path:
+        return (4, depth, url)
+    return (2 + min(depth, 2), depth, url)
 
 
 async def _fetch_text(client: httpx.AsyncClient, url: str) -> str | None:
@@ -127,16 +280,33 @@ def _extract_sitemap_locations(xml_text: str) -> list[str]:
     return locations
 
 
-async def _discover_sitemap_urls(root_url: str, root_netloc: str, limit: int) -> list[str]:
+async def _load_robots(base: str) -> RobotFileParser | None:
+    if not RESPECT_ROBOTS_TXT:
+        return None
+    async with httpx.AsyncClient(headers={"User-Agent": REAL_CHROME_UA}) as client:
+        robots_text = await _fetch_text(client, f"{base}/robots.txt")
+    if not robots_text:
+        return None
+    parser = RobotFileParser()
+    parser.set_url(f"{base}/robots.txt")
+    parser.parse(robots_text.splitlines())
+    return parser
+
+
+async def _discover_sitemap_urls(root_url: str, root_netloc: str, limit: int) -> tuple[list[str], RobotFileParser | None]:
     parsed_root = urlparse(root_url)
     base = f"{parsed_root.scheme}://{parsed_root.netloc}"
     sitemap_candidates = [f"{base}/sitemap.xml", f"{base}/sitemap_index.xml"]
     discovered: list[str] = []
     seen_sitemaps: set[str] = set()
+    robots_parser: RobotFileParser | None = None
 
     async with httpx.AsyncClient(headers={"User-Agent": REAL_CHROME_UA}) as client:
         robots_text = await _fetch_text(client, f"{base}/robots.txt")
         if robots_text:
+            robots_parser = RobotFileParser()
+            robots_parser.set_url(f"{base}/robots.txt")
+            robots_parser.parse(robots_text.splitlines())
             for line in robots_text.splitlines():
                 if line.lower().startswith("sitemap:"):
                     sitemap_url = line.split(":", 1)[1].strip()
@@ -146,28 +316,37 @@ async def _discover_sitemap_urls(root_url: str, root_netloc: str, limit: int) ->
         pending = deque(sitemap_candidates)
         while pending and len(seen_sitemaps) < MAX_SITEMAP_FILES and len(discovered) < limit:
             sitemap_url = pending.popleft()
-            normalized_sitemap = normalize_url(sitemap_url)
+            try:
+                normalized_sitemap = normalize_url(sitemap_url)
+            except ValueError:
+                continue
             if normalized_sitemap in seen_sitemaps:
                 continue
             seen_sitemaps.add(normalized_sitemap)
-            xml_text = await _fetch_text(client, sitemap_url)
+            xml_text = await _fetch_text(client, normalized_sitemap)
             if not xml_text:
                 continue
 
-            locations = _extract_sitemap_locations(xml_text)
-            for location in locations:
-                normalized = normalize_url(location)
+            for location in _extract_sitemap_locations(xml_text):
+                try:
+                    normalized = normalize_url(location)
+                except ValueError:
+                    continue
                 if normalized.endswith(".xml") and len(seen_sitemaps) + len(pending) < MAX_SITEMAP_FILES:
                     pending.append(normalized)
                     continue
                 if _is_skippable(normalized, root_netloc):
+                    continue
+                if robots_parser and RESPECT_ROBOTS_TXT and not robots_parser.can_fetch(REAL_CHROME_UA, normalized):
                     continue
                 if normalized not in discovered:
                     discovered.append(normalized)
                 if len(discovered) >= limit:
                     break
 
-    return discovered
+    if robots_parser is None:
+        robots_parser = await _load_robots(base)
+    return discovered, robots_parser
 
 
 async def _emit_progress(
@@ -181,6 +360,54 @@ async def _emit_progress(
         await result
 
 
+def _extract_canonical_url(html: str, fallback_url: str, root_netloc: str) -> str:
+    soup = BeautifulSoup(html, "lxml")
+    canonical = soup.find("link", attrs={"rel": lambda value: value and "canonical" in value})
+    if canonical and canonical.get("href"):
+        try:
+            normalized = normalize_url(urljoin(fallback_url, str(canonical["href"])))
+            if not _is_skippable(normalized, root_netloc):
+                return normalized
+        except ValueError:
+            pass
+    return fallback_url
+
+
+def _extract_hrefs(html: str, final_url: str, root_netloc: str, robots_parser: RobotFileParser | None) -> list[str]:
+    soup = BeautifulSoup(html, "lxml")
+    links: list[str] = []
+    for tag in soup.select("a[href]"):
+        href = str(tag.get("href") or "").strip()
+        if not href or href.startswith("#"):
+            continue
+        try:
+            absolute = normalize_url(urljoin(final_url, href))
+        except ValueError:
+            continue
+        if _is_skippable(absolute, root_netloc):
+            continue
+        if robots_parser and RESPECT_ROBOTS_TXT and not robots_parser.can_fetch(REAL_CHROME_UA, absolute):
+            continue
+        links.append(absolute)
+    return links
+
+
+def _should_abort_request(request: PlaywrightRequest, root_netloc: str) -> bool:
+    if request.resource_type in {"font", "image", "media", "stylesheet"}:
+        return True
+    try:
+        parsed = urlparse(request.url)
+    except Exception:
+        return True
+    if parsed.scheme not in {"http", "https"}:
+        return request.resource_type == "document"
+    if parsed.hostname and _is_private_ip(parsed.hostname):
+        return True
+    if request.resource_type == "document":
+        return _is_skippable(request.url, root_netloc)
+    return False
+
+
 async def crawl_site(
     url: str,
     site_id: str,
@@ -190,15 +417,29 @@ async def crawl_site(
 ) -> List[PageResult]:
     del site_id
     root_url = normalize_url(url)
-    root_netloc = urlparse(root_url).netloc
+    parsed_root = urlparse(root_url)
+    root_netloc = parsed_root.netloc
+    if parsed_root.scheme not in {"http", "https"}:
+        raise ValueError("Only http and https URLs can be crawled.")
+    public_host_cache: dict[str, bool] = {}
+
+    async def host_is_public(hostname: str) -> bool:
+        if hostname not in public_host_cache:
+            public_host_cache[hostname] = await _hostname_resolves_public(hostname)
+        return public_host_cache[hostname]
+
+    if not parsed_root.hostname or not await host_is_public(parsed_root.hostname):
+        raise ValueError("URL must resolve to a public website.")
+
     visited: set[str] = set()
+    result_urls: set[str] = set()
     queued: set[str] = {root_url}
     queue = deque([(root_url, 0)])
     results: list[PageResult] = []
     crawl_started_at = monotonic()
 
-    sitemap_urls = await _discover_sitemap_urls(root_url, root_netloc, min(MAX_SITEMAP_URLS, max_pages * 4))
-    for sitemap_url in sitemap_urls:
+    sitemap_urls, robots_parser = await _discover_sitemap_urls(root_url, root_netloc, min(MAX_SITEMAP_URLS, max_pages * 4))
+    for sitemap_url in sorted(sitemap_urls, key=lambda item: _page_priority(item, 1)):
         if sitemap_url in queued or sitemap_url == root_url:
             continue
         queue.append((sitemap_url, 1))
@@ -206,12 +447,12 @@ async def crawl_site(
 
     await _emit_progress(
         progress_callback,
-        {
-            "pages_crawled": 0,
-            "pages_discovered": len(queued),
-            "current_url": root_url,
-        },
+        {"stage": "crawling", "pages_crawled": 0, "pages_discovered": len(queued), "current_url": root_url},
     )
+
+    concurrency = max(1, min(MAX_CRAWL_CONCURRENCY, max_pages))
+    queue_lock = asyncio.Lock()
+    result_lock = asyncio.Lock()
 
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(headless=True)
@@ -219,99 +460,121 @@ async def crawl_site(
             viewport={"width": 1280, "height": 800},
             user_agent=REAL_CHROME_UA,
             ignore_https_errors=True,
+            java_script_enabled=True,
         )
-        page = await context.new_page()
+        async def route_handler(route, request: PlaywrightRequest) -> None:
+            if _should_abort_request(request, root_netloc):
+                await route.abort()
+            else:
+                await route.continue_()
 
-        while queue and len(results) < max_pages:
-            if results and (monotonic() - crawl_started_at) > SITE_CRAWL_DEADLINE_SECONDS:
-                logger.warning(
-                    "Stopping crawl for %s after %ss with %s pages collected",
-                    root_url,
-                    SITE_CRAWL_DEADLINE_SECONDS,
-                    len(results),
-                )
-                break
-            current_url, depth = queue.popleft()
-            queued.discard(current_url)
-            if current_url in visited or depth > max_depth:
-                continue
+        await context.route("**/*", route_handler)
 
-            visited.add(current_url)
-            await asyncio.sleep(CRAWL_DELAY_SECONDS)
-
-            try:
-                try:
-                    response = await page.goto(
-                        current_url,
-                        wait_until="domcontentloaded",
-                        timeout=PRIMARY_NAVIGATION_TIMEOUT_MS,
-                    )
-                except PlaywrightTimeoutError:
-                    logger.warning(
-                        "Primary navigation timeout for %s, retrying with commit wait",
-                        current_url,
-                    )
-                    response = await page.goto(
-                        current_url,
-                        wait_until="commit",
-                        timeout=FALLBACK_NAVIGATION_TIMEOUT_MS,
-                    )
-                    await page.wait_for_timeout(POST_COMMIT_WAIT_MS)
-                try:
-                    await page.wait_for_load_state("networkidle", timeout=NETWORK_IDLE_TIMEOUT_MS)
-                except PlaywrightTimeoutError:
-                    logger.warning("networkidle timeout for %s", current_url)
-
-                final_url = normalize_url(page.url)
-                if final_url != current_url:
-                    visited.add(final_url)
-                    queued.discard(final_url)
-                html = await page.content()
-                title = await page.title()
-                status = response.status if response is not None else None
-                if final_url != current_url and any(existing.url == final_url for existing in results):
-                    continue
-                results.append(PageResult(url=final_url, html=html, title=title or "", depth=depth, http_status=status))
-                await _emit_progress(
-                    progress_callback,
-                    {
-                        "pages_crawled": len(results),
-                        "pages_discovered": len(results) + len(queue),
-                        "current_url": final_url,
-                    },
-                )
-
-                if depth >= max_depth:
-                    continue
-
-                hrefs = await page.eval_on_selector_all(
-                    "a[href]",
-                    "elements => elements.map(el => el.getAttribute('href')).filter(Boolean)",
-                )
-                for href in hrefs:
-                    if href.startswith("#"):
+        async def take_next() -> tuple[str, int] | None:
+            async with queue_lock:
+                while queue:
+                    if len(results) >= max_pages:
+                        return None
+                    if results and (monotonic() - crawl_started_at) > SITE_CRAWL_DEADLINE_SECONDS:
+                        return None
+                    ordered = sorted(queue, key=lambda item: _page_priority(item[0], item[1]))
+                    queue.clear()
+                    queue.extend(ordered)
+                    current_url, depth = queue.popleft()
+                    queued.discard(current_url)
+                    if current_url in visited or depth > max_depth:
                         continue
-                    absolute = normalize_url(urljoin(final_url, href))
+                    visited.add(current_url)
+                    return current_url, depth
+                return None
+
+        async def enqueue_links(links: list[str], depth: int) -> None:
+            if depth >= max_depth:
+                return
+            async with queue_lock:
+                for absolute in links:
+                    if len(visited) + len(queued) >= max_pages * MAX_DISCOVERY_MULTIPLIER:
+                        break
                     if absolute in visited or absolute in queued:
-                        continue
-                    if _is_skippable(absolute, root_netloc):
                         continue
                     queue.append((absolute, depth + 1))
                     queued.add(absolute)
-                await _emit_progress(
-                    progress_callback,
-                    {
-                        "pages_crawled": len(results),
-                        "pages_discovered": len(results) + len(queue),
-                        "current_url": final_url,
-                    },
-                )
-            except PlaywrightTimeoutError:
-                logger.warning("Playwright timeout for %s", current_url)
-            except Exception as exc:
-                logger.warning("Failed to crawl %s: %s", current_url, exc)
 
+        async def crawl_worker(worker_id: int) -> None:
+            page = await context.new_page()
+            try:
+                while True:
+                    if CRAWL_DELAY_SECONDS > 0:
+                        await asyncio.sleep(CRAWL_DELAY_SECONDS)
+                    item = await take_next()
+                    if item is None:
+                        return
+                    current_url, depth = item
+                    try:
+                        try:
+                            response = await page.goto(
+                                current_url,
+                                wait_until="domcontentloaded",
+                                timeout=PRIMARY_NAVIGATION_TIMEOUT_MS,
+                            )
+                        except PlaywrightTimeoutError:
+                            logger.info("Navigation timeout for %s, retrying with commit wait", current_url)
+                            response = await page.goto(
+                                current_url,
+                                wait_until="commit",
+                                timeout=FALLBACK_NAVIGATION_TIMEOUT_MS,
+                            )
+                            await page.wait_for_timeout(POST_COMMIT_WAIT_MS)
+                        try:
+                            await page.wait_for_load_state("networkidle", timeout=NETWORK_IDLE_TIMEOUT_MS)
+                        except PlaywrightTimeoutError:
+                            pass
+
+                        final_url = normalize_url(page.url)
+                        if _is_skippable(final_url, root_netloc):
+                            continue
+                        if not _same_site_host(final_url, root_netloc):
+                            continue
+                        final_host = urlparse(final_url).hostname
+                        if not final_host or not await host_is_public(final_host):
+                            continue
+
+                        html = await page.content()
+                        if len(html.encode("utf-8", errors="ignore")) > MAX_PAGE_HTML_BYTES:
+                            logger.info("Skipping oversized page %s", final_url)
+                            continue
+                        canonical_url = _extract_canonical_url(html, final_url, root_netloc)
+                        if robots_parser and RESPECT_ROBOTS_TXT and not robots_parser.can_fetch(REAL_CHROME_UA, canonical_url):
+                            continue
+                        links = _extract_hrefs(html, canonical_url, root_netloc, robots_parser)
+                        await enqueue_links(links, depth)
+
+                        async with result_lock:
+                            if canonical_url in result_urls or len(results) >= max_pages:
+                                continue
+                            result_urls.add(canonical_url)
+                            title = await page.title()
+                            status = response.status if response is not None else None
+                            results.append(PageResult(url=canonical_url, html=html, title=title or "", depth=depth, http_status=status))
+                            await _emit_progress(
+                                progress_callback,
+                                {
+                                    "stage": "crawling",
+                                    "pages_crawled": len(results),
+                                    "pages_discovered": len(results) + len(queue),
+                                    "current_url": canonical_url,
+                                },
+                            )
+                    except PlaywrightTimeoutError:
+                        logger.info("Playwright timeout for %s", current_url)
+                    except Exception as exc:
+                        logger.info("Failed to crawl %s in worker %s: %s", current_url, worker_id, exc)
+            finally:
+                await page.close()
+
+        workers = [asyncio.create_task(crawl_worker(index)) for index in range(concurrency)]
+        await asyncio.gather(*workers)
         await context.close()
         await browser.close()
 
-    return results
+    return sorted(results, key=lambda page: _page_priority(page.url, page.depth))

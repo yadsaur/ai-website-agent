@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
@@ -347,6 +348,48 @@ def _ui_query_bonus(query: str, chunk: dict) -> float:
     return bonus
 
 
+def _keyword_score(query: str, chunk: dict) -> float:
+    normalized_query = query.lower()
+    haystack_title = str(chunk.get("page_title", "")).lower()
+    haystack_section = str(chunk.get("section", "")).lower()
+    haystack_url = str(chunk.get("page_url", "")).lower()
+    haystack_text = str(chunk.get("text", "")).lower()
+    haystack = f"{haystack_title} {haystack_section} {haystack_url} {haystack_text}"
+
+    tokens = [token for token in re.findall(r"[a-z0-9][a-z0-9-]{2,}", normalized_query) if token not in {"what", "where", "when", "which", "does", "with", "your", "this", "that", "about"}]
+    if not tokens:
+        return 0.0
+
+    matched = sum(1 for token in tokens if token in haystack)
+    score = min(0.18, (matched / max(len(tokens), 1)) * 0.18)
+
+    important_terms = (
+        "pricing",
+        "price",
+        "cost",
+        "plan",
+        "plans",
+        "features",
+        "contact",
+        "support",
+        "faq",
+        "integrations",
+        "security",
+        "privacy",
+        "refund",
+        "cancel",
+    )
+    for term in important_terms:
+        if term in normalized_query and (term in haystack_title or term in haystack_section or term in haystack_url):
+            score += 0.08
+            break
+
+    quoted_like_phrases = [phrase.strip() for phrase in re.split(r"[?.!,]", normalized_query) if len(phrase.split()) >= 3]
+    if any(phrase and phrase in haystack_text for phrase in quoted_like_phrases):
+        score += 0.08
+    return min(score, 0.3)
+
+
 def _minimum_score_threshold(query: str, intent: str) -> float:
     if is_ui_position_query(query):
         return UI_SCORE_THRESHOLD
@@ -363,6 +406,19 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
     if store is None or store.embeddings.size == 0:
         return [], intent
 
+    valid_indices = [
+        index
+        for index, chunk in enumerate(store.chunks)
+        if chunk.get("site_id") == site_id and str(chunk.get("chunk_id", "")).strip()
+    ]
+    if len(valid_indices) != len(store.chunks):
+        logger.warning("Retrieval discarded %s chunks with invalid site metadata for site %s", len(store.chunks) - len(valid_indices), site_id)
+    if not valid_indices:
+        return [], intent
+
+    chunks = [store.chunks[index] for index in valid_indices]
+    embeddings = store.embeddings[valid_indices]
+
     is_overview_query = _is_site_overview_query(query)
     is_search = _is_search_query(query)
     is_ui_query = is_ui_position_query(query)
@@ -370,15 +426,16 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
     logger.info("Retrieval query classification for '%s': overview=%s search=%s ui=%s threshold=%.2f", query, is_overview_query, is_search, is_ui_query, score_threshold)
     expanded_query = expand_query(query)
     query_vec = get_embedder().embed_query(expanded_query)
-    scores = np.dot(store.embeddings, query_vec)
+    scores = np.dot(embeddings, query_vec)
+    scores = scores + np.asarray([_keyword_score(query, chunk) for chunk in chunks], dtype=np.float32)
     if is_overview_query:
-        scores = scores + np.asarray([_score_bonus(chunk, True) for chunk in store.chunks], dtype=np.float32)
+        scores = scores + np.asarray([_score_bonus(chunk, True) for chunk in chunks], dtype=np.float32)
     if is_search:
         scores = scores + np.asarray(
             [
                 0.14 if any(term in f"{chunk.get('page_title', '')} {chunk.get('section', '')}".lower() for term in ("support", "search", "find", "about"))
                 else 0.0
-                for chunk in store.chunks
+                for chunk in chunks
             ],
             dtype=np.float32,
         )
@@ -386,7 +443,7 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
         scores = scores + np.asarray(
             [
                 _ui_query_bonus(query, chunk)
-                for chunk in store.chunks
+                for chunk in chunks
             ],
             dtype=np.float32,
         )
@@ -400,8 +457,8 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
         query,
         [
             {
-                "section": store.chunks[int(index)].get("section"),
-                "title": store.chunks[int(index)].get("page_title"),
+                "section": chunks[int(index)].get("section"),
+                "title": chunks[int(index)].get("page_title"),
                 "score": round(float(scores[int(index)]), 4),
             }
             for index in candidate_indices[:5]
@@ -419,8 +476,8 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
             if not selected_positions:
                 mmr_score = relevance
             else:
-                candidate_vec = store.embeddings[original_index]
-                selected_vecs = store.embeddings[candidate_indices[selected_positions]]
+                candidate_vec = embeddings[original_index]
+                selected_vecs = embeddings[candidate_indices[selected_positions]]
                 diversity_penalty = float(np.max(np.dot(selected_vecs, candidate_vec)))
                 mmr_score = RETRIEVAL_MMR_LAMBDA * relevance - (1 - RETRIEVAL_MMR_LAMBDA) * diversity_penalty
             if best_score is None or mmr_score > best_score:
@@ -434,7 +491,7 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
     for position in selected_positions:
         original_index = int(candidate_indices[position])
         score = float(scores[original_index])
-        chunk = store.chunks[original_index]
+        chunk = chunks[original_index]
         mmr_results.append(
             RetrievedChunk(
                 chunk_id=chunk["chunk_id"],
@@ -497,5 +554,23 @@ def retrieve(site_id: str, query: str, top_k: int = RETRIEVAL_TOP_K) -> tuple[li
                 chunk.score = min(1.0, chunk.score + 0.08)
 
     mmr_results.sort(key=lambda item: item.score, reverse=True)
-    results = [chunk for chunk in mmr_results if chunk.score >= score_threshold]
+    diverse_results: list[RetrievedChunk] = []
+    page_counts: dict[str, int] = {}
+    for chunk in mmr_results:
+        page_key = chunk.page_url or chunk.page_title or chunk.chunk_id
+        if page_counts.get(page_key, 0) >= 2:
+            continue
+        diverse_results.append(chunk)
+        page_counts[page_key] = page_counts.get(page_key, 0) + 1
+        if len(diverse_results) >= top_k:
+            break
+    if len(diverse_results) < min(top_k, len(mmr_results)):
+        for chunk in mmr_results:
+            if chunk in diverse_results:
+                continue
+            diverse_results.append(chunk)
+            if len(diverse_results) >= top_k:
+                break
+
+    results = [chunk for chunk in diverse_results if chunk.score >= score_threshold]
     return results, intent

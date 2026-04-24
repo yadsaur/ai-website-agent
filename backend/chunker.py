@@ -59,6 +59,34 @@ def build_site_overview_chunk(
 
 
 def _split_sentences(text: str) -> list[dict[str, int | str]]:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if any(line.startswith(("FAQ:", "Answer:", "Table:")) for line in lines):
+        units: list[dict[str, int | str]] = []
+        offset = 0
+        index = 0
+        while index < len(lines):
+            line = lines[index]
+            start = text.find(line, offset)
+            if line.startswith("FAQ:") and index + 1 < len(lines) and lines[index + 1].startswith("Answer:"):
+                combined = f"{line} {lines[index + 1]}".strip()
+                units.append({"text": combined, "start": max(start, 0)})
+                offset = max(start, 0) + len(combined)
+                index += 2
+                continue
+            if line.startswith("Table:"):
+                table_lines = [line]
+                index += 1
+                while index < len(lines) and "|" in lines[index]:
+                    table_lines.append(lines[index])
+                    index += 1
+                units.append({"text": " ".join(table_lines), "start": max(start, 0)})
+                continue
+            units.append({"text": line, "start": max(start, 0)})
+            offset = max(start, 0) + len(line)
+            index += 1
+        if units:
+            return units
+
     pattern = re.compile(r"(?<=[.?!])(?:\s+|\n+)")
     sentences: list[dict[str, int | str]] = []
     last_end = 0

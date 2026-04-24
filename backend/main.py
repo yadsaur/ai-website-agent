@@ -92,15 +92,15 @@ from backend.schemas import (
     UserSummary,
 )
 from backend.session_store import append_turn, build_contextual_query, get_history
-from backend.vector_store import write_vector_store
+from backend.vector_store import invalidate_cache, write_vector_store
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 _bg_tasks: dict[str, asyncio.Task] = {}
 FALLBACK_MESSAGE = (
-    "I don't have that specific information here, but the team at "
-    "{site_name} would be able to give you a definitive answer. "
-    "Is there anything else about the product I can help you with?"
+    "I couldn't find that information in the website content I have for "
+    "{site_name}. You may want to contact the business directly, or ask me "
+    "another question about this site."
 )
 GREETING_RESPONSES = {
     "hi": "Hi! How can I help you today?",
@@ -109,6 +109,10 @@ GREETING_RESPONSES = {
     "good morning": "Good morning! What would you like to know about this website?",
     "good afternoon": "Good afternoon! What can I help you find on this site?",
     "good evening": "Good evening! I can help answer questions about this site.",
+    "thanks": "You're welcome. Anything else I can help you find on this site?",
+    "thank you": "You're welcome. Anything else I can help you with?",
+    "bye": "Thanks for stopping by. Have a good one.",
+    "goodbye": "Thanks for stopping by. Have a good one.",
 }
 SYNTHETIC_SECTIONS = {"Site Overview", "UI Layout & Navigation"}
 STARTER_QUESTION_FALLBACK = [
@@ -149,6 +153,10 @@ def _simple_conversational_reply(query: str) -> str | None:
     for phrase in ("good morning", "good afternoon", "good evening"):
         if normalized.startswith(phrase):
             return GREETING_RESPONSES[phrase]
+    if normalized in {"thanks", "thank you", "thankyou", "thx"}:
+        return GREETING_RESPONSES["thanks"]
+    if normalized in {"bye", "goodbye", "see you"}:
+        return GREETING_RESPONSES["bye"]
     return None
 
 
@@ -648,6 +656,7 @@ async def process_site(site_id: str, root_url: str):
                         site.chunk_count = 0
                         site.error_msg = None
                         site.updated_at = datetime.utcnow()
+                invalidate_cache(site_id)
 
                 async def crawl_progress(payload: dict[str, int | str]) -> None:
                     with session_scope() as progress_db:
@@ -672,23 +681,39 @@ async def process_site(site_id: str, root_url: str):
                 site_name = None
                 total_pages = 0
                 total_chunks = 0
+                seen_content_hashes: set[str] = set()
+
+                with session_scope() as db:
+                    site = db.get(Site, site_id)
+                    if site is not None:
+                        site.status = "extracting"
+                        site.updated_at = datetime.utcnow()
 
                 for page_result in pages:
                     extracted = await asyncio.to_thread(extract_content, page_result.html, page_result.url)
                     if not extracted.text.strip():
                         continue
+                    if extracted.content_hash in seen_content_hashes:
+                        logger.info("Skipping duplicate extracted content for %s", page_result.url)
+                        continue
+                    seen_content_hashes.add(extracted.content_hash)
 
                     page_title = extracted.title or page_result.title or page_result.url
+                    page_url = page_result.url
+                    try:
+                        page_url = normalize_url(extracted.canonical_url or page_result.url)
+                    except Exception:
+                        page_url = page_result.url
                     if site_name is None:
                         site_name = page_title
 
                     page_id = str(uuid4())
-                    page_chunks = await asyncio.to_thread(chunk_page, extracted, page_result.url, page_title)
+                    page_chunks = await asyncio.to_thread(chunk_page, extracted, page_url, page_title)
                     if total_pages == 0:
                         overview_chunk = await asyncio.to_thread(
                             build_site_overview_chunk,
                             extracted,
-                            page_result.url,
+                            page_url,
                             page_title,
                             site_name,
                         )
@@ -700,7 +725,7 @@ async def process_site(site_id: str, root_url: str):
                             Page(
                                 id=page_id,
                                 site_id=site_id,
-                                url=page_result.url,
+                                url=page_url,
                                 title=page_title,
                                 depth=page_result.depth,
                                 word_count=extracted.word_count,
@@ -740,7 +765,7 @@ async def process_site(site_id: str, root_url: str):
                             )
                         ui_chunk = chunk_ui_structure(
                             html=page_result.html,
-                            page_url=page_result.url,
+                            page_url=page_url,
                             page_title=page_title,
                             page_id=page_id,
                             site_id=site_id,
@@ -1127,6 +1152,7 @@ async def retry_site(site_id: str, request: Request, db: Session = Depends(get_d
 
     db.execute(delete(Chunk).where(Chunk.site_id == site_id))
     db.execute(delete(Page).where(Page.site_id == site_id))
+    invalidate_cache(site_id)
     site.status = "pending"
     site.page_count = 0
     site.chunk_count = 0
