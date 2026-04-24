@@ -4,12 +4,18 @@
     logoPath: "/website/logo.svg",
     dashboardUrl: "/dashboard?onboarding=1",
     workspaceUrl: "/dashboard",
+    signInUrl: "/dashboard?auth=1",
     supportUrl: "/support",
     fallbackDemoSiteId: "fa8a88b5-12cf-426b-9e2c-fe161ad1c6af",
     fallbackAppUrl: "https://ai-website-agent-aikinley.onrender.com",
     appUrl: window.location.origin,
     heroPreviewPath: "/website/hero-preview.html",
   };
+
+  function resolveSignInUrl() {
+    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    return `/dashboard?auth=1&returnTo=${encodeURIComponent(returnTo)}`;
+  }
 
   const navLinks = [
     { href: "/features", label: "Features", page: "features" },
@@ -82,7 +88,7 @@
               .join("")}
           </nav>
           <div class="nav-cta">
-            <a class="button button-ghost button-sm" href="${siteConfig.workspaceUrl}">Sign in</a>
+              <a class="button button-ghost button-sm" href="${resolveSignInUrl()}">Sign in</a>
             <a class="button button-primary button-sm" href="${siteConfig.dashboardUrl}">Start free</a>
             <button class="nav-mobile-toggle" type="button" aria-label="Open menu">
               <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -97,7 +103,7 @@
       <div class="nav-panel" aria-label="Mobile navigation">
         ${navLinks.map((link) => `<a href="${link.href}" class="${pageName === link.page ? "active" : ""}">${link.label}</a>`).join("")}
         <a href="${siteConfig.supportUrl}">Support</a>
-        <a class="button button-ghost" href="${siteConfig.workspaceUrl}">Sign in</a>
+          <a class="button button-ghost" href="${resolveSignInUrl()}">Sign in</a>
         <a class="button button-primary" href="${siteConfig.dashboardUrl}">Start free</a>
       </div>
       <div class="nav-scrim"></div>
